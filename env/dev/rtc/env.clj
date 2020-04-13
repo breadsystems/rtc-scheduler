@@ -1,7 +1,8 @@
 (ns rtc.env
   (:require
    [mount.core :refer [defstate]]
-   [nrepl.server :as nrepl]))
+   [nrepl.server :as nrepl]
+   [ring.middleware.reload :refer [wrap-reload]]))
 
 
 (defonce stop-repl (atom nil))
@@ -17,6 +18,10 @@
     (@stop-repl)
     (reset! stop-repl nil))
   nil)
+
+
+(defn middleware [app]
+  (wrap-reload app))
 
 
 (defstate repl-server

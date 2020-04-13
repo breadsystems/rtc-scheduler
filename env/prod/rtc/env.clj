@@ -1,3 +1,5 @@
 (ns rtc.env)
 
-;; Nothing much here
+
+;; No special middleware in production
+(def middleware identity)

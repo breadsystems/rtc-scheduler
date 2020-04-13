@@ -3,7 +3,7 @@
    [org.httpkit.server :as http]
    [mount.core :as mount :refer [defstate]]
    [reitit.ring :as ring]
-   [rtc.env]))
+   [rtc.env :refer [middleware]]))
 
 
 (defn handler [_]
@@ -20,7 +20,10 @@
                            :body "OK"})]])
    (ring/routes
     (ring/create-resource-handler {:path "/"})
-    (ring/create-default-handler))))
+    (ring/create-default-handler
+     {:not-found (constantly {:status 404
+                              :headers {"Content-Type" "text/plain; charset=utf-8"}
+                              :body "Not Found"})}))))
 
 
 (defonce stop-http (atom nil))
@@ -28,7 +31,8 @@
 (defn start! []
   (let [port (Integer. (or (System/getenv "HTTP_PORT") 8080))]
     (println (str "Running HTTP server at localhost:" port))
-    (reset! stop-http (http/run-server app {:port port})))
+    (reset! stop-http
+            (http/run-server (middleware app) {:port port})))
   nil)
 
 (defn stop! []
