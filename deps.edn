@@ -1,0 +1,10 @@
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.10.1"}
+        http-kit            {:mvn/version "2.3.0"}
+        mount               {:mvn/version "0.1.16"}
+        metosin/reitit-ring {:mvn/version "0.4.2"}
+        ring                {:mvn/version "1.7.0"}}
+ 
+ :aliases {:dev {:extra-paths ["env/dev"]
+                 :extra-deps [nrepl/nrepl {:mvn/version "0.7.0"}]}
+           :prod {:extra-paths ["env/prod"]}}}
