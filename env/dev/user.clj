@@ -1,15 +1,15 @@
 (ns user
   (:require
    [mount.core :as mount]
-   [rtc.app :refer [http-server]]))
+   [rtc.env :refer [repl-server]]))
 
 
 (defn restart []
-  (mount/stop #'http-server)
-  (mount/start #'http-server))
+  (mount/stop-except #'repl-server)
+  (mount/start))
 
 
 (comment
-  (mount/stop #'http-server)
-  (mount/start #'http-server)
+  (mount/stop-except #'repl-server)
+  (mount/start)
   (restart))

@@ -3,6 +3,7 @@
    [org.httpkit.server :as http]
    [mount.core :as mount :refer [defstate]]
    [reitit.ring :as ring]
+   [rtc.db]
    [rtc.env :refer [middleware]]))
 
 
