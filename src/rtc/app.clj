@@ -14,8 +14,7 @@
 (def app
   (ring/ring-handler
    (ring/router
-    [["/" {:get handler}]
-     ["/ping" (constantly {:status 200
+    [["/ping" (constantly {:status 200
                            :headers {"Content-Type" "text/plain; charset=utf-8"}
                            :body "OK"})]])
    (ring/routes
