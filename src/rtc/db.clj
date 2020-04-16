@@ -29,4 +29,14 @@
 (comment
   (mount/stop #'*db*)
   (mount/start #'*db*)
-  (reconnect!))
+  (reconnect!)
+
+  (try
+    (create-user! {:email "me@example.com" :pass "password123"})
+    (create-user! {:email "you@example.com" :pass "password234"})
+    (create-user! {:email "them@example.com" :pass "password345"})
+    (catch Exception e
+      (println "Exception:" (.getMessage e))
+      (.getMessage e)))
+  
+  (get-user {:id 1}))
