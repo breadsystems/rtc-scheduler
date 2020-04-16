@@ -1,6 +1,7 @@
 (ns rtc.db
   (:require
    [conman.core :as conman]
+   [migratus.core :as migratus]
    [mount.core :as mount :refer [defstate]]))
 
 
@@ -22,13 +23,28 @@
   (mount/start #'*db*)
   nil)
 
+(conman/bind-connection *db*
+                        "sql/users.sql"
+                        "sql/util.sql")
 
-(conman/bind-connection *db* "sql/users.sql")
+
+(def migration-config {:store :database
+                       :migration-dir "migrations/"
+                       :db {:classname "org.postgresql.Driver"
+                            :subprotocol "postgresql"
+                            :subname (or (System/getenv "DATABASE_NAME") "rtc")}})
+
+(defstate migrations
+  :start (do
+           (migratus/init migration-config)
+           (migratus/migrate migration-config)))
 
 
 (comment
   (mount/stop #'*db*)
   (mount/start #'*db*)
+  (mount/start #'migrations)
+  (mount/stop #'migrations)
   (reconnect!)
 
   (try
@@ -38,5 +54,7 @@
     (catch Exception e
       (println "Exception:" (.getMessage e))
       (.getMessage e)))
+
+  (get-user {:id 1})
   
-  (get-user {:id 1}))
+  (get-migrations))

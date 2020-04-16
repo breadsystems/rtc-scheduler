@@ -2,9 +2,11 @@
  :deps {org.clojure/clojure       {:mvn/version "1.10.1"}
         conman                    {:mvn/version "0.8.6"}
         http-kit                  {:mvn/version "2.3.0"}
-        mount                     {:mvn/version "0.1.16"}
         metosin/reitit-ring       {:mvn/version "0.4.2"}
+        migratus                  {:mvn/version "1.2.8"}
+        mount                     {:mvn/version "0.1.16"}
         org.postgresql/postgresql {:mvn/version "42.2.2"}
+        org.slf4j/slf4j-log4j12   {:mvn/version "1.7.7"}
         ring                      {:mvn/version "1.7.0"}}
  
  :aliases {:dev {:extra-paths ["env/dev"]
