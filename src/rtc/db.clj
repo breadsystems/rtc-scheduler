@@ -25,7 +25,24 @@
 
 (conman/bind-connection *db*
                         "sql/users.sql"
-                        "sql/util.sql")
+                        "sql/util.sql"
+                        "sql/base.sql")
+
+(comment
+  ;; connect/disconnect/reconnect database
+  (mount/stop #'*db*)
+  (mount/start #'*db*)
+  (reconnect!)
+
+  ;; run HugSQL-generated fns
+  (try
+    (create-user! {:email "me@example.com" :pass "password123"})
+    (create-user! {:email "you@example.com" :pass "password234"})
+    (create-user! {:email "them@example.com" :pass "password345"})
+    (catch Exception e
+      (.getMessage e)))
+
+  (get-user {:id 1}))
 
 
 (def migration-config {:store :database
@@ -41,20 +58,16 @@
 
 
 (comment
-  (mount/stop #'*db*)
-  (mount/start #'*db*)
-  (mount/start #'migrations)
-  (mount/stop #'migrations)
-  (reconnect!)
-
+  ;; manage migrations
   (try
-    (create-user! {:email "me@example.com" :pass "password123"})
-    (create-user! {:email "you@example.com" :pass "password234"})
-    (create-user! {:email "them@example.com" :pass "password345"})
+    (mount/start #'migrations)
     (catch Exception e
-      (println "Exception:" (.getMessage e))
       (.getMessage e)))
+  (mount/stop #'migrations)
+  (migratus/rollback migration-config)
 
-  (get-user {:id 1})
-  
+  ;; create a migration
+  (migratus/create migration-config "migration-name-here")
+
+  ;; list all schema migrations
   (get-migrations))
