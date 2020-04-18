@@ -26,7 +26,7 @@
 (conman/bind-connection *db*
                         "sql/users.sql"
                         "sql/util.sql"
-                        "sql/base.sql")
+                        "sql/rtc-base.sql")
 
 (comment
   ;; connect/disconnect/reconnect database
@@ -42,7 +42,31 @@
     (catch Exception e
       (.getMessage e)))
 
-  (get-user {:id 1}))
+  (get-user {:id 1})
+  
+  (try
+    (create-careseeker! {:email "octaviabutler@earthseed.com" :alias "George Simcoff" :state "WA"})
+    (create-careseeker! {:email "shevek@annarres.net" :alias "Selma Blaise" :state "OR"})
+    (create-careseeker! {:email "beloved@morrison.email" :alias "Alan McLoughlin" :state "CA"})
+    (catch Exception e
+      (.getMessage e)))
+  
+  (get-careseeker {:id 1})
+  ;; => {:email "newaddr@earthseed.com", :first_name "Octavia", :phone "2535551234", :pronouns "she/her", :state "WA", :ok_to_text false, :alias "George Simcoff", :id 1, :date_modified #inst "2020-04-18T19:04:35.019280000-00:00", :last_name "Butler", :date_created #inst "2020-04-18T18:59:46.058771000-00:00"}
+
+  (get-careseeker {:id 2})
+  (get-careseeker {:id 3})
+  
+  (delete-careseeker! {:id 3})
+  
+  (update-careseeker! {:id 1
+                       :first-name "Octavia"
+                       :last-name "Butler"
+                       :email "newaddr@earthseed.com"
+                       :pronouns "she/her"
+                       :phone "2535551234"
+                       :ok-to-text? false
+                       :state "WA"}))
 
 
 (def migration-config {:store :database

@@ -11,7 +11,9 @@ CREATE TABLE IF NOT EXISTS careseekers (
   pronouns varchar(15),
   phone varchar(12),
   ok_to_text boolean,
-  state varchar(2)
+  state varchar(2),
+  date_created TIMESTAMP,
+  date_modified TIMESTAMP
 );
 
 --;;
