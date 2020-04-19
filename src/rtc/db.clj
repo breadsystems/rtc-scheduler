@@ -23,10 +23,14 @@
   (mount/start #'*db*)
   nil)
 
-(conman/bind-connection *db*
-                        "sql/users.sql"
-                        "sql/util.sql"
-                        "sql/rtc-base.sql")
+(defn bind! []
+  (conman/bind-connection
+   *db*
+   "sql/util.sql"
+   "sql/rtc-base.sql"))
+
+(bind!)
+
 
 (comment
   ;; connect/disconnect/reconnect database
@@ -43,22 +47,21 @@
       (.getMessage e)))
 
   (get-user {:id 1})
-  
+
   (try
     (create-careseeker! {:email "octaviabutler@earthseed.com" :alias "George Simcoff" :state "WA"})
     (create-careseeker! {:email "shevek@annarres.net" :alias "Selma Blaise" :state "OR"})
     (create-careseeker! {:email "beloved@morrison.email" :alias "Alan McLoughlin" :state "CA"})
     (catch Exception e
       (.getMessage e)))
-  
-  (get-careseeker {:id 1})
-  ;; => {:email "newaddr@earthseed.com", :first_name "Octavia", :phone "2535551234", :pronouns "she/her", :state "WA", :ok_to_text false, :alias "George Simcoff", :id 1, :date_modified #inst "2020-04-18T19:04:35.019280000-00:00", :last_name "Butler", :date_created #inst "2020-04-18T18:59:46.058771000-00:00"}
 
+  (get-careseeker {:id 1})
   (get-careseeker {:id 2})
   (get-careseeker {:id 3})
-  
+
   (delete-careseeker! {:id 3})
-  
+  (get-careseeker {:id 3})
+
   (update-careseeker! {:id 1
                        :first-name "Octavia"
                        :last-name "Butler"
@@ -66,7 +69,16 @@
                        :pronouns "she/her"
                        :phone "2535551234"
                        :ok-to-text? false
-                       :state "WA"}))
+                       :state "WA"})
+
+  (try
+    (create-provider! {:user-id 1 :state "WA"})
+    (create-provider! {:user-id 2 :state "OR"})
+    (catch Exception e
+      (.getMessage e)))
+
+  (get-provider {:user-id 1})
+  (get-provider {:user-id 2}))
 
 
 (def migration-config {:store :database
@@ -84,11 +96,12 @@
 (comment
   ;; manage migrations
   (try
+    (migratus/rollback migration-config)
+    (mount/stop #'migrations)
     (mount/start #'migrations)
+    true
     (catch Exception e
       (.getMessage e)))
-  (mount/stop #'migrations)
-  (migratus/rollback migration-config)
 
   ;; create a migration
   (migratus/create migration-config "migration-name-here")

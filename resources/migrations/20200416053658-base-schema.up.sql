@@ -1,3 +1,19 @@
+-- Basic user table, for common data between all user types (doctors, admins, volunteers)
+CREATE TABLE IF NOT EXISTS users (
+  id bigserial PRIMARY KEY,
+  email varchar(30),
+  pass varchar(300),
+  first_name varchar(100),
+  last_name varchar(100),
+  pronouns varchar(15),
+  phone varchar(12),
+  last_login timestamp,
+  date_created timestamp,
+  date_modified timestamp,
+  UNIQUE (email)
+);
+
+--;;
 -- We are trying to humanize medical care again.
 -- To that end, we don't talk about "patients" - we talk about People Seeking Care,
 -- People Requiring Care (PRCs) or Careseekers for short.
@@ -12,21 +28,20 @@ CREATE TABLE IF NOT EXISTS careseekers (
   phone varchar(12),
   ok_to_text boolean,
   state varchar(2),
-  date_created TIMESTAMP,
-  date_modified TIMESTAMP
+  date_created timestamp,
+  date_modified timestamp,
+  UNIQUE (alias)
 );
 
 --;;
 -- Next up, doctors (and potentially other medical professionals)
 
 CREATE TABLE IF NOT EXISTS providers (
-  id bigserial PRIMARY KEY,
-  first_name varchar(100),
-  last_name varchar(100),
-  email varchar(100),
-  phone varchar(12),
-  pronouns varchar(15),
-  state varchar(2)
+  id int PRIMARY KEY,
+  state varchar(2),
+  date_created timestamp,
+  date_modified timestamp,
+  UNIQUE (id)
 );
 
 --;;
@@ -37,15 +52,18 @@ CREATE TABLE IF NOT EXISTS providers (
 
 CREATE TABLE IF NOT EXISTS appointments (
   id bigserial PRIMARY KEY,
-  start_time TIMESTAMP,
-  end_time TIMESTAMP,
+  start_time timestamp NOT NULL,
+  end_time timestamp NOT NULL,
   careseeker_id integer NOT NULL,
-  provider_id integer,
-  notes text,
+  provider_id integer NOT NULL,
+  reason varchar(100) NOT NULL,
+  provider_notes text,
   transcription text,
   state varchar(2),
-  reason varchar(100),
-  status varchar(50)
+  category varchar(100),
+  resolution varchar(50),
+  FOREIGN KEY (careseeker_id) REFERENCES careseekers (id) ON DELETE RESTRICT,
+  FOREIGN KEY (provider_id) REFERENCES providers (id) ON DELETE RESTRICT
 );
 
 --;;
@@ -54,9 +72,10 @@ CREATE TABLE IF NOT EXISTS appointments (
 
 CREATE TABLE IF NOT EXISTS availabilities (
   id bigserial PRIMARY KEY,
-  start_time TIMESTAMP,
-  end_time TIMESTAMP,
-  provider_id integer NOT NULL
+  start_time timestamp,
+  end_time timestamp,
+  provider_id integer NOT NULL,
+  FOREIGN KEY (provider_id) REFERENCES providers (id) ON DELETE CASCADE
 );
 
 --;;
@@ -65,17 +84,8 @@ CREATE TABLE IF NOT EXISTS availabilities (
 CREATE TABLE IF NOT EXISTS needs (
   id bigserial PRIMARY KEY,
   name varchar(100),
-  description text
-);
-
---;;
--- A fulfillment is the counterpart to a need; it is how the need is met.
--- For example, scheduling an interpreter satisfied the need for interpretation
-
-CREATE TABLE IF NOT EXISTS fulfillments (
-  id bigserial PRIMARY KEY,
-  need_id integer,
-  contact_id integer
+  description text,
+  UNIQUE (name)
 );
 
 --;;
@@ -91,3 +101,16 @@ CREATE TABLE IF NOT EXISTS contacts (
   email varchar(100)
 );
 
+--;;
+-- Associate appointment with a specific need
+
+CREATE TABLE IF NOT EXISTS appointment_needs (
+  appointment_id int NOT NULL,
+  need_id int NOT NULL,
+  info text,
+  contact_id int,
+  PRIMARY KEY (need_id, appointment_id),
+  FOREIGN KEY (appointment_id) REFERENCES appointments (id) ON DELETE RESTRICT,
+  FOREIGN KEY (need_id) REFERENCES needs (id) ON DELETE RESTRICT,
+  FOREIGN KEY (contact_id) REFERENCES contacts (id) ON DELETE RESTRICT
+);

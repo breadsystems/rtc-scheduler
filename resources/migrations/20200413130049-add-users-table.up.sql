@@ -1,6 +1,0 @@
-CREATE TABLE IF NOT EXISTS users
-(id BIGSERIAL PRIMARY KEY,
- email VARCHAR(30),
- pass VARCHAR(300),
- admin BOOLEAN,
- last_login TIMESTAMP);
