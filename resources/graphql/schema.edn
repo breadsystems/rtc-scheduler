@@ -1,0 +1,22 @@
+{:objects
+ {:Careseeker
+  {:description "A person seeking care"
+   :fields
+   {:id {:type (non-null ID)}
+    :name {:type String}
+    :pronouns {:type String}
+    :alias {:type String}
+    :email {:type String}
+    :phone {:type String}
+    :ok_to_text {:type Boolean}
+    :state {:type String}
+    ;; TODO should these be datetimes?
+    :date_created {:type String}
+    :date_modified {:type String}}}}
+ 
+ :queries
+ {:careseeker_by_id
+  {:type :Careseeker
+   :description "Get a Careseeker by their ID"
+   :args {:id {:type ID}}
+   :resolve :query/careseeker_by_id}}}

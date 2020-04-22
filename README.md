@@ -40,5 +40,5 @@ docker build . -t rtc:latest
 To build the dev environment, run:
 
 ```sh
-clj -A:dev -m rtc.app
+clojure -A:dev -m rtc.app
 ```
