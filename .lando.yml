@@ -1,0 +1,34 @@
+name: radical-telehealth-collective
+
+services:
+  appserver:
+    type: compose
+
+    services:
+      image: acobster/lando-clojure:cli-tools
+      command: clojure -A:dev -m rtc.app
+
+      environment:
+        # `dbhost` corresponds with the dbhost service
+        # `rtc` corresponds with dbhost.creds.database
+        - DATABASE_URL=jdbc:postgresql://dbhost/rtc?user=postgres
+
+    run_as_root:
+      - apt update
+      - apt install postgresql -y
+
+  dbhost:
+    type: postgres:11
+    creds:
+      database: rtc
+
+tooling:
+  clojure:
+    service: appserver
+    cmd: clojure
+
+proxy:
+  appserver:
+    # This tells Lando to forward requests on port 80 requests to 8080
+    # inside the appserver container
+    - radical-telehealth-collective.lndo.site:8080

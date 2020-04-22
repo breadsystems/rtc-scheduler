@@ -37,8 +37,24 @@ docker build . -t rtc:latest
 
 ## Building the movement
 
-To build the dev environment, run:
+To build the dev environment, you will first need to install [Lando](https://docs.lando.dev/), the official dev environment for RTC. It's the best local dev tool in the galaxy! Note that Lando runs on top of Docker, but it will install a recent version of Docker for you if you don't already have it.
+
+Next, get the RTC source code:
 
 ```sh
-clojure -A:dev -m rtc.app
+# TODO figure out where we're hosting this code
+cd radical-telehealth-collective
 ```
+
+Once Lando is installed, you can start the dev environment with a single command:
+
+```sh
+lando start 
+```
+
+This will initialize the database and start the dev environment. This may take a few minutes the first time, so be patient. When it's done, it will print the URL of the local RTC app to your terminal screen.
+
+### TODO
+
+* Link to Clojure guides
+* Document basic app architecture

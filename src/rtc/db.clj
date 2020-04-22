@@ -13,7 +13,7 @@
       (println "Connecting to database at URL:" database-url)
       (conman/connect! {:jdbc-url database-url}))
     (throw
-     (ex-info "No DATABASE_URL environment detected!"
+     (ex-info "Database exception!"
               {:causes #{:no-database-url}}))))
 
 (defstate ^:dynamic *db*
