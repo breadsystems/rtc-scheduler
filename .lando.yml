@@ -15,7 +15,7 @@ services:
 
     run_as_root:
       - apt update
-      - apt install postgresql -y
+      - apt install dnsutils postgresql -y
 
   dbhost:
     type: postgres:11

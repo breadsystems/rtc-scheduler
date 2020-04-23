@@ -2,22 +2,21 @@
   (:require
    [cheshire.core :as cheshire]
    [conman.core :as conman]
+   [clojure.java.jdbc :as jdbc]
    [migratus.core :as migratus]
    [mount.core :as mount :refer [defstate]])
   (:import (org.postgresql.util PGobject)))
 
 
-(defn connect! []
+(defn- database-url []
   (if-let [database-url (System/getenv "DATABASE_URL")]
-    (do
-      (println "Connecting to database at URL:" database-url)
-      (conman/connect! {:jdbc-url database-url}))
-    (throw
-     (ex-info "Database exception!"
-              {:causes #{:no-database-url}}))))
+    database-url
+    (throw (ex-info "Database exception!" {:causes #{:no-database-url}}))))
 
 (defstate ^:dynamic *db*
-  :start (connect!)
+  :start (do
+           (println "Connecting to database at URL:" database-url)
+           (conman/connect! {:jdbc-url (database-url)}))
   :stop  (conman/disconnect! *db*))
 
 (defn bind! []
@@ -66,22 +65,28 @@
 )
 
 
-(def migration-config {:store :database
-                       :migration-dir "migrations/"
-                       :db {:classname "org.postgresql.Driver"
-                            :subprotocol "postgresql"
-                            :subname (or (System/getenv "DATABASE_NAME") "rtc")}})
+(defn migration-config []
+  {:store :database
+   :migration-dir "migrations/"
+   ;; TODO why doesn't this work?
+   ;; com.zaxxer.hikari.HikariDataSource cannot be cast to class clojure.lang.Associative
+   :db *db*})
+                      ;;  :db {:classname "org.postgresql.Driver"
+                      ;;       :subprotocol "postgresql"
+                      ;;       :subname (or (System/getenv "DATABASE_NAME") "rtc")}})
 
 (defstate migrations
   :start (do
-           (migratus/init migration-config)
-           (migratus/migrate migration-config)))
+           (println "Performing database migrations...")
+           (migratus/init (migration-config))
+           (migratus/migrate (migration-config))
+           (println "Done.")))
 
 
 (comment
   ;; manage migrations
   (try
-    (migratus/rollback migration-config)
+    (migratus/rollback (migration-config))
     (mount/stop #'migrations)
     (mount/start #'migrations)
     true
@@ -89,7 +94,7 @@
       (.getMessage e)))
 
   ;; create a migration
-  (migratus/create migration-config "migration-name-here")
+  (migratus/create (migration-config) "migration-name-here")
 
   ;; list all schema migrations
   (get-migrations))
