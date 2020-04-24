@@ -15,7 +15,7 @@
 
 (defstate ^:dynamic *db*
   :start (do
-           (println "Connecting to database at URL:" database-url)
+           (println "Connecting to database at URL:" (database-url))
            (conman/connect! {:jdbc-url (database-url)}))
   :stop  (conman/disconnect! *db*))
 
@@ -68,12 +68,7 @@
 (defn migration-config []
   {:store :database
    :migration-dir "migrations/"
-   ;; TODO why doesn't this work?
-   ;; com.zaxxer.hikari.HikariDataSource cannot be cast to class clojure.lang.Associative
-   :db *db*})
-                      ;;  :db {:classname "org.postgresql.Driver"
-                      ;;       :subprotocol "postgresql"
-                      ;;       :subname (or (System/getenv "DATABASE_NAME") "rtc")}})
+   :db {:datasource *db*}})
 
 (defstate migrations
   :start (do

@@ -13,9 +13,11 @@ services:
         # `rtc` corresponds with dbhost.creds.database
         - DATABASE_URL=jdbc:postgresql://dbhost/rtc?user=postgres
 
-    run_as_root:
-      - apt update
-      - apt install dnsutils postgresql -y
+      depends_on:
+        - dbhost
+
+      ports:
+        - '7000:7000'
 
   dbhost:
     type: postgres:11
@@ -32,3 +34,6 @@ proxy:
     # This tells Lando to forward requests on port 80 requests to 8080
     # inside the appserver container
     - radical-telehealth-collective.lndo.site:8080
+    # For developing when offline. You will need an entry in your hosts file
+    # or something more advanced, such as dnsmasq, to resolve this URL
+    - radical-telehealth-collective.local:8080
