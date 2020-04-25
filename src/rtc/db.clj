@@ -38,16 +38,6 @@
   (mount/start #'*db*)
   (reconnect!)
 
-  ;; run HugSQL-generated fns
-  (try
-    (create-user! {:email "me@example.com" :pass "password123"})
-    (create-user! {:email "you@example.com" :pass "password234"})
-    (create-user! {:email "them@example.com" :pass "password345"})
-    (catch Exception e
-      (.getMessage e)))
-
-  (get-user {:id 1})
-
   (try
     (create-careseeker! {:email "octaviabutler@earthseed.com" :alias "George Simcoff" :state "WA"})
     (create-careseeker! {:email "shevek@annarres.net" :alias "Selma Blaise" :state "OR"})
@@ -70,15 +60,7 @@
                        :phone "2535551234"
                        :ok-to-text? false
                        :state "WA"})
-
-  (try
-    (create-provider! {:user-id 1 :state "WA"})
-    (create-provider! {:user-id 2 :state "OR"})
-    (catch Exception e
-      (.getMessage e)))
-
-  (get-provider {:user-id 1})
-  (get-provider {:user-id 2}))
+)
 
 
 (def migration-config {:store :database

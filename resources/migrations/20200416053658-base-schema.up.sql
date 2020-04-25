@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS providers (
   state varchar(2),
   date_created timestamp,
   date_modified timestamp,
-  UNIQUE (id)
+  FOREIGN KEY (id) REFERENCES users (id) ON DELETE RESTRICT
 );
 
 --;;

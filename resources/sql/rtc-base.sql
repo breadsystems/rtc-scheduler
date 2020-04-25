@@ -45,20 +45,20 @@ DELETE FROM careseekers WHERE id = :id
 -- :name create-provider! :! :n
 -- :doc create a new provider record
 INSERT INTO providers (state, id, date_created, date_modified)
-VALUES (:state, :user-id, now(), now())
+VALUES (:state, :id, now(), now())
 
 -- :name update-provider! :! :n
 -- :doc update an existing provider record
-UPDATE providers SET state = :state, date_modified = now() WHERE id = :user-id
+UPDATE providers SET state = :state, date_modified = now() WHERE id = :id
 
 -- :name get-provider :? :1
 -- :doc retrieve a provider by their id
 SELECT providers.id, state, email, first_name, last_name, pronouns, phone
-FROM providers JOIN users ON (providers.id = users.id) WHERE providers.id = :user-id
+FROM providers JOIN users ON (providers.id = users.id) WHERE providers.id = :id
 
 -- :name delete-provider! :! :n
 -- :doc delete a provider record given the id
-DELETE FROM providers WHERE id = :user-id
+DELETE FROM providers WHERE id = :id
 
 
 -- :name create-appointment! :! :n
@@ -125,7 +125,7 @@ SET start_time = :start, end_time = :end, provider_id = :provider-id WHERE id = 
 LEFT JOIN providers ON availabilities.provider_id = providers.id
 
 -- :snip available-between
-:sql:conj (start_time >= :v:start AND start_time <= :v:end)
+:sql:conj (start_time BETWEEN :v:start AND :v:end)
 
 -- :snip available-in-state
 :sql:conj (providers.state = :v:state)

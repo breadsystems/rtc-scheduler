@@ -2,21 +2,78 @@
  {:Careseeker
   {:description "A person seeking care"
    :fields
-   {:id {:type (non-null ID)}
+   {:id {:type (non-null Int)}
     :name {:type String}
     :pronouns {:type String}
+    :email {:type (non-null String)}
+    :state {:type (non-null String)}
     :alias {:type String}
-    :email {:type String}
     :phone {:type String}
     :ok_to_text {:type Boolean}
-    :state {:type String}
     ;; TODO should these be datetimes?
     :date_created {:type String}
-    :date_modified {:type String}}}}
+    :date_modified {:type String}}}
+
+  :Provider
+  {:description "A doctor or other medical expert"
+   :fields
+   {:id {:type (non-null Int)}
+    :first_name {:type String}
+    :last_name {:type String}
+    :pronouns {:type String}
+    :phone {:type String}
+    ;; TODO other user fields?
+    :state {:type String}}}
+
+  :Appointment
+  {:description "An appointment between a specific Careseeker and Provider"
+   :fields
+   {:id {:type (non-null Int)}
+    :start_time {:type String}
+    :end_time {:type String}
+    :careseeker_id {:type String}
+    :provider_id {:type String}
+    :reason {:type String}
+    :provider_notes {:type String}
+    :transcription {:type String}
+    :state {:type String}
+    :category {:type String}
+    :resolution {:type String}}}
+  
+  :Availability
+  {:description "A chunk of time in which a specific provider is available"
+   :fields
+   {:id {:type (non-null Int)}
+    :start_time {:type String}
+    :end_time {:type String}
+    :provider {:type :Provider}}}}
  
  :queries
- {:careseeker_by_id
+ {:careseeker
   {:type :Careseeker
    :description "Get a Careseeker by their ID"
-   :args {:id {:type ID}}
-   :resolve :query/careseeker_by_id}}}
+   :args {:id {:type Int}}
+   :resolve :query/careseeker}
+
+  :availabilities
+  {:type (list :Availability)
+   :description "Get availabilities by start/end/state"
+   :args {:from {:type String}
+          :to {:type String}
+          :state {:type String}
+          :provider_id {:type String}}
+   :resolve :query/availabilities}
+  
+  :appointment
+  {:type :Appointment
+   :description "Get a single appointment by its ID"
+   :args {:id {:type Int}}
+   :resolve :query/appointment}
+  
+  :appointments
+  {:type (list :Appointment)
+   :description "Get appointments by dates/provider"
+   :args {:from {:type String}
+          :to {:type String}
+          :provider_id {:type Int}}
+   :resolve :query/appointments}}}
