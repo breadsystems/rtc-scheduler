@@ -3,6 +3,7 @@
    [org.httpkit.server :as http]
    [mount.core :as mount :refer [defstate]]
    [reitit.ring :as ring]
+   [rtc.api :as api]
    [rtc.db]
    [rtc.env :refer [middleware]]))
 
@@ -17,7 +18,12 @@
    (ring/router
     [["/ping" (constantly {:status 200
                            :headers {"Content-Type" "text/plain; charset=utf-8"}
-                           :body "OK"})]])
+                           :body "OK"})]
+     ["/api/graphql" {:post (fn [req]
+                              {:status 200
+                               :headers {"Content-Type" "application/edn"}
+                               :body (-> req :body slurp api/q)})}]])
+
    (ring/routes
     (ring/create-resource-handler {:path "/"})
     (ring/create-default-handler
