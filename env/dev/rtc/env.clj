@@ -2,7 +2,8 @@
   (:require
    [mount.core :refer [defstate]]
    [nrepl.server :as nrepl]
-   [ring.middleware.reload :refer [wrap-reload]]))
+   [ring.middleware.reload :refer [wrap-reload]]
+   [rtc.middleware :refer [wrap-ip-safelist]]))
 
 
 (defonce stop-repl (atom nil))
@@ -21,7 +22,9 @@
 
 
 (defn middleware [app]
-  (wrap-reload app))
+  (-> app
+      (wrap-ip-safelist {:safelist #{"127.0.0.1"}})
+      wrap-reload))
 
 
 (defstate repl-server

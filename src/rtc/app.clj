@@ -22,7 +22,11 @@
      ["/api/graphql" {:post (fn [req]
                               {:status 200
                                :headers {"Content-Type" "application/edn"}
-                               :body (-> req :body slurp api/q)})}]])
+                               :body (-> req :body slurp api/q)})}]
+     ["/ip" {:get (fn [req]
+                    {:status 200
+                     :headers {"Content-Type" "text/plain; charset=utf-8"}
+                     :body (:remote-addr req)})}]])
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})
