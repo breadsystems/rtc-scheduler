@@ -3,6 +3,7 @@
    [org.httpkit.server :as http]
    [mount.core :as mount :refer [defstate]]
    [reitit.ring :as ring]
+   [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
    [rtc.api :as api]
    [rtc.db]
    [rtc.env :refer [middleware]]))
@@ -16,7 +17,9 @@
 (def app
   (ring/ring-handler
    (ring/router
-    [["/ping" (constantly {:status 200
+    [""
+     {:middleware [wrap-anti-forgery]}
+     ["/ping" (constantly {:status 200
                            :headers {"Content-Type" "text/plain; charset=utf-8"}
                            :body "OK"})]
      ["/api/graphql" {:post (fn [req]
