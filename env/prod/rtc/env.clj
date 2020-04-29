@@ -1,5 +1,8 @@
-(ns rtc.env)
+(ns rtc.env
+  (:require
+   [ring.middleware.params :refer [wrap-params]]))
 
 
-;; No special middleware in production
-(def middleware identity)
+(defn middleware [handler]
+  (-> handler
+      wrap-params))

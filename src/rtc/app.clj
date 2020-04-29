@@ -1,35 +1,33 @@
 (ns rtc.app
   (:require
-   [org.httpkit.server :as http]
+   [buddy.auth :refer [authenticated? throw-unauthorized]]
    [mount.core :as mount :refer [defstate]]
+   [org.httpkit.server :as http]
    [reitit.ring :as ring]
    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
    [rtc.api :as api]
+   [rtc.auth :as auth]
    [rtc.db]
    [rtc.env :refer [middleware]]))
 
-
-(defn handler [_]
-  {:status 200
-   :headers {"Content-Type" "text/html"}
-   :body "Hello, Comrades!"})
 
 (def app
   (ring/ring-handler
    (ring/router
     [""
      {:middleware [wrap-anti-forgery]}
-     ["/ping" (constantly {:status 200
-                           :headers {"Content-Type" "text/plain; charset=utf-8"}
-                           :body "OK"})]
      ["/api/graphql" {:post (fn [req]
                               {:status 200
                                :headers {"Content-Type" "application/edn"}
                                :body (-> req :body slurp api/q)})}]
-     ["/ip" {:get (fn [req]
-                    {:status 200
-                     :headers {"Content-Type" "text/plain; charset=utf-8"}
-                     :body (:remote-addr req)})}]])
+     ["/login" auth/login-handler]
+     ["/provider" {:middleware [auth/wrap-auth]
+                   :get (fn [req]
+                          (if-not (authenticated? req)
+                            (throw-unauthorized)
+                            {:status 200
+                             :headers {"Content-Type" "text/plain"}
+                             :body "ok"}))}]])
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})
