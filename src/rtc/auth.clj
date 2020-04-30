@@ -1,20 +1,16 @@
 (ns rtc.auth
   (:require
-   [buddy.auth :refer [authenticated?]]
+   [buddy.auth :refer [authenticated? throw-unauthorized]]
    [buddy.auth.backends.session :refer [session-backend]]
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
    [buddy.hashers :as hash]
    [clojure.string :as string]
    [mount.core :as mount :refer [defstate]]
    [rtc.db :as db]
-   [rtc.layout :refer [page]]
+   [rtc.layout :as layout]
    [ring.middleware.session :refer [wrap-session]]
    [ring.util.response :refer [redirect]]))
 
-
-(comment
-  (db/get-user-by-email {:email "rtc-admin@example.com"})
-)
 
 (defn- rand-password []
   (string/join ""
@@ -65,8 +61,7 @@
     (if user
       (-> (redirect (get query-params "next" "/dashboard"))
           (assoc-in [:session :identity] user))
-      {:status 401
-       :body "nope"})))
+      (layout/login-page req))))
 
 
 ;; Define middlewares
@@ -89,7 +84,10 @@
   (session-backend {:unauthorized-handler unauthorized-handler}))
 
 (defn wrap-auth [handler]
-  (-> handler
+  (-> (fn [req]
+        (if (authenticated? req)
+          (handler req)
+          (throw-unauthorized)))
       (wrap-authorization auth-backend)
       (wrap-authentication auth-backend)
       wrap-session))

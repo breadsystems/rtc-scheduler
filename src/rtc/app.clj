@@ -1,6 +1,5 @@
 (ns rtc.app
   (:require
-   [buddy.auth :refer [authenticated? throw-unauthorized]]
    [mount.core :as mount :refer [defstate]]
    [org.httpkit.server :as http]
    [reitit.ring :as ring]
@@ -8,7 +7,8 @@
    [rtc.api :as api]
    [rtc.auth :as auth]
    [rtc.db]
-   [rtc.env :refer [middleware]]))
+   [rtc.env :refer [middleware]]
+   [rtc.layout :refer [html-response]]))
 
 
 (def app
@@ -21,13 +21,9 @@
                                :headers {"Content-Type" "application/edn"}
                                :body (-> req :body slurp api/q)})}]
      ["/login" auth/login-handler]
-     ["/provider" {:middleware [auth/wrap-auth]
-                   :get (fn [req]
-                          (if-not (authenticated? req)
-                            (throw-unauthorized)
-                            {:status 200
-                             :headers {"Content-Type" "text/plain"}
-                             :body "ok"}))}]])
+     ["/admin" {:middleware [auth/wrap-auth]}
+      ["/provider" {:get (fn [_req]
+                           (html-response {:content [:div "PROVIDER"]}))}]]])
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})

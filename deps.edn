@@ -4,6 +4,7 @@
         buddy/buddy-hashers       {:mvn/version "1.4.0"}
         clj-time                  {:mvn/version "0.15.2"}
         conman                    {:mvn/version "0.8.6"}
+        hiccup                    {:mvn/version "1.0.5"}
         http-kit                  {:mvn/version "2.3.0"}
         metosin/reitit-ring       {:mvn/version "0.4.2"}
         migratus                  {:mvn/version "1.2.8"}
