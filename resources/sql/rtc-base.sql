@@ -10,6 +10,12 @@ UPDATE users SET email = :email WHERE id = :id
 -- :doc retrieves a user record given the id
 SELECT * FROM users WHERE id = :id
 
+-- :name get-user-by-email :? :1
+-- :doc retrieves a user record given an email
+SELECT u.*, p.*, p.id != NULL AS is_provider FROM users u
+LEFT JOIN providers p ON u.ID = p.ID
+WHERE email = :email
+
 -- :name delete-user! :! :n
 -- :doc deletes a user record given the id
 DELETE FROM users WHERE id = :id

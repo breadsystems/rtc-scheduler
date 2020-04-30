@@ -18,11 +18,6 @@
   :start (connect!)
   :stop  (conman/disconnect! *db*))
 
-(defn reconnect! []
-  (mount/stop #'*db*)
-  (mount/start #'*db*)
-  nil)
-
 (defn bind! []
   (conman/bind-connection
    *db*
@@ -30,6 +25,12 @@
    "sql/rtc-base.sql"))
 
 (bind!)
+
+(defn reconnect! []
+  (mount/stop #'*db*)
+  (mount/start #'*db*)
+  (bind!)
+  nil)
 
 
 (comment
