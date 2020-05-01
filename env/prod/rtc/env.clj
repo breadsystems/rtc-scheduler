@@ -1,8 +1,5 @@
-(ns rtc.env
-  (:require
-   [ring.middleware.params :refer [wrap-params]]))
+(ns rtc.env)
 
 
 (defn middleware [handler]
-  (-> handler
-      wrap-params))
+  handler)
