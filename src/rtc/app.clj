@@ -4,26 +4,47 @@
    [org.httpkit.server :as http]
    [reitit.ring :as ring]
    [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
+   [ring.middleware.params :refer [wrap-params]]
+   [ring.middleware.session :refer [wrap-session]]
+   [ring.middleware.session.memory :as memory]
    [rtc.api :as api]
    [rtc.auth :as auth]
    [rtc.db]
-   [rtc.env :refer [middleware]]
-   [rtc.layout :refer [html-response]]))
+   [rtc.env :as env]
+   [rtc.layout :as layout]))
+
+
+(defn- debugging-csrf-error-handler
+  ([req]
+   (layout/error-page {:err "Invalid CSRF Token!" :req (:session req "(nil)")}))
+  ([_ req _]
+   (debugging-csrf-error-handler req)))
+
+(defn- csrf-middleware [handler]
+  (wrap-anti-forgery handler {:error-handler debugging-csrf-error-handler}))
+
+
+;; shared session store for all reitit routes
+;; https://github.com/metosin/reitit/issues/205
+(def store (memory/memory-store))
 
 
 (def app
   (ring/ring-handler
    (ring/router
     [""
-     {:middleware [wrap-anti-forgery]}
+     {:middleware [wrap-params [wrap-session {:store store}]]}
+     ;; TODO figure out the right order for middleware
+    ;;  {:middleware [wrap-params csrf-middleware]}
      ["/api/graphql" {:post (fn [req]
                               {:status 200
                                :headers {"Content-Type" "application/edn"}
                                :body (-> req :body slurp api/q)})}]
      ["/login" auth/login-handler]
      ["/admin" {:middleware [auth/wrap-auth]}
-      ["/provider" {:get (fn [_req]
-                           (html-response {:content [:div "PROVIDER"]}))}]]])
+      ["" {:get (constantly {:status 400 :body "admin"})}]
+      ["/provider" {:get (fn [req]
+                           (layout/page {:content [:div "PROVIDER"]}))}]]])
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})
@@ -39,7 +60,7 @@
   (let [port (Integer. (or (System/getenv "HTTP_PORT") 8080))]
     (println (str "Running HTTP server at localhost:" port))
     (reset! stop-http
-            (http/run-server (middleware app) {:port port})))
+            (http/run-server (env/middleware app) {:port port})))
   nil)
 
 (defn stop! []
