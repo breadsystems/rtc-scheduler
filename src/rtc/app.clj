@@ -75,5 +75,5 @@
   :stop  (stop!))
 
 
-(defn -main [& args]
+(defn -main [& _args]
   (mount/start))
