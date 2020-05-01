@@ -41,10 +41,11 @@
                                :headers {"Content-Type" "application/edn"}
                                :body (-> req :body slurp api/q)})}]
      ["/login" auth/login-handler]
+     ["/logout" auth/logout-handler]
      ["/admin" {:middleware [auth/wrap-auth]}
-      ["" {:get (constantly {:status 400 :body "admin"})}]
       ["/provider" {:get (fn [req]
-                           (layout/page {:content [:div "PROVIDER"]}))}]]])
+                           (layout/page {:req req
+                                         :content [:div "PROVIDER"]}))}]]])
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})

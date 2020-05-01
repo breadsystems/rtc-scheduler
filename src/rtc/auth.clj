@@ -55,6 +55,10 @@
     :else
     (redirect (format "/login?next=%s" (:uri req)))))
 
+(defn logout-handler [req]
+  (-> (redirect "/login")
+      (assoc :session {})))
+
 (defn login-handler [{:keys [query-params form-params session] :as req}]
   (let [email (get form-params "email")
         password (get form-params "password")

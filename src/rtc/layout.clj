@@ -1,5 +1,6 @@
 (ns rtc.layout
   (:require
+   [buddy.auth :refer [authenticated?]]
    [hiccup.core :refer [html]]
    [hiccup.page :refer [doctype]]))
 
@@ -36,7 +37,9 @@
               [:meta {:name "csrf-token" :content (:anti-forgery-token req)}]]
              head)
        (conj [:body
-              [:header "site header"]
+              [:header "site header"
+               (when (authenticated? req)
+                 [:a.logout {:href "/logout"} "Logout"])]
               content
               [:footer "site footer"]]
              footer-content)])}))
