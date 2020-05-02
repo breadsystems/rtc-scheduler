@@ -40,19 +40,18 @@
               [:header "site header"
                (when (authenticated? req)
                  [:a.logout {:href "/logout"} "Logout"])]
-              content
-              [:footer "site footer"]]
+              content]
              footer-content)])}))
 
 
-(defn login-page [{:keys [form-params uri query-string] :as req}]
+(defn login-page [{:keys [form-params query-string] :as req}]
   (let [{:keys [email password]} form-params]
     (page
      {:title "Login"
       :req req
       :content
       [:main
-       [:form {:action (str uri "?" query-string) :method "POST"}
+       [:form {:action (str "/login?" query-string) :method "POST"}
         [:input {:type :email
                  :name "email"
                  ;; TODO
@@ -63,3 +62,15 @@
                  ;; TODO
                  :value (or password "bgf7ekabllojGyvZ")}]
         [:button {:type :submit} "Login"]]]})))
+
+
+(defn two-factor-page [{:keys [form-params query-params] :as req}]
+  (let [dest (get query-params "next")]
+    (page
+     {:title "Verify Token"
+      :content [:form {:action (str "/2fa?next=" dest)
+                       :method "POST"}
+                [:input {:type :text
+                         :name "token"
+                         :value ""
+                         :placeholder "12 345 678"}]]})))
