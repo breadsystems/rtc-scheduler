@@ -33,7 +33,6 @@
   (ring/ring-handler
    (ring/router
     [""
-     {:middleware [wrap-params [wrap-session {:store store}]]}
      ;; TODO figure out the right order for middleware
     ;;  {:middleware [wrap-params csrf-middleware]}
      ["/api/graphql" {:post (fn [req]
@@ -61,7 +60,12 @@
   (let [port (Integer. (or (System/getenv "HTTP_PORT") 8080))]
     (println (str "Running HTTP server at localhost:" port))
     (reset! stop-http
-            (http/run-server (env/middleware app) {:port port})))
+            (http/run-server (-> app
+                                 (wrap-session)
+                                 (wrap-params)
+                                ;;  (wrap-anti-forgery)
+                                 (env/middleware))
+                             {:port port})))
   nil)
 
 (defn stop! []
