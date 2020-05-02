@@ -50,7 +50,7 @@
           (assoc :session {:identity user}))
       (layout/login-page req))))
 
-(defn require-authentication [handler]
+(defn wrap-require-auth [handler]
   (fn [req]
     (if (authenticated? req)
       (handler req)
@@ -62,6 +62,6 @@
 
 (defn wrap-auth [handler]
   (-> handler
-      (require-authentication)
+      (wrap-require-auth)
       (wrap-authorization auth-backend)
       (wrap-authentication auth-backend)))
