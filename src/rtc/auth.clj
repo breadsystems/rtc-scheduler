@@ -5,14 +5,11 @@
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
    [buddy.hashers :as hash]
    [rtc.auth.two-factor :as two-factor]
-   [rtc.auth.util :as util]
+   [rtc.auth.util]
    [rtc.db :as db]
    [rtc.layout :as layout]
    [ring.util.response :refer [redirect]]))
 
-
-(defn verified-2fa-token? [req]
-  (boolean (:verified-2fa-token? (:session req))))
 
 (defn authenticate-user [email password]
   (if (and email password)

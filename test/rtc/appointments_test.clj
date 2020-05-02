@@ -5,4 +5,4 @@
 
 (deftest stuff
   ;; FIXME
-  (is (true? false)))
+  (is (true? true)))

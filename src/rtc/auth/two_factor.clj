@@ -37,6 +37,9 @@
        (:success)
        (= "true")))
 
+(defn verified? [req]
+  (boolean (:verified-2fa-token? (:session req))))
+
 (comment
 
   (app-details)
