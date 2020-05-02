@@ -4,33 +4,15 @@
    [buddy.auth.backends.session :refer [session-backend]]
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
    [buddy.hashers :as hash]
-   [clojure.string :as string]
-   [mount.core :as mount :refer [defstate]]
+   [rtc.auth.two-factor :as two-factor]
+   [rtc.auth.util :as util]
    [rtc.db :as db]
    [rtc.layout :as layout]
    [ring.util.response :refer [redirect]]))
 
 
-(defn- tmp-password []
-  (string/join ""
-               (map (fn [_]
-                      (rand-nth "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
-                    (range 0 16))))
-
-(defn- create-first-admin-user! []
-  (try
-    (let [pw (or (System/getenv "ADMIN_PASSWORD") (tmp-password))
-          pw-hash (hash/derive pw)
-          email (or (System/getenv "ADMIN_EMAIL") "rtc-admin@example.com")]
-      (db/create-user! {:email email :pass pw-hash})
-      (println "admin email:" email)
-      (println "admin password: " pw))
-    (catch Exception e
-      (.getMessage e))))
-
-(defstate admin-user
-  :start (create-first-admin-user!))
-
+(defn verified-2fa-token? [req]
+  (boolean (:verified-2fa-token? (:session req))))
 
 (defn authenticate-user [email password]
   (if (and email password)
