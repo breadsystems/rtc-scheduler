@@ -29,10 +29,10 @@
   (api-call http/post "/users/new" {:form-params {:user data}
                                     :flatten-nested-form-params true}))
 
-(defn get-2fa-token [id]
+(defn get-token [id]
   (api-call http/get (str "/sms/" id)))
 
-(defn verify-2fa-token [token id]
+(defn verify-token [token id]
   (->> (api-call http/get (format "/verify/%s/%s" token id))
        (:success)
        (= "true")))
@@ -48,7 +48,7 @@
                            :cellphone "253-222-9139"
                            :country_code "1"}))
 
-  (verify-2fa-token "15 644 34" (get-in user [:user :id]))
+  (verify-token "15 644 34" (get-in user [:user :id]))
 
   ;;
   )

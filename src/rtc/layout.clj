@@ -44,33 +44,41 @@
              footer-content)])}))
 
 
-(defn login-page [{:keys [form-params query-string] :as req}]
-  (let [{:keys [email password]} form-params]
+(defn login-page [{:keys [error req]}]
+  (let [{:keys [form-params query-string]} req
+        {:keys [email password]} form-params]
     (page
      {:title "Login"
       :req req
       :content
       [:main
        [:form {:action (str "/login?" query-string) :method "POST"}
+        (when error
+          [:div.error
+           [:p error]])
         [:input {:type :email
                  :name "email"
                  ;; TODO
-                 :value (or email "rtc-admin@example.com")
+                 :value (or email "")
                  :placeholder "me@example.com"}]
         [:input {:type :password
                  :name "password"
                  ;; TODO
-                 :value (or password "bgf7ekabllojGyvZ")}]
+                 :value (or password "")}]
         [:button {:type :submit} "Login"]]]})))
 
 
-(defn two-factor-page [{:keys [form-params query-params] :as req}]
-  (let [dest (get query-params "next")]
+(defn two-factor-page [{:keys [req error]}]
+  (let [dest (get-in req [:query-params "next"])]
     (page
      {:title "Verify Token"
-      :content [:form {:action (str "/2fa?next=" dest)
+      :content [:form {:action (str "/login?next=" dest)
                        :method "POST"}
+                (when error
+                  [:div.error
+                  [:p error]])
                 [:input {:type :text
                          :name "token"
                          :value ""
-                         :placeholder "12 345 678"}]]})))
+                         :placeholder "12 345 678"}]
+                [:button {:type :submit} "Confirm"]]})))

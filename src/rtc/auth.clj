@@ -26,14 +26,19 @@
 
 (defn login-step [{:keys [form-params] :as req}]
   (cond
-    (and (authenticated? req) (two-factor/verified? req))
+    (and
+     ;; (authenticated? req)
+     (boolean (:identity (:session req)))
+     (two-factor/verified? req))
     :logged-in
 
-    (and (authenticated? req)
-         (get form-params "token"))
+    (and ;; (authenticated? req)
+     (boolean (:identity (:session req)))
+     (get form-params "token"))
     :verifying
 
-    (authenticated? req)
+    ;; (authenticated? req)
+    (boolean (:identity (:session req)))
     :two-factor
 
     (and (get form-params "email")
@@ -43,53 +48,52 @@
     :else
     :unauthenticated))
 
-(defn login-uri [{:keys [uri query-params] :as req}]
-  (let [logged-in? (= :logged-in (login-step req))]
-    (if logged-in?
-      (get query-params "next" "/admin/volunteer")
-      (let [dest (get query-params "next" uri)]
-        (format "/login?next=%s" dest)))))
+(defn destination-uri [{:keys [query-params]}]
+  (let [dest (get query-params "next")]
+    (if (seq dest) dest "/admin/volunteer")))
 
-(defn authenticate-request [{:keys [form-params] :as req}]
-  (let [user (authenticate-user (get form-params "email")
-                                (get form-params "password"))]
-    (println user)
-    (if user
-      (-> (redirect (login-uri req))
-          (assoc :session {:identity user}))
-      (layout/login-page req))))
-
-(defn verify-two-factor-request [{:keys [form-params] :as req}]
-  (if (two-factor/verify-2fa-token (get form-params "token"))
-    (-> (redirect (login-uri req))
-        (assoc-in [:session :verified-2fa-token?] true))
-    (layout/two-factor-page req)))
-
-(defn unauthorized-handler [req _metadata]
-  (redirect (login-uri req)))
-
-
-(defn logout-handler [req]
+(defn logout-handler [_req]
   (-> (redirect "/login")
       (assoc :session {})))
 
-(defn login-handler [{:keys [query-params form-params session] :as req}]
-  (let [email (get form-params "email")
-        password (get form-params "password")
-        user (authenticate-user email password)]
-    (if user
-      (-> (redirect (get query-params "next" "/admin/provider"))
-          (assoc :session {:identity user}))
-      (layout/login-page req))))
+(defn login-handler [{:keys [form-params session] :as req}]
+  (condp = (login-step req)
+    :unauthenticated
+    (layout/login-page {:req req})
+
+    :authenticating
+    (if-let [user (authenticate-user (get form-params "email")
+                                     (get form-params "password"))]
+      (assoc (layout/two-factor-page req) :session {:identity user})
+      (layout/login-page {:req req
+                          :error "Invalid email or password"}))
+
+    :two-factor
+    (layout/two-factor-page req)
+
+    :verifying
+    (if (two-factor/verify-token (get form-params "token") 25490095)
+      (-> (redirect (destination-uri req))
+          (assoc :session (assoc session :verified-2fa-token? true)))
+      (layout/two-factor-page {:req req
+                               :error "Invalid token"}))
+
+    :logged-in    (redirect
+     (destination-uri req))))
 
 (defn wrap-require-auth [handler]
   (fn [req]
-    (if (authenticated? req)
+    (if (and
+        ;;  (authenticated? req)
+         (boolean (:identity (:session req)))
+         (two-factor/verified? req))
       (handler req)
       (throw-unauthorized))))
 
 (def auth-backend
-  (session-backend {:unauthorized-handler unauthorized-handler}))
+  (session-backend
+   {:unauthorized-handler (fn [{:keys [uri]}]
+                            (redirect (format "/login?next=%s" uri)))}))
 
 
 (defn wrap-auth [handler]

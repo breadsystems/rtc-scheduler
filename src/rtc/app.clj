@@ -44,7 +44,10 @@
      ["/admin" {:middleware [auth/wrap-auth]}
       ["/provider" {:get (fn [req]
                            (layout/page {:req req
-                                         :content [:div "PROVIDER"]}))}]]])
+                                         :content [:div "PROVIDER"]}))}]
+      ["/volunteer" {:get (fn [req]
+                            (layout/page {:req req
+                                          :content [:div "VOLUNTEER"]}))}]]])
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})
