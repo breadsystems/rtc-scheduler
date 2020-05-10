@@ -78,8 +78,8 @@
       (layout/two-factor-page {:req req
                                :error "Invalid token"}))
 
-    :logged-in    (redirect
-     (destination-uri req))))
+    :logged-in
+    (redirect (destination-uri req))))
 
 (defn wrap-require-auth [handler]
   (fn [req]
