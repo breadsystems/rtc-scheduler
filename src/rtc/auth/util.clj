@@ -8,7 +8,11 @@
 (defn- tmp-password []
   (string/join ""
                (map (fn [_]
-                      (rand-nth "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"))
+                      (rand-nth
+                       (str "0123456789"
+                            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                            "abcdefghijklmnopqrstuvwxyz"
+                            "!@#$%^&*_+-=/")))
                     (range 0 16))))
 
 (defn create-first-admin-user! []
