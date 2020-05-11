@@ -5,7 +5,7 @@
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
    [buddy.hashers :as hash]
    [rtc.auth.two-factor :as two-factor]
-   [rtc.auth.roles :as roles]
+   [rtc.users.core :as u]
    [rtc.auth.util]
    [rtc.db :as db]
    [rtc.layout :as layout]
@@ -20,8 +20,10 @@
     nil))
 
 (comment
-  (db/get-user-by-email {:email "rtc-admin@example.com"})
-  (roles/admin? (db/get-user-by-email {:email "rtc-admin@example.com"}))
+  (db/get-user-by-email {:email "rtc@example.com"})
+  (u/admin? (db/get-user-by-email {:email "rtc@example.com"}))
+  (u/preferences (db/get-user-by-email {:email "rtc@example.com"}))
+  (u/two-factor-enabled? (db/get-user-by-email {:email "rtc@example.com"}))
   (authenticate-user "rtc-admin@example.com" "bgf7ekabllojGyvZ")
   (authenticate-user "rtc-admin@example.com" "garbage"))
 
@@ -52,7 +54,7 @@
 
 (defn destination-uri [{:keys [query-params]}]
   (let [dest (get query-params "next")]
-    (if (seq dest) dest "/admin/volunteer")))
+    (if (seq dest) dest "/admin")))
 
 (defn logout-handler [_req]
   (-> (redirect "/login")

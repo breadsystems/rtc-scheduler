@@ -4,10 +4,14 @@
    [clojure.data.json :as json]
    [clojure.walk :as walk]
    [ring.util.response :refer [redirect]]
-   [rtc.layout :as layout]))
+   [rtc.layout :as layout]
+   [rtc.users.core :as u]))
 
 
 (def authy-api-key (System/getenv "AUTHY_API_KEY"))
+
+(when (empty? authy-api-key)
+  (println "WARNING: No AUTHY_API_KEY env var detected!"))
 
 
 (defn- api-call
@@ -39,6 +43,11 @@
 
 (defn verified? [req]
   (boolean (:verified-2fa-token? (:session req))))
+
+(defn require-verification? [{:keys [session] :as req}]
+  (let [user (:identity session)]
+    (and (u/two-factor-enabled? user)
+         (not (verified? req)))))
 
 (comment
 

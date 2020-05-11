@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
   date_created timestamp,
   date_modified timestamp,
   is_admin boolean,
+  authy_id varchar(15),
+  preferences json default '{}',
   UNIQUE (email)
 );
 
