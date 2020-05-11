@@ -3,6 +3,7 @@
         org.clojure/data.json     {:mvn/version "1.0.0"}
         buddy/buddy-auth          {:mvn/version "2.2.0"}
         buddy/buddy-hashers       {:mvn/version "1.4.0"}
+        cheshire                  {:mvn/version "5.10.0"}
         clj-http                  {:mvn/version "3.10.1"}
         clj-time                  {:mvn/version "0.15.2"}
         conman                    {:mvn/version "0.8.6"}
