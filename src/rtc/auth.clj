@@ -5,6 +5,7 @@
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
    [buddy.hashers :as hash]
    [rtc.auth.two-factor :as two-factor]
+   [rtc.auth.roles :as roles]
    [rtc.auth.util]
    [rtc.db :as db]
    [rtc.layout :as layout]
@@ -20,6 +21,7 @@
 
 (comment
   (db/get-user-by-email {:email "rtc-admin@example.com"})
+  (roles/admin? (db/get-user-by-email {:email "rtc-admin@example.com"}))
   (authenticate-user "rtc-admin@example.com" "bgf7ekabllojGyvZ")
   (authenticate-user "rtc-admin@example.com" "garbage"))
 
@@ -92,7 +94,7 @@
 
 (def auth-backend
   (session-backend
-   {:unauthorized-handler (fn [{:keys [uri]}]
+   {:unauthorized-handler (fn [{:keys [uri]} _metadata]
                             (redirect (format "/login?next=%s" uri)))}))
 
 

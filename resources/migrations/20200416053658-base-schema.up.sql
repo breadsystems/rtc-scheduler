@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   last_login timestamp,
   date_created timestamp,
   date_modified timestamp,
+  is_admin boolean,
   UNIQUE (email)
 );
 
