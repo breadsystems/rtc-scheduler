@@ -51,6 +51,7 @@
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})
+    (ring/redirect-trailing-slash-handler {:method :strip})
     (ring/create-default-handler
      {:not-found (constantly {:status 404
                               :headers {"Content-Type" "text/plain; charset=utf-8"}
