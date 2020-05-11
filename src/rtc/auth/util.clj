@@ -19,12 +19,13 @@
   (try
     (let [pw (or (System/getenv "ADMIN_PASSWORD") (tmp-password))
           pw-hash (hash/derive pw)
-          email (or (System/getenv "ADMIN_EMAIL") "rtc-admin@example.com")
+          email (or (System/getenv "ADMIN_EMAIL") "rtc@example.com")
           data {:email email :pass pw-hash :is_admin true}]
       (db/create-user! data)
       (println "admin email:" email)
       (println "admin password: " pw)
-      data)
+      {:email email
+       :pass  pw})
     (catch Exception e
       (.getMessage e))))
 
