@@ -12,6 +12,9 @@
    [ring.util.response :refer [redirect]]))
 
 
+(defn- auth-disabled? []
+  (= "1" (System/getenv "DEV_DISABLE_AUTH")))
+
 (defn authenticate-user [email password]
   (if (and email password)
     (let [user (db/get-user-by-email {:email email})]
@@ -85,6 +88,12 @@
     :logged-in
     (redirect (destination-uri req))))
 
+(defn admin-only-resolver [resolver]
+  (fn [{:keys [request] :as context} query-string value]
+    (if (or (auth-disabled?) (u/admin? (:identity (:session request))))
+      (resolver context query-string value)
+      {:errors [{:message "You do not have permission to do that"}]})))
+
 (defn wrap-require-auth [handler]
   (fn [req]
     (if (or
@@ -93,7 +102,7 @@
           (boolean (:identity (:session req)))
           (two-factor/verified? req))
          ;; Support disabling auth for nicer frontend dev workflow
-         (= "1" (System/getenv "DEV_DISABLE_AUTH")))
+         (auth-disabled?))
       (handler req)
       (throw-unauthorized))))
 
