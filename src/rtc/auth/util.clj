@@ -5,15 +5,22 @@
    [mount.core :refer [defstate]]
    [rtc.db :as db]))
 
-(defn- tmp-password []
-  (string/join ""
-               (map (fn [_]
-                      (rand-nth
-                       (str "0123456789"
-                            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                            "abcdefghijklmnopqrstuvwxyz"
-                            "!@#$%^&*_+-=/")))
-                    (range 0 16))))
+(defn- tmp-password
+  ([pw-length]
+   (string/join ""
+                (map (fn [_]
+                       (rand-nth
+                        (str "0123456789"
+                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                             "abcdefghijklmnopqrstuvwxyz"
+                             "!@#$%^&*_+-=/")))
+                     (range 0 pw-length))))
+  ([]
+   (tmp-password 16)))
+
+(comment
+  (tmp-password)
+  (tmp-password 32))
 
 (defn create-first-admin-user! []
   (try
