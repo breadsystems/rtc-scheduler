@@ -29,6 +29,10 @@ tooling:
     service: appserver
     cmd: clojure
 
+  test:
+    service: appserver
+    cmd: clojure -A:dev -m kaocha.runner
+
 proxy:
   appserver:
     # This tells Lando to forward requests on port 80 requests to 8080
