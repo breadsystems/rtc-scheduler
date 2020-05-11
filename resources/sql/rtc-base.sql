@@ -21,6 +21,15 @@ WHERE email = :email
 DELETE FROM users WHERE id = :id
 
 
+-- :name get-invitation :? :1
+-- :doc get an invitation by email and code
+SELECT * FROM invitations WHERE email = :email AND code = :code
+
+-- :name create-invitation! :! :n
+-- :doc creates a new invitation record
+INSERT INTO invitations (email, code, date_invited) VALUES (:email, :code, now())
+
+
 -- :name create-careseeker! :! :n
 -- :doc create a new careseeker record
 INSERT INTO careseekers (email, alias, state, date_created, date_modified)

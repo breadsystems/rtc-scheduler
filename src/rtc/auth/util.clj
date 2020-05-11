@@ -5,7 +5,7 @@
    [mount.core :refer [defstate]]
    [rtc.db :as db]))
 
-(defn- tmp-password
+(defn tmp-password
   ([pw-length]
    (string/join ""
                 (map (fn [_]

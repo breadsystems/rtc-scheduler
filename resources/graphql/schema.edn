@@ -46,7 +46,13 @@
    {:id {:type (non-null Int)}
     :start_time {:type String}
     :end_time {:type String}
-    :provider {:type :Provider}}}}
+    :provider {:type :Provider}}}
+  
+  :Invitation
+  {:description "An invitation for a new user account"
+   :fields
+   {:email {:type (non-null String)}
+    :code {:type String}}}}
  
  :queries
  {:careseeker
@@ -76,4 +82,10 @@
    :args {:from {:type String}
           :to {:type String}
           :provider_id {:type Int}}
-   :resolve :query/appointments}}}
+   :resolve :query/appointments}}
+
+ :mutations
+ {:invite
+  {:type :Invitation
+   :args {:email {:type String}}
+   :resolve :mutation/invite}}}

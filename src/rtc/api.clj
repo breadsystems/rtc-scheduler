@@ -7,8 +7,10 @@
    [com.walmartlabs.lacinia.util :as util]
    [com.walmartlabs.lacinia.schema :as schema]
    [mount.core :as mount :refer [defstate]]
+   [rtc.auth :as auth]
    [rtc.db :as db]
-   [rtc.appointments.data :as appt])
+   [rtc.appointments.data :as appt]
+   [rtc.users.core :as u])
   (:import (clojure.lang IPersistentMap)))
 
 
@@ -24,7 +26,11 @@
                            (db/get-availabilities (select-keys args [:start :end :state])))
    :query/appointments   (fn [_context args _value]
                            ;; TODO
-                           [])})
+                           [])
+
+   :mutation/invite      (auth/admin-only-resolver
+                          (fn [_context {:keys [email]} _value]
+                            (u/invite! email)))})
 
 (defn load-schema []
   (-> (io/resource "graphql/schema.edn")
@@ -50,9 +56,12 @@
   :start (load-schema))
 
 
-(defn q [query-string]
-  (-> (l/execute graphql-schema query-string nil nil)
-      simplify))
+(defn q
+  ([query-string]
+   (q query-string {}))
+  ([query-string context]
+   (-> (l/execute graphql-schema query-string nil context)
+       simplify)))
 
 (defn restart! []
   (mount/stop #'graphql-schema)
@@ -62,6 +71,11 @@
 
 (comment
   (restart!)
+
+  (get-in (q "bogus query") [:errors 0 :message])
+
+  (q "mutation { invite(email: \"new1234@example.com\") { email code }}"
+     {:request {:session {:identity {:is_admin true}}}})
 
   (q "{ careseeker (id: 1) { id name alias pronouns }}")
   (q "{ availabilities { id start_time end_time }}")
