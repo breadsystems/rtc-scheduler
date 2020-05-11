@@ -85,10 +85,13 @@
 
 (defn wrap-require-auth [handler]
   (fn [req]
-    (if (and
-        ;;  (authenticated? req)
-         (boolean (:identity (:session req)))
-         (two-factor/verified? req))
+    (if (or
+         (and
+          ;;  (authenticated? req)
+          (boolean (:identity (:session req)))
+          (two-factor/verified? req))
+         ;; Support disabling auth for nicer frontend dev workflow
+         (= "1" (System/getenv "DEV_DISABLE_AUTH")))
       (handler req)
       (throw-unauthorized))))
 
