@@ -22,7 +22,10 @@ CREATE TABLE IF NOT EXISTS invitations (
   email varchar(100),
   code varchar(64),
   date_invited timestamp,
-  UNIQUE (email, code)
+  invited_by integer,
+  redeemed boolean,
+  UNIQUE (email, code),
+  FOREIGN KEY (invited_by) REFERENCES users (id) ON DELETE CASCADE
 );
 
 --;;

@@ -12,4 +12,6 @@ DROP TABLE IF EXISTS needs;
 --;;
 DROP TABLE IF EXISTS contacts;
 --;;
+DROP TABLE IF EXISTS invitations;
+--;;
 DROP TABLE IF EXISTS users;

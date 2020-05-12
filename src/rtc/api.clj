@@ -29,8 +29,9 @@
                            [])
 
    :mutation/invite      (auth/admin-only-resolver
-                          (fn [_context {:keys [email]} _value]
-                            (u/invite! email)))})
+                          (fn [{:keys [request]} {:keys [email]} _value]
+                            (let [user-id (get-in request [:session :identity :id])]
+                              (u/invite! email user-id))))})
 
 (defn load-schema []
   (-> (io/resource "graphql/schema.edn")
@@ -75,7 +76,7 @@
   (get-in (q "bogus query") [:errors 0 :message])
 
   (q "mutation { invite(email: \"new1234@example.com\") { email code }}"
-     {:request {:session {:identity {:is_admin true}}}})
+     {:request {:session {:identity {:is_admin true :id 1}}}})
 
   (q "{ careseeker (id: 1) { id name alias pronouns }}")
   (q "{ availabilities { id start_time end_time }}")

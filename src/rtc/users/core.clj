@@ -17,13 +17,16 @@
 (defn two-factor-enabled? [user]
   (boolean (:two-factor-enabled? (preferences user))))
 
-(defn invite! [email]
+(defn invite! [email inviter-id]
   (let [invite-code (crypto/url-part 32)
-        invitation {:email email :code invite-code}]
+        invitation {:email email :code invite-code :invited_by inviter-id}]
     (db/create-invitation! invitation)
     ;; TODO send email
     invitation))
 
+(defn validate-invitation [invitation]
+  (boolean (db/get-invitation invitation)))
+
 
 (comment
-  (invite! "test@example.com"))
+  (invite! "test@example.com" 1))
