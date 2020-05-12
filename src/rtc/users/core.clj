@@ -29,4 +29,6 @@
 
 
 (comment
-  (invite! "test@example.com" 1))
+  (def invitation (invite! "test@example.com" 1))
+  (validate-invitation invitation)
+  (validate-invitation (assoc invitation :email "bogus@example.email")))

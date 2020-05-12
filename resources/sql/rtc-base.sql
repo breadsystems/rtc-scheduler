@@ -23,7 +23,8 @@ DELETE FROM users WHERE id = :id
 
 -- :name get-invitation :? :1
 -- :doc get an invitation by email and code
-SELECT * FROM invitations WHERE email = :email AND code = :code AND redeemed = false
+SELECT * FROM invitations WHERE email = :email
+AND code = :code AND redeemed = false AND now() < (date_invited + interval '72 hours')
 
 -- :name create-invitation! :! :n
 -- :doc creates a new invitation record
