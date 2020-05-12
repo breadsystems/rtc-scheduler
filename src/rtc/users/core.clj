@@ -1,6 +1,6 @@
 (ns rtc.users.core
   (:require
-   [clojure.data.json :as json]
+   [crypto.random :as crypto]
    [rtc.auth.util :as util]
    [rtc.db :as db]))
 
@@ -18,7 +18,7 @@
   (boolean (:two-factor-enabled? (preferences user))))
 
 (defn invite! [email]
-  (let [invite-code (util/tmp-password 64)
+  (let [invite-code (crypto/url-part 32)
         invitation {:email email :code invite-code}]
     (db/create-invitation! invitation)
     ;; TODO send email

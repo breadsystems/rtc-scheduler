@@ -1,20 +1,13 @@
 (ns rtc.auth.util
   (:require
    [buddy.hashers :as hash]
-   [clojure.string :as string]
+   [crypto.random :as crypto]
    [mount.core :refer [defstate]]
    [rtc.db :as db]))
 
 (defn tmp-password
-  ([pw-length]
-   (string/join ""
-                (map (fn [_]
-                       (rand-nth
-                        (str "0123456789"
-                             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                             "abcdefghijklmnopqrstuvwxyz"
-                             "!@#$%^&*_+-=/")))
-                     (range 0 pw-length))))
+  ([num-bytes]
+   (crypto/base64 num-bytes))
   ([]
    (tmp-password 16)))
 
