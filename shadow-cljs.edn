@@ -1,0 +1,11 @@
+{:source-paths ["src"]
+ :deps true
+ :builds {:app {:output-dir "resources/public/js"
+                :target :browser
+                :modules {:shared   {:entries []}
+                          :admin    {:depends-on #{:shared}
+                                     :init-fn rtc.admin.core/init!}
+                          :intake   {:depends-on #{:shared}
+                                     :init-fn rtc.intake.core/init!}}
+                :devtools {:http-root "public"
+                           :http-port 3001}}}}

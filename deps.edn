@@ -4,6 +4,7 @@
         buddy/buddy-auth          {:mvn/version "2.2.0"}
         buddy/buddy-hashers       {:mvn/version "1.4.0"}
         cheshire                  {:mvn/version "5.10.0"}
+        cider/cider-nrepl         {:mvn/version "0.21.1"}
         clj-http                  {:mvn/version "3.10.1"}
         clj-time                  {:mvn/version "0.15.2"}
         conman                    {:mvn/version "0.8.6"}
@@ -15,6 +16,8 @@
         mount                     {:mvn/version "0.1.16"}
         org.postgresql/postgresql {:mvn/version "42.2.2"}
         org.slf4j/slf4j-log4j12   {:mvn/version "1.7.7"}
+        reagent                   {:mvn/version "0.8.1"}
+        re-frame                  {:mvn/version "0.12.0"}
         ring                      {:mvn/version "1.7.0"}
         ring/ring-defaults        {:mvn/version "0.3.2"}
         com.walmartlabs/lacinia   {:mvn/version "0.36.0"}}

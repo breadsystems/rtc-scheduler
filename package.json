@@ -1,0 +1,13 @@
+{
+  "name": "rtc",
+  "version": "1.0.0",
+  "description": "Radical Telehealth Collective",
+  "main": "index.js",
+  "author": "Coby Tamayo <acobster@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "create-react-class": "^15.6.3",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  }
+}
