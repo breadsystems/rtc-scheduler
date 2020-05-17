@@ -23,10 +23,10 @@
     nil))
 
 (comment
-  (db/get-user-by-email {:email "rtc@example.com"})
-  (u/admin? (db/get-user-by-email {:email "rtc@example.com"}))
-  (u/preferences (db/get-user-by-email {:email "rtc@example.com"}))
-  (u/two-factor-enabled? (db/get-user-by-email {:email "rtc@example.com"}))
+  (u/email->user "rtc@example.com")
+  (u/admin? (u/email->user "rtc@example.com"))
+  (u/preferences (u/email->user "rtc@example.com"))
+  (u/two-factor-enabled? (u/email->user "rtc@example.com"))
   (authenticate-user "rtc-admin@example.com" "bgf7ekabllojGyvZ")
   (authenticate-user "rtc-admin@example.com" "garbage"))
 

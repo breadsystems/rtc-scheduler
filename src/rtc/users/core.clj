@@ -27,8 +27,26 @@
 (defn validate-invitation [invitation]
   (boolean (db/get-invitation invitation)))
 
+(defn register! [user]
+  ;; TODO wrap this in a tx
+  (let [created (db/create-user! user)]
+    (db/redeem-invitation! user)
+    created))
+
+(defn id->user [id]
+  (dissoc (db/get-user {:id id}) :pass))
+
+(defn email->user [email]
+  (dissoc (db/get-user-by-email {:email email}) :pass))
+
+(defn filters->users [filters]
+  [])
 
 (comment
   (def invitation (invite! "test@example.com" 1))
   (validate-invitation invitation)
-  (validate-invitation (assoc invitation :email "bogus@example.email")))
+  (validate-invitation (assoc invitation :email "bogus@example.email"))
+
+  (email->user "rtc@example.com")
+  (admin? (email->user "rtc@example.com"))
+  (preferences (email->user "rtc@example.com")))

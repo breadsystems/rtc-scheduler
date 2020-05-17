@@ -13,6 +13,16 @@
     ;; TODO should these be datetimes?
     :date_created {:type String}
     :date_modified {:type String}}}
+  
+  :User
+  {:description "A user account"
+   :fields
+   {:id {:type (non-null String)}
+    :first_name {:type String}
+    :last_name {:type String}
+    :pronouns {:type String}
+    :phone {:type String}
+    :email {:type String}}}
 
   :Provider
   {:description "A doctor or other medical expert"
@@ -22,7 +32,7 @@
     :last_name {:type String}
     :pronouns {:type String}
     :phone {:type String}
-    ;; TODO other user fields?
+    :email {:type String}
     :state {:type String}}}
 
   :Appointment
@@ -39,7 +49,7 @@
     :state {:type String}
     :category {:type String}
     :resolution {:type String}}}
-  
+
   :Availability
   {:description "A chunk of time in which a specific provider is available"
    :fields
@@ -47,7 +57,7 @@
     :start_time {:type String}
     :end_time {:type String}
     :provider {:type :Provider}}}
-  
+
   :Invitation
   {:description "An invitation for a new user account"
    :fields
@@ -69,23 +79,57 @@
           :state {:type String}
           :provider_id {:type String}}
    :resolve :query/availabilities}
-  
+
   :appointment
   {:type :Appointment
    :description "Get a single appointment by its ID"
    :args {:id {:type Int}}
    :resolve :query/appointment}
-  
+
   :appointments
   {:type (list :Appointment)
    :description "Get appointments by dates/provider"
    :args {:from {:type String}
           :to {:type String}
-          :provider_id {:type Int}}
-   :resolve :query/appointments}}
+          :provider_id {:type Int}
+          :status {:type String}}
+   :resolve :query/appointments}
+
+  :user
+  {:type :User
+   :description "Get a single user"
+   :args {:id {:type Int}}
+   :resolve :query/user}
+
+  :users
+  {:type (list :User)
+   :description "Get a list of users"
+   :args {:count {:type Int}
+          :offset {:type Int}
+          :account_created_start {:type String}
+          :account_created_end {:type String}}
+   :resolve :query/users}
+
+  :invitations
+  {:type :Invitation
+   :description "Get a list of invitations"
+   :args {:invited_by {:type Int}
+          :redeemed {:type Boolean}}
+   :resolve :query/invitations}}
 
  :mutations
  {:invite
   {:type :Invitation
    :args {:email {:type String}}
-   :resolve :mutation/invite}}}
+   :resolve :mutation/invite}
+  
+  :register
+  {:type :User
+   :args {:first_name {:type String}
+          :last_name {:type String}
+          :email {:type String}
+          :code {:type String}
+          :phone {:type String}
+          :password {:type String}
+          :password_confirmation {:type String}}
+   :resolve :mutation/register}}}
