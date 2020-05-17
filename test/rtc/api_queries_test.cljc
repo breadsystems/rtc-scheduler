@@ -17,6 +17,10 @@
          (->query-string [:appointments {:from "2020-01-01" :to "2020-02-29"}
                           :code
                           :email])))
+  (is (= "invitations(redeemed: false) { code email }"
+         (->query-string [:invitations {:redeemed false}
+                          :code
+                          :email])))
   (is (= "appointments { code email }"
          (->query-string [:appointments
                           :code

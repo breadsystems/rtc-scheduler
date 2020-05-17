@@ -48,7 +48,10 @@
   (->query-arg-value [n] n)
 
   #?(:clj clojure.lang.Keyword :cljs cljs.core.Keyword)
-  (->query-arg-value [k] (double-quotes (name k))))
+  (->query-arg-value [k] (double-quotes (name k))) 
+  
+  #?(:clj java.lang.Boolean :cljs boolean)
+  (->query-arg-value [b] (str b)))
 
 
 (comment
