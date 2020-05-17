@@ -62,7 +62,9 @@
   {:description "An invitation for a new user account"
    :fields
    {:email {:type (non-null String)}
-    :code {:type String}}}}
+    :code {:type String}
+    :redeemed {:type Boolean}
+    :date_invited {:type String}}}}
  
  :queries
  {:careseeker

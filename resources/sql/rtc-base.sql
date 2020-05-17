@@ -26,7 +26,7 @@ DELETE FROM users WHERE id = :id
 SELECT * FROM invitations WHERE email = :email
 AND code = :code AND redeemed = false AND now() < (date_invited + interval '72 hours')
 
--- :name get-invitations :? :n
+-- :name get-invitations :n
 -- :doc get multiple invitations
 SELECT * FROM invitations WHERE redeemed = :redeemed AND invited_by = :invited_by
 

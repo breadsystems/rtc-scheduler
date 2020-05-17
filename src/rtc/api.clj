@@ -12,8 +12,7 @@
    [rtc.db :as db]
    [rtc.appointments.data :as appt]
    [rtc.users.core :as u]
-   [rtc.users.handlers :refer [register-resolver]]
-   )
+   [rtc.users.handlers :refer [register-resolver]])
   (:import (clojure.lang IPersistentMap)))
 
 
@@ -36,6 +35,8 @@
                                                                 :offset
                                                                 :account_created_start
                                                                 :account_created_end])))
+   :query/invitations    (fn [_context args _value]
+                           (db/get-invitations (select-keys args [:invited_by :redeemed])))
 
    :mutation/invite      (auth/admin-only-resolver
                           (fn [{:keys [request]} {:keys [email]} _value]
@@ -85,7 +86,12 @@
 
   (get-in (q "bogus query") [:errors 0 :message])
 
-  (q (->query-string [:query [:invitations {:invited_by 1} :email :code :redee]]))
+  (q (->query-string [:query [:invitations
+                              {:invited_by 1 :redeemed false}
+                              :email
+                              :code
+                              :redeemed
+                              :date_invited]]))
 
   (q (->query-string [:mutation [:invite {:email "new1234@example.com"} :email :code]])
      {:request {:session {:identity {:is_admin true :id 1}}}})
@@ -94,8 +100,7 @@
   (q (->query-string [:query [:availabilities :id :start_time :end_time]]))
 
   (q (->query-string [:query [:availabilities
-                              {:from "2020-08-11"
-                               :to "2020-08-13"}
+                              {:from "2020-08-11" :to "2020-08-13"}
                               :id
                               :start_time
                               :end_time]]))
