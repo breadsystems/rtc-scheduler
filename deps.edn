@@ -23,6 +23,7 @@
         com.walmartlabs/lacinia   {:mvn/version "0.36.0"}}
  
  :aliases {:dev {:extra-paths ["env/dev" "test"]
-                 :extra-deps {nrepl/nrepl         {:mvn/version "0.7.0"}
-                              lambdaisland/kaocha {:mvn/version "0.0-529"}}}
+                 :extra-deps {nrepl/nrepl          {:mvn/version "0.7.0"}
+                              lambdaisland/kaocha  {:mvn/version "0.0-529"}
+                              thheller/shadow-cljs {:mvn/version "2.9.6"}}}
            :prod {:extra-paths ["env/prod"]}}}
