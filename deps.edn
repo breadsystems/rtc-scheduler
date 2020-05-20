@@ -7,6 +7,7 @@
         cider/cider-nrepl         {:mvn/version "0.21.1"}
         clj-http                  {:mvn/version "3.10.1"}
         clj-time                  {:mvn/version "0.15.2"}
+        cljs-http                 {:mvn/version "0.1.46"}
         conman                    {:mvn/version "0.8.6"}
         crypto-random             {:mvn/version "1.2.0"}
         hiccup                    {:mvn/version "1.0.5"}
