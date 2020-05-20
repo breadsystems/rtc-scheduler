@@ -113,7 +113,7 @@
    :resolve :query/users}
 
   :invitations
-  {:type :Invitation
+  {:type (list :Invitation)
    :description "Get a list of invitations"
    :args {:invited_by {:type Int}
           :redeemed {:type Boolean}}
