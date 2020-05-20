@@ -11,7 +11,8 @@
    [rtc.auth :as auth]
    [rtc.db]
    [rtc.env :as env]
-   [rtc.layout :as layout]))
+   [rtc.layout :as layout]
+   [rtc.users.handlers :as user]))
 
 
 (defn- debugging-csrf-error-handler
@@ -38,16 +39,13 @@
      ["/api/graphql" {:post (fn [req]
                               {:status 200
                                :headers {"Content-Type" "application/edn"}
-                               :body (-> req :body slurp api/q)})}]
+                               :body (-> req :body slurp (api/q {:request req}))})}]
+     ["/register" user/register-handler]
      ["/login" auth/login-handler]
      ["/logout" auth/logout-handler]
      ["/admin" {:middleware [auth/wrap-auth]}
-      ["/provider" {:get (fn [req]
-                           (layout/page {:req req
-                                         :content [:div "PROVIDER"]}))}]
-      ["/volunteer" {:get (fn [req]
-                            (layout/page {:req req
-                                          :content [:div "VOLUNTEER"]}))}]]])
+      ["" {:get (fn [req]
+                  (layout/admin-page {:title "Care Schedule"}))}]]])
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})

@@ -43,9 +43,16 @@
   [])
 
 (comment
-  (def invitation (invite! "test@example.com" 1))
+  (def invitation (invite! (str (crypto/url-part 6) "@example.com") 1))
   (validate-invitation invitation)
   (validate-invitation (assoc invitation :email "bogus@example.email"))
+
+  (db/get-invitations {:redeemed false :invited_by 1})
+  (db/get-invitations {:redeemed true :invited_by 1})
+
+  (register! (conj (select-keys invitation [:code :email])
+                   {:pass (crypto/url-part 16)
+                    :is_admin false}))
 
   (email->user "rtc@example.com")
   (admin? (email->user "rtc@example.com"))
