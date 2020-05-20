@@ -22,7 +22,7 @@
 
   #?(:cljs cljs.core.PersistentHashMap)
   #?(:cljs (->query-string [m]
-     (str "(" (string/join ", " (map ->query-string m)) ")")))
+             (str "(" (string/join ", " (map ->query-string m)) ")")))
 
   #?(:clj clojure.lang.MapEntry :cljs cljs.core.MapEntry)
   (->query-string [entry]
