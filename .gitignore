@@ -1,4 +1,5 @@
 .cpcache/
 /target/
 /resources/public/js/
+/resources/public/test/
 /resources/public/css/

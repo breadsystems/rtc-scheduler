@@ -22,3 +22,12 @@
           :body ""}
          (auth/logout-handler {:uri "/logout"
                                :session {:identity {:id 123}}}))))
+
+(deftest test-admin-only-resolver
+  (let [my-resolver (fn [_ _ _]
+                      {:some :data})
+        secure-resolver (auth/admin-only-resolver my-resolver)]
+    (is (= {:errors [{:message "You do not have permission to do that"}]}
+           (secure-resolver {:request {:session {:identity nil}}} "query string" nil)))
+    (is (= {:some :data}
+           (secure-resolver {:request {:session {:identity {:is_admin true}}}} "query string" nil)))))

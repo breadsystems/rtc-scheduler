@@ -17,6 +17,18 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 --;;
+-- Invitations for new users.
+CREATE TABLE IF NOT EXISTS invitations (
+  email varchar(100),
+  code varchar(64),
+  date_invited timestamp,
+  invited_by integer,
+  redeemed boolean,
+  UNIQUE (email, code),
+  FOREIGN KEY (invited_by) REFERENCES users (id) ON DELETE CASCADE
+);
+
+--;;
 -- We are trying to humanize medical care again.
 -- To that end, we don't talk about "patients" - we talk about People Seeking Care,
 -- People Requiring Care (PRCs) or Careseekers for short.

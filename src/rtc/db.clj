@@ -40,6 +40,8 @@
   (mount/start #'*db*)
   (reconnect!)
 
+  (get-invitations {:redeemed false :invited_by 1})
+
   (try
     (create-careseeker! {:email "octaviabutler@earthseed.com" :alias "George Simcoff" :state "WA"})
     (create-careseeker! {:email "shevek@annarres.net" :alias "Selma Blaise" :state "OR"})

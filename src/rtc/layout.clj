@@ -30,18 +30,33 @@
      (html
       (doctype :html5)
       [:html
-       (conj [:head
-              [:title (str title " | Radical Telehealth Collective")]
-              [:meta {:charset "utf-8"}]
-              [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-              [:meta {:name "csrf-token" :content (:anti-forgery-token req)}]]
-             head)
+       (vec (concat [:head
+                     [:title (str title " | Radical Telehealth Collective")]
+                     [:meta {:charset "utf-8"}]
+                     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+                     [:meta {:name "csrf-token" :content (:anti-forgery-token req)}]
+                     [:link {:href "https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&display=swap" :rel "stylesheet"}] 
+                     [:link {:href "/css/screen.css" :rel "stylesheet"}]]
+                    head))
        (conj [:body
-              [:header "site header"
+              [:header
+               [:h1 "Radical Telehealth Collective"]
                (when (authenticated? req)
                  [:a.logout {:href "/logout"} "Logout"])]
               content]
              footer-content)])}))
+(concat [:head [:a 'adsf]] [[:link]])
+
+
+(defn admin-page [opts]
+  (page
+   (merge
+    opts
+    {:head           []
+     :content        [:div#rtc-admin-app]
+     :footer-content [:div
+                      [:script {:src "/js/shared.js" :type "text/javascript"}]
+                      [:script {:src "/js/admin.js" :type "text/javascript"}]]})))
 
 
 (defn login-page [{:keys [error req]}]

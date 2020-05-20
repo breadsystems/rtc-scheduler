@@ -21,6 +21,26 @@ WHERE email = :email
 DELETE FROM users WHERE id = :id
 
 
+-- :name get-invitation :? :1
+-- :doc get an invitation by email and code
+SELECT * FROM invitations WHERE email = :email
+AND code = :code AND redeemed = false AND now() < (date_invited + interval '72 hours')
+
+-- :name get-invitations :n
+-- :doc get multiple invitations
+SELECT * FROM invitations WHERE redeemed = :redeemed AND invited_by = :invited_by
+
+-- :name create-invitation! :! :n
+-- :doc creates a new invitation record
+INSERT INTO invitations (email, code, date_invited, invited_by, redeemed)
+VALUES (:email, :code, now(), :invited_by, false)
+
+-- :name redeem-invitation! :! :n
+-- :doc redeem an existing email/code invitation combo
+UPDATE invitations SET redeemed = true
+WHERE email = :email AND code = :code AND now() < (date_invited + interval '72 hours')
+
+
 -- :name create-careseeker! :! :n
 -- :doc create a new careseeker record
 INSERT INTO careseekers (email, alias, state, date_created, date_modified)

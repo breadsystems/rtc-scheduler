@@ -8,9 +8,9 @@
 (comment
 
   (try
-    (db/create-user! {:email "me@example.com" :pass "password123"})
-    (db/create-user! {:email "you@example.com" :pass "password234"})
-    (db/create-user! {:email "them@example.com" :pass "password345"})
+    (db/create-user! {:email "me@example.com" :pass "password123" :is_admin true})
+    (db/create-user! {:email "you@example.com" :pass "password234" :is_admin false})
+    (db/create-user! {:email "them@example.com" :pass "password345" :is_admin false})
     (catch Exception e
       (.getMessage e)))
 
