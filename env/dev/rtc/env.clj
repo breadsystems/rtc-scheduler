@@ -23,8 +23,7 @@
 
 (defn middleware [app]
   (-> app
-      (ip/wrap-ip-safelist {:safelist #{"127.0.0.1"}})
-      wrap-reload))
+      (wrap-reload)))
 
 
 (defstate repl-server

@@ -24,6 +24,18 @@ services:
     creds:
       database: rtc
 
+  nginx:
+    type: nginx:1.14
+    webroot: resources/public
+    ssl: true
+
+    config:
+      server: lando/nginx.conf
+
+    overrides:
+      depends_on:
+        - appserver
+
 tooling:
   clojure:
     service: appserver
@@ -34,10 +46,10 @@ tooling:
     cmd: clojure -A:dev -m kaocha.runner
 
 proxy:
-  appserver:
+  nginx:
     # This tells Lando to forward requests on port 80 requests to 8080
     # inside the appserver container
-    - radical-telehealth-collective.lndo.site:8080
+    - radical-telehealth-collective.lndo.site
     # For developing when offline. You will need an entry in your hosts file
     # or something more advanced, such as dnsmasq, to resolve this URL
-    - radical-telehealth-collective.local:8080
+    - radical-telehealth-collective.local

@@ -1,0 +1,12 @@
+# Copy this file to set up your own machine-specific overrides:
+#
+#   cp .lando.local-example.yml .lando.local.yml
+#
+# Learn more: https://docs.lando.dev/config/lando.html#override-file
+services:
+  appserver:
+    services:
+      environment:
+        - AUTHY_API_KEY=asdfqwerty
+        # Uncomment to disable authentication in your dev environment:
+        #-DEV_DISABLE_AUTH=1
