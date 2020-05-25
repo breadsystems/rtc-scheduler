@@ -2,8 +2,7 @@
   (:require
    [mount.core :refer [defstate]]
    [nrepl.server :as nrepl]
-   [ring.middleware.reload :refer [wrap-reload]]
-   [rtc.ip :as ip]))
+   [ring.middleware.reload :refer [wrap-reload]]))
 
 
 (defonce stop-repl (atom nil))
