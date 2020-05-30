@@ -110,11 +110,13 @@
      [:section
       [:h3 "Invite a comrade"]
       [:div.field
-       [:label {:for "invite-email"} "Email"]
-       [:input#invite-email {:value (:email current-invite)
-                             :on-change #(rf/dispatch [::update-invite-email (.. % -target -value)])}]
-       [:button {:on-click #(rf/dispatch [::invite! current-invite])
-                 :disabled (empty? (:email current-invite))} "Invite!"]]]
+       [:form {:on-submit #(do (.preventDefault %)
+                               (rf/dispatch [::invite! current-invite]))}
+        [:label {:for "invite-email"} "Email"]
+        [:input#invite-email {:type :email
+                              :value (:email current-invite)
+                              :on-change #(rf/dispatch [::update-invite-email (.. % -target -value)])}]
+        [:button {:disabled (empty? (:email current-invite))} "Invite!"]]]]
      [:section
       [:h3 "Your invites"]
       (map
