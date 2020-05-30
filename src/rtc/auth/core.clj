@@ -35,18 +35,16 @@
 (defn login-step [{:keys [form-params] :as req}]
   (cond
     (and
-     ;; (authenticated? req)
-     (boolean (:identity (:session req)))
+     (authenticated? req)
      (two-factor/verified? req))
     :logged-in
 
-    (and ;; (authenticated? req)
-     (boolean (:identity (:session req)))
+    (and
+     (authenticated? req)
      (get form-params "token"))
     :verifying
 
-    ;; (authenticated? req)
-    (boolean (:identity (:session req)))
+    (authenticated? req)
     :two-factor
 
     (and (get form-params "email")
@@ -108,8 +106,7 @@
   (fn [req]
     (if (or
          (and
-          ;;  (authenticated? req)
-          (boolean (:identity (:session req)))
+          (authenticated? req)
           (two-factor/verified? req))
          ;; Support disabling auth for nicer frontend dev workflow
          (auth-disabled?))
