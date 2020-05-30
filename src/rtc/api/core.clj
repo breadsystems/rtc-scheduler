@@ -1,5 +1,4 @@
-;; TODO move this to rtc.api.core
-(ns rtc.api
+(ns rtc.api.core
   (:require
    [clojure.edn :as edn]
    [clojure.java.io :as io]
@@ -8,7 +7,7 @@
    [com.walmartlabs.lacinia.util :as util]
    [com.walmartlabs.lacinia.schema :as schema]
    [mount.core :as mount :refer [defstate]]
-   [rtc.auth :as auth]
+   [rtc.auth.core :as auth]
    [rtc.api.queries :refer [->query-string]]
    [rtc.db :as db]
    [rtc.appointments.data :as appt]

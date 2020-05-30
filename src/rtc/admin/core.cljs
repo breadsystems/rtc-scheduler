@@ -13,7 +13,7 @@
    [re-frame.core :as rf]
    [reitit.frontend :as reitit]
    [reitit.frontend.easy :as easy]
-   [rtc.api :as api]
+   [rtc.api.core :as api]
    [rtc.users.invites.ui :as invites]))
 
 

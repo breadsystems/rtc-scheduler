@@ -1,7 +1,7 @@
-(ns rtc.auth-test
+(ns rtc.auth-core-test
   (:require
    [clojure.test :refer [deftest is]]
-   [rtc.auth :as auth]))
+   [rtc.auth.core :as auth]))
 
 
 (deftest test-login-step

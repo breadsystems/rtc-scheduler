@@ -1,4 +1,4 @@
-(ns rtc.auth
+(ns rtc.auth.core
   (:require
    [buddy.auth :refer [authenticated? throw-unauthorized]]
    [buddy.auth.backends.session :refer [session-backend]]

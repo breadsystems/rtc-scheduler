@@ -1,5 +1,4 @@
-;; TODO move this to rtc.api.core
-(ns rtc.api
+(ns rtc.api.core
   (:require
    [cljs.core.async :refer [<!]]
    [cljs-http.client :as http]

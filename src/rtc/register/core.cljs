@@ -3,7 +3,7 @@
    [clojure.string :refer [join]]
    [reagent.core :as r]
    [reagent.dom :as dom]
-   [rtc.validators.core :as validators]))
+   [rtc.users.passwords :as pass]))
 
 
 (defonce app (r/atom {:email ""
@@ -40,7 +40,7 @@
     (swap! app assoc-in [:errors field] field-errors)))
 
 (defn check-password-fields! []
-  (let [validation (validators/validate-passwords @user)]
+  (let [validation (pass/validate-passwords @user)]
     (if (true? validation)
       (set-field-errors! {:password [] :password-confirmation []})
       (set-field-errors! validation))))

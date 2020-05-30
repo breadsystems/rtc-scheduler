@@ -1,20 +1,20 @@
-(ns rtc.validators-test
+(ns rtc.users-passwords-test
   (:require
    [clojure.test :refer [deftest is]]
-   [rtc.validators.core :as validators]))
+   [rtc.users.passwords :as pass]))
 
 
 (deftest test-validate-passwords
   (is (= {:password [{:message "Please enter a password"}]
           :password-confirmation []}
-         (validators/validate-passwords {:password ""
+         (pass/validate-passwords {:password ""
                                          :password-confirmation "anything"})))
   (is (= {:password []
           :password-confirmation [{:message "Passwords do not match"}]}
-         (validators/validate-passwords {:password "something"
+         (pass/validate-passwords {:password "something"
                                          :password-confirmation "else"})))
   (is (= {:password [{:message "Please choose a longer password"}]
           :password-confirmation []}
-         (validators/validate-passwords {:password "1234567"})))
-  (is (true? (validators/validate-passwords {:password "longpassword"
+         (pass/validate-passwords {:password "1234567"})))
+  (is (true? (pass/validate-passwords {:password "longpassword"
                                              :password-confirmation "longpassword"}))))

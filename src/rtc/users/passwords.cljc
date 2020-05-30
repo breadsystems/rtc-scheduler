@@ -1,4 +1,4 @@
-(ns rtc.validators.core)
+(ns rtc.users.passwords)
 
 
 (defn validate-passwords [{:keys [password password-confirmation]}]

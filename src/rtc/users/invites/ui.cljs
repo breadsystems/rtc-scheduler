@@ -1,7 +1,7 @@
 (ns rtc.users.invites.ui
   (:require
    [re-frame.core :as rf]
-   [rtc.api :as api]))
+   [rtc.api.core :as api]))
 
 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;
