@@ -9,15 +9,15 @@
   (:import (org.postgresql.util PGobject)))
 
 
-(defn- database-url []
-  (if-let [database-url (:database-url env)]
-    database-url
-    (throw (ex-info "Database exception!" {:causes #{:no-database-url}}))))
+(defstate url
+  :start (if-let [url (:database-url env)]
+           url
+           (throw (ex-info "No database-url detected!" {:causes #{:no-database-url}}))))
 
 (defstate ^:dynamic *db*
   :start (do
-           (println "Connecting to database at URL:" (database-url))
-           (conman/connect! {:jdbc-url (database-url)}))
+           (println "Connecting to database at URL:" url)
+           (conman/connect! {:jdbc-url url}))
   :stop  (conman/disconnect! *db*))
 
 (defn bind! []
@@ -25,6 +25,11 @@
    *db*
    "sql/util.sql"
    "sql/rtc-base.sql"))
+
+(defn query
+  "Run an arbitrary SQL query"
+  [sql]
+  (jdbc/query {:connection-uri url} sql))
 
 (bind!)
 
@@ -40,6 +45,8 @@
   (mount/stop #'*db*)
   (mount/start #'*db*)
   (reconnect!)
+
+  (query "SELECT * FROM appointments")
 
   (get-invitations {:redeemed false :invited_by 1})
 
@@ -64,8 +71,7 @@
                        :pronouns "she/her"
                        :phone "2535551234"
                        :ok-to-text? false
-                       :state "WA"})
-)
+                       :state "WA"}))
 
 
 (defn migration-config []
