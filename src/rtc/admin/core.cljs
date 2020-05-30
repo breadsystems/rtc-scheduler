@@ -3,6 +3,8 @@
    [cljs.core.async :refer [<!]]
    [reagent.dom :as dom]
    [re-frame.core :as rf]
+   [reitit.frontend :as reitit]
+   [reitit.frontend.easy :as rfe]
    [rtc.api.queries :as q :refer [->query-string]]
    [rtc.api :as api])
   (:require-macros
@@ -102,6 +104,8 @@
   (let [current-invite @(rf/subscribe [::current-invite])
         my-invitations @(rf/subscribe [::my-invitations])]
     [:main
+     [:p [:a {:href (rfe/href ::dashboard)} "Dashboard"]]
+     [:p [:a {:href (rfe/href ::schedule)} "Schedule"]]
      [:h2 "Dashboard"]
      [:section
       [:h3 "Invite a comrade"]
@@ -119,11 +123,24 @@
          [invitation invite])
        my-invitations)]]))
 
+(def routes
+  (reitit/router
+   ["/comrades"
+    [""
+     {:name ::dashboard
+      :view :hello}]
+    ["/schedule"
+     {:name ::schedule
+      :view :schedule}]]))
 
 (defn ^:dev/after-load mount! []
   (dom/render [dashboard] (.getElementById js/document "rtc-admin-app")))
 
 (defn init! []
+  (rfe/start! routes
+              (fn [new-match]
+                (js/console.log (:name (:data new-match))))
+              {:use-fragment false})
   (rf/dispatch-sync [::init-db])
   (rf/dispatch [::init-admin])
   (mount!))

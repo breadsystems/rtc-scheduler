@@ -12,7 +12,8 @@
         crypto-random             {:mvn/version "1.2.0"}
         hiccup                    {:mvn/version "1.0.5"}
         http-kit                  {:mvn/version "2.3.0"}
-        metosin/reitit-ring       {:mvn/version "0.4.2"}
+        metosin/reitit-frontend   {:mvn/version "0.5.2"}
+        metosin/reitit-ring       {:mvn/version "0.5.2"}
         migratus                  {:mvn/version "1.2.8"}
         mount                     {:mvn/version "0.1.16"}
         org.postgresql/postgresql {:mvn/version "42.2.2"}
