@@ -99,6 +99,7 @@
                              (rf/dispatch [::invite! current-invite]))}
         [:label {:for "invite-email"} "Email"]
         [:input#invite-email {:type :email
+                              :placeholder "comrade@riseup.net"
                               :value (:email current-invite)
                               :on-change #(rf/dispatch [::update-invite-email (.. % -target -value)])}]
         [:button {:disabled (empty? (:email current-invite))} "Invite!"]]]]
