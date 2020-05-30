@@ -37,8 +37,8 @@
   (ring/ring-handler
    (ring/router
     [""
-     ;; TODO figure out the right order for middleware
-    ;;  {:middleware [wrap-params csrf-middleware]}
+     ;; TODO figure out the right order for middleware & fix anti-CSRF
+     {:middleware [wrap-params auth/wrap-identity #_csrf-middleware]}
      ["/api/graphql" {:post (fn [req]
                               {:status 200
                                :headers {"Content-Type" "application/edn"}

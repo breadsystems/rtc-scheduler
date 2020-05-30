@@ -4,6 +4,7 @@
    [buddy.auth.backends.session :refer [session-backend]]
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
    [buddy.hashers :as hash]
+   [config.core :as config :refer [env]]
    [rtc.auth.two-factor :as two-factor]
    [rtc.users.core :as u]
    [rtc.auth.util]
@@ -13,7 +14,7 @@
 
 
 (defn- auth-disabled? []
-  (= "1" (System/getenv "DEV_DISABLE_AUTH")))
+  (boolean (:dev-disable-auth env)))
 
 (defn authenticate-user [email password]
   (if (and email password)
@@ -90,9 +91,18 @@
 
 (defn admin-only-resolver [resolver]
   (fn [{:keys [request] :as context} query-string value]
-    (if (or (auth-disabled?) (u/admin? (:identity (:session request))))
+    (if (or (:auth-disabled? (:env request))
+            (u/admin? (:identity (:session request))))
       (resolver context query-string value)
       {:errors [{:message "You do not have permission to do that"}]})))
+
+(defn wrap-identity
+  "Persist session identity directly into request"
+  [handler]
+  (fn [{:keys [session] :as req}]
+    (handler (-> req
+                 (assoc :identity (:identity session))
+                 (assoc-in [:env :auth-disabled?] (auth-disabled?))))))
 
 (defn wrap-require-auth [handler]
   (fn [req]

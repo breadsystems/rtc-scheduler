@@ -30,4 +30,7 @@
     (is (= {:errors [{:message "You do not have permission to do that"}]}
            (secure-resolver {:request {:session {:identity nil}}} "query string" nil)))
     (is (= {:some :data}
-           (secure-resolver {:request {:session {:identity {:is_admin true}}}} "query string" nil)))))
+           (secure-resolver {:request {:env {:auth-disabled? true}}} "query string" nil)))
+    (is (= {:some :data}
+           (secure-resolver {:request {:env {:auth-disabled? false}
+                                       :session {:identity {:is_admin true}}}} "query string" nil)))))
