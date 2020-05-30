@@ -160,17 +160,31 @@
   (rf/dispatch [::init-admin]))
 
 
-(defn dashboard []
-  [:main
-   [:p [:a {:href (easy/href ::dashboard)} "Dashboard"]]
-   [:p [:a {:href (easy/href ::schedule)} "Schedule"]]
-   [:p [:a {:href (easy/href ::invites)} "Invites"]]
-   [:h2 "Dashboard"]
-   (condp = (:name @(rf/subscribe [::current-view]))
-     ::invites [invites/invites]
-     ::schedule [:p "SCHEDULE HERE"]
-     ::settings [:p "SETTINGS HERE"]
-     [:p "DASH"])])
+(defn- main-nav []
+  (let [my-routes @(rf/subscribe [::routes routes])]
+    [:nav
+     [:ul
+      (map (fn [{:keys [name heading nav-title]}]
+             ^{:key name}
+             [:li [:a {:href (easy/href name)} (or nav-title heading)]])
+           my-routes)
+      [:li [:a.logout {:href "/logout"} "Logout"]]]]))
+
+(defn admin-ui []
+  (let [{:keys [name heading]} @(rf/subscribe [::current-view])]
+    [:div.container.container--comrades
+     [:header
+      [:h1 heading]
+      [main-nav]]
+     [:main
+      (condp = name
+        ::welcome [:p "Welcome!"]
+        ::new-careseekers [:p "TODO NEW CARESEEKERS"]
+        ::schedule [:p "TODO SCHEDULE HERE"]
+        ::calendar [:p "TODO MY CALENDAR"]
+        ::invites [invites/invites]
+        ::settings [:p "TODO SETTINGS HERE"]
+        [:p "DASH"])]]))
 
 
 
@@ -183,7 +197,7 @@
 
 
 (defn ^:dev/after-load mount! []
-  (dom/render [dashboard] (.getElementById js/document "rtc-admin-app")))
+  (dom/render [admin-ui] (.getElementById js/document "rtc-admin-app")))
 
 (defn init! []
   (init-routing!)
