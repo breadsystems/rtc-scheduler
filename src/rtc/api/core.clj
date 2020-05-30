@@ -10,7 +10,7 @@
    [rtc.auth.core :as auth]
    [rtc.api.queries :refer [->query-string]]
    [rtc.db :as db]
-   [rtc.appointments.data :as appt]
+   [rtc.appointments.avail :as avail]
    [rtc.users.core :as u]
    [rtc.users.handlers :refer [register-resolver]])
   (:import (clojure.lang IPersistentMap)))
@@ -41,6 +41,8 @@
                                                                 :offset
                                                                 :account_created_start
                                                                 :account_created_end])))
+   :query/windows        (fn [_req args _value]
+                           (avail/window-resolver args))
    :query/invitations    (auth/admin-only-resolver
                           (fn [{:keys [request]} args _value]
                             (db/get-invitations (merge (select-keys args [:redeemed])

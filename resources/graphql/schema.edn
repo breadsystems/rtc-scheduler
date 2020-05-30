@@ -58,6 +58,13 @@
     :end_time {:type String}
     :provider {:type :Provider}}}
 
+  :AppointmentWindow
+  {:description "A window for a single appointment. Derived from availability data rather that reified in the database."
+   :fields
+   {:start_time {:type String}
+    :end_time {:type String}
+    :provider {:type :Provider}}}
+
   :Invitation
   {:description "An invitation for a new user account"
    :fields
@@ -96,6 +103,14 @@
           :provider_id {:type Int}
           :status {:type String}}
    :resolve :query/appointments}
+
+  :appointment_windows
+  {:type (list :AppointmentWindow)
+   :description "Get open appointment windows by dates/state"
+   :args {:from {:type String}
+          :to {:type String}
+          :state {:type String}}
+   :resolve :query/windows}
 
   :user
   {:type :User

@@ -1,4 +1,7 @@
-(ns rtc.appointments.data
+;; Availabilities.
+;; This is where existing appointments and calendar availabilities
+;; get turned into open appointment windows to present to careseekers.
+(ns rtc.appointments.avail
   (:require
    [clj-time.coerce :as c]
    [rtc.db :as d]))
@@ -7,6 +10,11 @@
 (defn create!
   "TODO"
   [])
+
+(defn window-resolver [{:keys [from to state]}]
+  [{:start_time ""
+    :end_time ""
+    :provider {}}])
 
 (defn get-availabilities [params]
   (let [params (into {} (filter (comp some? val) params))]
