@@ -39,10 +39,6 @@
                      [:link {:href "/css/screen.css" :rel "stylesheet"}]]
                     head))
        (conj [:body
-              [:header
-               [:h1 "Radical Telehealth Collective"]
-               (when (authenticated? req)
-                 [:a.logout {:href "/logout"} "Logout"])]
               content]
              footer-content)])}))
 (concat [:head [:a 'adsf]] [[:link]])
@@ -66,34 +62,44 @@
      {:title "Login"
       :req req
       :content
-      [:main
-       [:form {:action (str "/login?" query-string) :method "POST"}
-        (when error
-          [:div.error
-           [:p error]])
-        [:input {:type :email
-                 :name "email"
-                 ;; TODO
-                 :value (or email "")
-                 :placeholder "me@example.com"}]
-        [:input {:type :password
-                 :name "password"
-                 ;; TODO
-                 :value (or password "")}]
-        [:button {:type :submit} "Login"]]]})))
+      [:div.container.container--login
+       [:header
+        [:h1 "Radical Telehealth Collective"]
+        [:h2 "Login"]]
+       [:main
+        [:form {:action (str "/login?" query-string) :method "POST"}
+         (when error
+           [:div.error
+            [:p error]])
+         [:input {:type :email
+                  :name "email"
+                  ;; TODO
+                  :value (or email "")
+                  :placeholder "me@example.com"}]
+         [:input {:type :password
+                  :name "password"
+                  ;; TODO
+                  :value (or password "")}]
+         [:button {:type :submit} "Login"]]]]})))
 
 
 (defn two-factor-page [{:keys [req error]}]
   (let [dest (get-in req [:query-params "next"])]
     (page
      {:title "Verify Token"
-      :content [:form {:action (str "/login?next=" dest)
-                       :method "POST"}
-                (when error
-                  [:div.error
-                  [:p error]])
-                [:input {:type :text
-                         :name "token"
-                         :value ""
-                         :placeholder "12 345 678"}]
-                [:button {:type :submit} "Confirm"]]})))
+      :content
+      [:div.container.container--2fa
+       [:header
+        [:h1 "Radical Telehealth Collective"]
+        [:h2 "Login"]]
+       [:form {:action (str "/login?next=" dest)
+               :method "POST"}
+        [:p "Please confirm the token shown in your authenticator app."]
+        (when error
+          [:div.error
+           [:p error]])
+        [:input {:type :text
+                 :name "token"
+                 :value ""
+                 :placeholder "12 345 678"}]
+        [:button {:type :submit} "Confirm"]]]})))

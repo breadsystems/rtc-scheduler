@@ -57,7 +57,7 @@
 
 (defn destination-uri [{:keys [query-params]}]
   (let [dest (get query-params "next")]
-    (if (seq dest) dest "/admin")))
+    (if (seq dest) dest "/comrades")))
 
 (defn logout-handler [_req]
   (-> (redirect "/login")
