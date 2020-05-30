@@ -8,6 +8,7 @@
 ;;
 (ns rtc.admin.core
   (:require
+   [clojure.set :refer [intersection]]
    [reagent.dom :as dom]
    [re-frame.core :as rf]
    [reitit.frontend :as reitit]
@@ -36,6 +37,8 @@
  ::init-db
  (fn [_]
    {:view :schedule
+    ;; TODO get this from admin data
+    :my-roles #{:doc :kin}
     :users []
     :current-invite {:email ""}
     :greeting "Hello, world!"
@@ -51,26 +54,53 @@
 ;; https://metosin.github.io/reitit/frontend/controllers.html
 ;;
 (def ^:private routes
-  (reitit/router
-   ["/comrades"
-    [""
-     {:name ::dashboard}]
-    ["/new-careseekers"
-     {:name ::new-careseekers}]
-    ["/schedule"
-     {:name ::schedule}]
-    ["/invites"
-     {:name ::invites}]
-    ["/settings"
-     {:name ::settings}]]))
+  [[""
+    {:name ::welcome
+     :heading "Welcome, Comrade!"
+     :nav-title "Welcome"}]
+   ["/new-careseekers"
+    {:name ::new-careseekers
+     :heading "New Careseekers"}]
+   ["/schedule"
+    {:name ::schedule
+     :heading "Care Schedule"}]
+   ["/calendar"
+    {:name ::calendar
+     :heading "Calendar"
+     :restrict-to-roles #{:doc :kin}}]
+   ["/invites"
+    {:name ::invites
+     :heading "Invites"}]
+   ["/settings"
+    {:name ::settings
+     :heading "Account Settings"}]])
 
 (defn- init-routing! []
   (easy/start!
-   routes
+   (reitit/router
+    ;; Build up our routes like this: ["/comrades" ["" {:name ::dashboard ...}] ...]
+    (concat ["/comrades"] routes))
    (fn [match]
      (when match
        (rf/dispatch [::update-route (:data match)])))
+   ;; Use the HTML5 History API, not URL fragments
    {:use-fragment false}))
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                       ;;
+  ;;        Helpers        ;;
+ ;;                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defn accessible-by?
+  "Whether the given roles grant a user access to resource"
+  [user-roles resource]
+  (let [required-roles (:restrict-to-roles resource)]
+    (or (empty? required-roles)
+        (> (count (intersection required-roles user-roles)) 0))))
 
 
 
@@ -81,9 +111,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (rf/reg-sub ::current-view :current-view)
+(rf/reg-sub ::routes (fn [db [_ routes]]
+                       (as-> routes $
+                         (map second $)
+                         (filter (partial accessible-by? (:my-roles db)) $))))
 
 (comment
-  @(rf/subscribe [::current-view]))
+  routes
+  @(rf/subscribe [::current-view])
+  @(rf/subscribe [::routes routes]))
 
 
 
