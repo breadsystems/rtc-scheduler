@@ -40,12 +40,14 @@
                               {:status 200
                                :headers {"Content-Type" "application/edn"}
                                :body (-> req :body slurp (api/q {:request req}))})}]
+     ;; TODO /get-care
      ["/register" user/register-handler]
      ["/login" auth/login-handler]
      ["/logout" auth/logout-handler]
-     ["/admin" {:middleware [auth/wrap-auth]}
-      ["" {:get (fn [req]
-                  (layout/admin-page {:title "Care Schedule"}))}]]])
+     ;; From here on down, routing is done client-side.
+     ["/comrades" {:middleware [auth/wrap-auth]
+                   :get (fn [_req]
+                          (layout/admin-page {:title "Comrades"}))}]])
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})

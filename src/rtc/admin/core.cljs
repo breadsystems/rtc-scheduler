@@ -104,7 +104,7 @@
     [:main
      [:h2 "Dashboard"]
      [:section
-      [:h3 "Invite a user"]
+      [:h3 "Invite a comrade"]
       [:div.field
        [:label {:for "invite-email"} "Email"]
        [:input#invite-email {:value (:email current-invite)
