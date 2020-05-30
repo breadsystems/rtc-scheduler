@@ -1,3 +1,5 @@
+;; Central RTC application namespace, where main method lives.
+;; This is the code that Java invokes on application startup.
 (ns rtc.app
   (:require
    [mount.core :as mount :refer [defstate]]
@@ -15,6 +17,7 @@
    [rtc.users.handlers :as user]))
 
 
+;; TODO CSRF isn't working right now; figure out why
 (defn- debugging-csrf-error-handler
   ([req]
    (layout/error-page {:err "Invalid CSRF Token!" :req (:session req "(nil)")}))
@@ -41,13 +44,19 @@
                                :headers {"Content-Type" "application/edn"}
                                :body (-> req :body slurp (api/q {:request req}))})}]
      ;; TODO /get-care
+
      ["/register" user/register-handler]
      ["/login" auth/login-handler]
      ["/logout" auth/logout-handler]
+
+     ;; Make sure any route matching /comrades/* serves the admin center.
      ;; From here on down, routing is done client-side.
-     ["/comrades" {:middleware [auth/wrap-auth]
-                   :get (fn [_req]
-                          (layout/admin-page {:title "Comrades"}))}]])
+     (let [conf {:middleware [auth/wrap-auth]
+                 :get (fn [_req]
+                        (layout/admin-page {:title "Comrades"}))}]
+       ["/comrades"
+        ["" conf]
+        ["/*" conf]])])
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})

@@ -1,3 +1,4 @@
+;; TODO move this to rtc.api.core
 (ns rtc.api
   (:require
    [cljs.core.async :refer [<!]]

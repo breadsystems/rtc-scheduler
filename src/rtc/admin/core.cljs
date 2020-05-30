@@ -1,50 +1,107 @@
+;;
+;; This is the core Admin UI of the RTC scheduler app.
+;;
+;; In this namespace:
+;; * Client-side DB (Re-frame)
+;; * Client-side routes (Reitit)
+;; * React/reagent initialization/mount
+;;
 (ns rtc.admin.core
   (:require
-   [cljs.core.async :refer [<!]]
    [reagent.dom :as dom]
    [re-frame.core :as rf]
    [reitit.frontend :as reitit]
-   [reitit.frontend.easy :as rfe]
-   [rtc.api.queries :as q :refer [->query-string]]
-   [rtc.api :as api])
-  (:require-macros
-   [cljs.core.async.macros :refer [go]]))
+   [reitit.frontend.easy :as easy]
+   [rtc.api :as api]
+   [rtc.users.invites.ui :as invites]))
 
 
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                           ;;
+  ;;   Client DB and Routing   ;;
+ ;;                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;
+;; This is where all the client-side application state lives.
+;; We don't read or write this state data directly; instead,
+;; we read it via re-frame subscriptions and write to it via
+;; events: http://day8.github.io/re-frame/application-state/
+;;
+;; TODO: We PROMISED to make a leverageable schema...go do that
+;; http://day8.github.io/re-frame/application-state/#create-a-leveragable-schema
+;;
 (rf/reg-event-db
  ::init-db
  (fn [_]
-   {:users []
+   {:view :schedule
+    :users []
     :current-invite {:email ""}
     :greeting "Hello, world!"
     :my-invitations []}))
 
-(rf/reg-sub ::current-invite (fn [db]
-                               (:current-invite db)))
+;;
+;; Client-side routing, via Reitit.
+;; This manages navigation, including browser history.
+;; https://metosin.github.io/reitit/frontend/browser.html
+;;
+;; We don't use Controllers here, but if this starts to get messy,
+;; we may want to.
+;; https://metosin.github.io/reitit/frontend/controllers.html
+;;
+(def ^:private routes
+  (reitit/router
+   ["/comrades"
+    [""
+     {:name ::dashboard}]
+    ["/new-careseekers"
+     {:name ::new-careseekers}]
+    ["/schedule"
+     {:name ::schedule}]
+    ["/invites"
+     {:name ::invites}]
+    ["/settings"
+     {:name ::settings}]]))
 
-(rf/reg-sub ::my-invitations (fn [db]
-                               (:my-invitations db)))
+(defn- init-routing! []
+  (easy/start!
+   routes
+   (fn [match]
+     (when match
+       (rf/dispatch [::update-route (:data match)])))
+   {:use-fragment false}))
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                       ;;
+  ;;     Subscriptions     ;;
+ ;;                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(rf/reg-sub ::current-view :current-view)
 
 (comment
-  @(rf/subscribe [::current-invite])
-  @(rf/subscribe [::my-invitations]))
+  @(rf/subscribe [::current-view]))
 
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                       ;;
+  ;;        Events         ;;
+ ;;                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; Dispatched when the user visits a client-side route (including on
+;; initial page load, once the router figures out what page we're on).
 (rf/reg-event-db
- ::update-invite-email
- (fn [db [_ email]]
-   (assoc-in db [:current-invite :email] email)))
+ ::update-route
+ (fn [db [_ view]]
+   (assoc db :current-view view)))
 
-(rf/reg-event-db
- ::my-invitations
- (fn [db [_ payload]]
-   (assoc db :my-invitations payload)))
-
-(rf/reg-event-db
- ::invite-generated
- (fn [db [_ {:keys [data error]}]]
-   (js/console.log data error)
-   (update db :my-invitations conj data)))
-
+;; Dispatched on initial page load
 (rf/reg-event-fx
  ::init-admin
  (fn []
@@ -54,95 +111,46 @@
                         :date_invited]]
                ::admin-data)))
 
+;; Dispatched once the admin data is ready
 (rf/reg-event-db
  ::admin-data
  (fn [db [_ {:keys [data errors]}]]
    (if (seq errors)
-     ;; TODO
+     ;; TODO some kind of real error handling
      (js/console.error errors)
      (assoc db :my-invitations (:invitations data)))))
 
-(rf/reg-event-fx
- ::invite!
- (fn [db [_ {:keys [email]}]]
-   (if (seq email)
-     (api/query! [:mutate [:invite
-                           {:email email}
-                           :email
-                           :date_invited
-                           :code]]
-                 ::on-invite-response)
-     (js/console.error "no email?"))))
-
-(rf/reg-event-db
- ::on-invite-response
- (fn [db [_ {:keys [data errors]}]]
-   (-> db
-       (assoc :current-invite {:email ""})
-       (update :my-invitations conj (merge (:current-invite db)
-                                           {:date_invited "Just now"
-                                            :code "asdfqwerty_x234"})))))
-
 (comment
-  (rf/dispatch [::init-admin])
-  (rf/dispatch [::update-invite-email "foo@example.com"])
-  (rf/dispatch [::update-invite-email "foo2@example.com"])
-  @(rf/subscribe [::my-invitations]))
-
-
-(defn- invitation [{:keys [email code date_invited]}]
-  [:div.invite
-   [:strong.email email]
-   [:em date_invited]
-   (when code
-     [:span.invite-url
-      ;; oh god why
-      (str "http://" js/window.location.host "/register?email=" email "&code=" code)])])
+  (rf/dispatch [::init-admin]))
 
 
 (defn dashboard []
-  (let [current-invite @(rf/subscribe [::current-invite])
-        my-invitations @(rf/subscribe [::my-invitations])]
-    [:main
-     [:p [:a {:href (rfe/href ::dashboard)} "Dashboard"]]
-     [:p [:a {:href (rfe/href ::schedule)} "Schedule"]]
-     [:h2 "Dashboard"]
-     [:section
-      [:h3 "Invite a comrade"]
-      [:div.field
-       [:form {:on-submit #(do (.preventDefault %)
-                               (rf/dispatch [::invite! current-invite]))}
-        [:label {:for "invite-email"} "Email"]
-        [:input#invite-email {:type :email
-                              :value (:email current-invite)
-                              :on-change #(rf/dispatch [::update-invite-email (.. % -target -value)])}]
-        [:button {:disabled (empty? (:email current-invite))} "Invite!"]]]]
-     [:section
-      [:h3 "Your invites"]
-      (map
-       (fn [invite]
-         ^{:key (:email invite)}
-         [invitation invite])
-       my-invitations)]]))
+  [:main
+   [:p [:a {:href (easy/href ::dashboard)} "Dashboard"]]
+   [:p [:a {:href (easy/href ::schedule)} "Schedule"]]
+   [:p [:a {:href (easy/href ::invites)} "Invites"]]
+   [:h2 "Dashboard"]
+   (condp = (:name @(rf/subscribe [::current-view]))
+     ::invites [invites/invites]
+     ::schedule [:p "SCHEDULE HERE"]
+     ::settings [:p "SETTINGS HERE"]
+     [:p "DASH"])])
 
-(def routes
-  (reitit/router
-   ["/comrades"
-    [""
-     {:name ::dashboard
-      :view :hello}]
-    ["/schedule"
-     {:name ::schedule
-      :view :schedule}]]))
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                           ;;
+  ;;      MOUNT THE APP!!      ;;
+ ;;                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 (defn ^:dev/after-load mount! []
   (dom/render [dashboard] (.getElementById js/document "rtc-admin-app")))
 
 (defn init! []
-  (rfe/start! routes
-              (fn [new-match]
-                (js/console.log (:name (:data new-match))))
-              {:use-fragment false})
+  (init-routing!)
   (rf/dispatch-sync [::init-db])
   (rf/dispatch [::init-admin])
   (mount!))
