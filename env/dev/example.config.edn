@@ -1,0 +1,7 @@
+;; Default environment variables.
+;; https://github.com/yogthos/config
+;; Copy this to a file called `config.edn` somewhere on the classpath
+;; and it will be detected automatically on startup.
+{:database-url "jdbc:postgresql://localhost/rtc"
+ :dev-disable-auth false
+ :authy-api-key "API KEY HERE"}

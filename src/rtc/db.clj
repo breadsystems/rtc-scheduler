@@ -1,6 +1,7 @@
 (ns rtc.db
   (:require
    [cheshire.core :as cheshire]
+   [config.core :as config :refer [env]]
    [conman.core :as conman]
    [clojure.java.jdbc :as jdbc]
    [migratus.core :as migratus]
@@ -9,7 +10,7 @@
 
 
 (defn- database-url []
-  (if-let [database-url (System/getenv "DATABASE_URL")]
+  (if-let [database-url (:database-url env)]
     database-url
     (throw (ex-info "Database exception!" {:causes #{:no-database-url}}))))
 

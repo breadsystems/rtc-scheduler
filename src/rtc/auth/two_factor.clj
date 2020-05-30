@@ -3,15 +3,18 @@
    [clj-http.client :as http]
    [clojure.data.json :as json]
    [clojure.walk :as walk]
+   [config.core :as config :refer [env]]
+   [mount.core :as mount :refer [defstate]]
    [ring.util.response :refer [redirect]]
    [rtc.layout :as layout]
    [rtc.users.core :as u]))
 
 
-(def authy-api-key (System/getenv "AUTHY_API_KEY"))
-
-(when (empty? authy-api-key)
-  (println "WARNING: No AUTHY_API_KEY env var detected!"))
+(defstate authy-api-key
+  :start (let [api-key (:authy-api-key env)]
+           (when (empty? api-key)
+             (println "WARNING: No API Key detected!"))
+           api-key))
 
 
 (defn- api-call

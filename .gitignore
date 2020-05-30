@@ -1,4 +1,5 @@
 .cpcache/
+env/**/config.edn
 /target/
 /resources/public/js/
 /resources/public/test/
