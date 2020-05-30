@@ -41,7 +41,6 @@
     :my-roles #{:doc :kin}
     :users []
     :current-invite {:email ""}
-    :greeting "Hello, world!"
     :my-invitations []}))
 
 ;;
