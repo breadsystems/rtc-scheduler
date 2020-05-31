@@ -120,4 +120,13 @@
                               :start_time
                               :end_time]]))
 
-  (q (->query-string [:query [:appointments :id]])))
+  (q (->query-string [:query [:appointments :id]]))
+  
+  (q (->query-string [:query [:appointment_windows
+                              :start_time
+                              :end_time
+                              [:provider
+                               :id
+                               :first_name
+                               :last_name
+                               :state]]])))
