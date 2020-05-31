@@ -9,7 +9,7 @@
 
 
 (defn ^:dev/after-load mount! []
-  (dom/render [intake-form] (.getElementById js/document "rtc-intake")))
+  (dom/render [intake-form] (.getElementById js/document "rtc-intake-app")))
 
 (defn init! []
   (mount!))

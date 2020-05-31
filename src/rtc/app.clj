@@ -13,6 +13,7 @@
    [rtc.auth.core :as auth]
    [rtc.db]
    [rtc.env :as env]
+   [rtc.intake.core :as intake]
    [rtc.layout :as layout]
    [rtc.users.handlers :as user]))
 
@@ -43,7 +44,8 @@
                               {:status 200
                                :headers {"Content-Type" "application/edn"}
                                :body (-> req :body slurp (api/q {:request req}))})}]
-     ;; TODO /get-care
+
+     ["/get-care" {:get intake/get-care-handler}]
 
      ["/register" user/register-handler]
      ["/login" auth/login-handler]

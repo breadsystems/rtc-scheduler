@@ -41,7 +41,17 @@
        (conj [:body
               content]
              footer-content)])}))
-(concat [:head [:a 'adsf]] [[:link]])
+
+
+(defn intake-page [opts]
+  (page
+   (merge
+    opts
+    {:head           []
+     :content        [:div#rtc-intake-app]
+     :footer-content [:div
+                      [:script {:src "/js/shared.js" :type "text/javascript"}]
+                      [:script {:src "/js/intake.js" :type "text/javascript"}]]})))
 
 
 (defn admin-page [opts]
