@@ -45,7 +45,10 @@
                                :headers {"Content-Type" "application/edn"}
                                :body (-> req :body slurp (api/q {:request req}))})}]
 
-     ["/get-care" {:get intake/get-care-handler}]
+     (let [conf {:get intake/get-care-handler}]
+       ["/get-care"
+        ["" conf]
+        ["/*" conf]])
 
      ["/register" user/register-handler]
      ["/login" auth/login-handler]

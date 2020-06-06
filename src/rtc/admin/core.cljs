@@ -159,6 +159,14 @@
   (rf/dispatch [::init-admin]))
 
 
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                       ;;
+  ;;      Components       ;;
+ ;;                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defn- main-nav []
   (let [my-routes @(rf/subscribe [::routes routes])]
     [:nav

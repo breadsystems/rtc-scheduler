@@ -55,7 +55,8 @@
   (page
    (merge
     opts
-    {:head           []
+    {:head           [[:link {:rel "stylesheet" :href "/css/fullcalendar/main.min.css"}]
+                      [:link {:rel "stylesheet" :href "/css/fullcalendar/timegrid.min.css"}]]
      :content        [:div#rtc-intake-app]
      :footer-content [:div
                       [:script {:src "/js/shared.js" :type "text/javascript"}]
