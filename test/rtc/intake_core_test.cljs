@@ -60,13 +60,31 @@
                    [:answers :two+two])))))
 
 (deftest next-and-previous-steps-work
-  (let [db {:steps [1 2 3 4 5]
-            :step 3}]
-    (is (= 0 (:step (intake/prev-step (intake/prev-step (intake/prev-step (intake/prev-step db)))))))
-    (is (= 0 (:step (intake/prev-step (intake/prev-step (intake/prev-step db))))))
-    (is (= 1 (:step (intake/prev-step (intake/prev-step db)))))
-    (is (= 2 (:step (intake/prev-step db))))
-    (is (= 3 (:step (intake/next-step (intake/prev-step db)))))
-    (is (= 4 (:step (intake/next-step db))))
-    (is (= 5 (:step (intake/next-step (intake/next-step db)))))
-    (is (= 5 (:step (intake/next-step (intake/next-step (intake/next-step db))))))))
+  (let [cofx {:db {:steps [0 1 2 3 4]
+                   :viewed-up-to-step 3
+                   :step 3}}]
+    ;; The main thing next/prev-step do is update the currect :step in the db.
+    (is (= 0 (:step (:db (intake/prev-step (intake/prev-step (intake/prev-step (intake/prev-step cofx))))))))
+    (is (= 0 (:step (:db (intake/prev-step (intake/prev-step (intake/prev-step cofx)))))))
+    (is (= 1 (:step (:db (intake/prev-step (intake/prev-step cofx))))))
+    (is (= 2 (:step (:db (intake/prev-step cofx)))))
+    (is (= 3 (:step (:db (intake/next-step (intake/prev-step cofx))))))
+    (is (= 4 (:step (:db (intake/next-step cofx)))))
+    (is (= 4 (:step (:db (intake/next-step (intake/next-step cofx))))))
+
+    ;; We also keep track of the max step the user has navigated to, so they can jump
+    ;; forward to a step they've already reached if they want to.
+    (is (= 3 (:viewed-up-to-step (:db (intake/prev-step (intake/prev-step (intake/prev-step cofx)))))))
+    (is (= 3 (:viewed-up-to-step (:db (intake/prev-step (intake/prev-step cofx))))))
+    (is (= 3 (:viewed-up-to-step (:db (intake/prev-step cofx)))))
+    (is (= 3 (:viewed-up-to-step (:db (intake/next-step (intake/prev-step cofx))))))
+    (is (= 4 (:viewed-up-to-step (:db (intake/next-step cofx)))))
+    (is (= 4 (:viewed-up-to-step (:db (intake/next-step (intake/next-step cofx))))))
+
+    ;; Finally, we also dispatch a ::location, effect to update the current URL.
+    (is (= 0 (::intake/location (intake/prev-step (intake/prev-step (intake/prev-step cofx))))))
+    (is (= 1 (::intake/location (intake/prev-step (intake/prev-step cofx)))))
+    (is (= 2 (::intake/location (intake/prev-step cofx))))
+    (is (= 3 (::intake/location (intake/next-step (intake/prev-step cofx)))))
+    (is (= 4 (::intake/location (intake/next-step cofx))))
+    (is (= 4 (::intake/location (intake/next-step (intake/next-step cofx)))))))

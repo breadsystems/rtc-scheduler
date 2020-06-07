@@ -1,5 +1,6 @@
 (ns rtc.intake.core
   (:require
+   [clojure.string :refer [join]]
    ["moment" :as moment]
    ["@fullcalendar/react" :default FullCalendar]
    ["@fullcalendar/daygrid" :default dayGridPlugin]
@@ -9,7 +10,8 @@
    [reitit.frontend :as reitit]
    [reitit.frontend.easy :as easy]
    [rtc.api.core :as api]
-   [rtc.i18n.core :as i18n]))
+   [rtc.i18n.core :as i18n]
+   [rtc.util :refer [->opt]]))
 
 
 
@@ -69,6 +71,7 @@
      {:name :access-needs
       :questions
       [{:key :interpreter-lang
+        :help :interpreter-lang-help
         :type :select
         :options :lang-options}
        {:key :other-access-needs
@@ -104,11 +107,27 @@
           :text-ok-help "Depending on your carrier, you may incur charges."
           :preferred-communication-method "Preferred Communcation Method"
           :schedule "Schedule an Appointment"
-          :lang-options [{:value :en :label "English"}
-                         {:value :es :label "Espanol"}]
+          :interpreter-lang "Do you need an interpreter?"
+          :interpreter-lang-help "If you don't need an interpreter, leave this blank."
+          :lang-options [{:value nil :label "Choose..."}
+                         "Amharic"
+                         "Arabic"
+                         "ASL - American Sign Language"
+                         "Chinese Cantonese"
+                         "Chinese Madorin"
+                         "Khmer"
+                         "Korean"
+                         "Punjabi"
+                         "Russian"
+                         "Spanish"
+                         "Somali"
+                         "Tagalog"
+                         "Ukrainian"
+                         "Vietnamese"
+                         {:value :other :label "Other..."}]
           :other-access-needs "Any other access needs we can assist you with?"
           :description-of-needs "Short Description of Medical Needs"
-          :description-of-needs-help "For example, \"fever and sore throat\" for 3 days, or \"insulin prescription\""
+          :description-of-needs-help "For example, \"fever and sore throat for 3 days,\" or \"insulin prescription\""
           :anything-else "Anything we forgot to ask?"
           :states
           [{:value ""   :label "Choose a state"}
@@ -132,6 +151,7 @@
 ;; we may want to.
 ;; https://metosin.github.io/reitit/frontend/controllers.html
 ;;
+(def ^:private parent-route "/get-care")
 (def ^:private routes
   [[""
     {:name :basic-info}]
@@ -144,6 +164,9 @@
    ["/schedule"
     {:name :schedule}]])
 
+(defn- nested-route [child]
+  (str parent-route child))
+
 (defn- init-routing! []
   (easy/start!
    (let [indexed-routes (map-indexed (fn [idx route]
@@ -151,7 +174,7 @@
                                      routes)]
      (reitit/router
      ;; Build up our routes like this: ["/get-care" ["" {:name :basic-info ...}] ...]
-      (concat ["/get-care"] indexed-routes)))
+      (concat [parent-route] indexed-routes)))
    (fn [match]
      (when match
        (rf/dispatch [::update-route (:data match)])))
@@ -225,23 +248,40 @@
 (defn update-route [db [_ {:keys [step]}]]
   (assoc db :step step))
 
+(defn update-location!
+  "Related to update-route, but only responsible for (effectfully) updating window Location.
+   Does not affect the db."
+  [step]
+  (let [route (nested-route (first (get routes step)))]
+    (.pushState js/window.history #js {} nil route)))
+
 (defn update-answer [db [_ k v]]
   (assoc-in db [:answers k] v))
 
-(defn next-step [{:keys [step steps] :as db}]
-  (assoc db :step (min (inc step) (count steps))))
+(defn next-step [{:keys [db]}]
+  (let [{:keys [step steps viewed-up-to-step]} db
+        new-step (min (inc step) (dec (count steps)))]
+    {:db (assoc db
+                :step new-step
+                :viewed-up-to-step (max viewed-up-to-step new-step))
+     ::location new-step}))
 
-(defn prev-step [{:keys [step] :as db}]
-  (assoc db :step (max (dec step) 0)))
+(defn prev-step [{:keys [db]}]
+  (let [{:keys [step]} db
+        new-step (max (dec step) 0)]
+    {:db (assoc db :step new-step)
+     ::location new-step}))
 
 
 ;; Dispatched when the user visits a client-side route (including on
 ;; initial page load, once the router figures out what page we're on).
 (rf/reg-event-db ::update-route update-route)
 
+(rf/reg-fx ::location update-location!)
+
 (rf/reg-event-db ::answer! update-answer)
-(rf/reg-event-db ::prev-step prev-step)
-(rf/reg-event-db ::next-step next-step)
+(rf/reg-event-fx ::prev-step prev-step)
+(rf/reg-event-fx ::next-step next-step)
 
 ;; Dispatched on initial page load
 (defn- *generate-calendar-events [cnt]
@@ -338,9 +378,10 @@
       :select
       [:select {:value @(rf/subscribe [::answer key])
                 :on-change #(rf/dispatch [::answer! key (.. % -target -value)])}
-       (map (fn [{:keys [value label]}]
-              ^{:key value}
-              [:option {:value value} label])
+       (map (fn [opt]
+              (let [{:keys [value label]} (->opt opt)]
+                ^{:key value}
+                [:option {:value value} label]))
             (t options))]
 
       [:span "TODO"])]
@@ -373,10 +414,10 @@
   (let [nav-routes @(rf/subscribe [::routes])]
     [:nav
      [:ul
-      (map (fn [{:keys [name current?]}]
+      (map (fn [{:keys [name current? viewed?]}]
              (let [nav-title (t name)]
                ^{:key name}
-               [:li {:class (when current? "current")}
+               [:li {:class (join " " [(when current? "current") (when viewed? "viewed")])}
                 [:a {:href (easy/href name)} nav-title]]))
            nav-routes)]]))
 
