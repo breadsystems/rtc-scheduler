@@ -5,5 +5,5 @@
 
 (defn t
   "Translate a phrase into the given lang. Fetches from the db or something. I dunno."
-  [phrase _lang]
-  phrase)
+  [{:keys [lang i18n]} phrase-key]
+  (get-in i18n [lang phrase-key]))

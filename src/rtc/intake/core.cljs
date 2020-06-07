@@ -8,7 +8,8 @@
    [re-frame.core :as rf]
    [reitit.frontend :as reitit]
    [reitit.frontend.easy :as easy]
-   [rtc.api.core :as api]))
+   [rtc.api.core :as api]
+   [rtc.i18n.core :as i18n]))
 
 
 
@@ -31,45 +32,56 @@
  ::init-db
  (fn [_]
    ;; Just make first view the default?
-   {:current-view {:name ::basic-info
-                   :nav-title "Basic Info"}
+   {:step 0
+    :lang :en
     ;; Where we collect info about the Person Seeking Care.
     :careseeker-info {}
     :appointment-windows []
+    :answers {}
     ;; TODO farm this out to an EDN file to make it more configurable?
     :steps
-    {::basic-info {:name ::basic-info
-                   :questions
-                   [{:key :name
-                     :type :text}
-                    {:key :pronouns
-                     :type :text}
-                    {:key :state
-                     :type :select
-                     :options ::states}]}
-     ::contact-info {:name ::contact-info
-                     :questions
-                     [{:key :email
-                       :type :email}
-                      {:key :phone
-                       :type :text}
-                      {:key :text-ok?
-                       :type :radio
-                       :options :yes-no}
-                      {:key :preferred-communication-method
-                       :type :radio
-                       :options :communication-methods}]}
-     ::access-needs {:name ::access-needs
-                     :questions
-                     [{:key :interpreter-lang
-                       :type :select
-                       :options :lang-options}]}
-     ::medical-needs {:name ::medical-needs
-                      :questions
-                      [{:key :description-of-needs
-                        :type :text}
-                       {:key :anything-else
-                        :type :text}]}}
+    [{:name :basic-info
+      :questions
+      [{:key :name
+        :help :name-help
+        :type :text}
+       {:key :pronouns
+        :placeholder :they-them
+        :type :text}
+       {:key :state
+        :help :state-help
+        :type :select
+        :required? true
+        :options :states}]}
+     {:name :contact-info
+      :questions
+      [{:key :email
+        :type :email}
+       {:key :phone
+        :type :text}
+       {:key :text-ok
+        :help :text-ok-help
+        :type :radio
+        :options :yes-no}
+       {:key :preferred-communication-method
+        :type :radio
+        :options :communication-methods}]}
+     {:name :access-needs
+      :questions
+      [{:key :interpreter-lang
+        :type :select
+        :options :lang-options}
+       {:key :other-access-needs
+        :type :text
+        :options :lang-options}]}
+     {:name :medical-needs
+      :questions
+      [{:key :description-of-needs
+        :help :description-of-needs-help
+        :type :text}
+       {:key :anything-else
+        :type :text}]}
+     {:name :schedule}]
     :i18n
     ;; TODO how to deal with groupings like this?
     {:en {:yes-no [{:value 1 :label "Yes"}
@@ -77,19 +89,39 @@
           :communication-methods [{:value "phone" :label "Phone"}
                                   {:value "email" :label "Email"}]
           :name "Name"
+          :name-help "Not required."
           :pronouns "Pronouns"
-          :state "States"}
+          :they-them "they/them/theirs"
+          :state "States"
+          :state-help "Needed to find a provider who can legally provide care for you."
+          :basic-info "Basic Info"
+          :contact-info "Contact Info"
+          :access-needs "Access Needs"
+          :medical-needs "Medical Needs"
+          :email "Email"
+          :phone "Phone"
+          :text-ok "OK to text?"
+          :text-ok-help "Depending on your carrier, you may incur charges."
+          :preferred-communication-method "Preferred Communcation Method"
+          :schedule "Schedule an Appointment"
+          :lang-options [{:value :en :label "English"}
+                         {:value :es :label "Espanol"}]
+          :other-access-needs "Any other access needs we can assist you with?"
+          :description-of-needs "Short Description of Medical Needs"
+          :description-of-needs-help "For example, \"fever and sore throat\" for 3 days, or \"insulin prescription\""
+          :anything-else "Anything we forgot to ask?"
+          :states
+          [{:value ""   :label "Choose a state"}
+           {:value "WA" :label "Washington"}
+           {:value "NY" :label "New York"}
+           {:value "CA" :label "California"}]}
      :es {:yes-no [{:value 1 :label "Si"}
                    {:value 0 :label "Yes"}]
           :communication-methods [{:value "phone" :label "Telefono"}
                                   {:value "email" :label "Email"}]
           :name "Nombre"
           :pronouns "Pronombres"
-          :state "Estado"}}
-    :states
-    [{:value "WA" :label "Washington"}
-     {:value "NY" :label "New York"}
-     {:value "CA" :label "California"}]}))
+          :state "Estado"}}}))
 
 ;;
 ;; Client-side routing, via Reitit.
@@ -102,26 +134,24 @@
 ;;
 (def ^:private routes
   [[""
-    {:name ::basic-info
-     :nav-title "Basic Info"}]
+    {:name :basic-info}]
    ["/contact"
-    {:name ::contact-info
-     :nav-title "Contact Info"}]
+    {:name :contact-info}]
    ["/access-needs"
-    {:name ::access-needs
-     :nav-title "Access Needs"}]
+    {:name :access-needs}]
    ["/medical-needs"
-    {:name ::medical-needs
-     :nav-title "Medical Needs"}]
+    {:name :medical-needs}]
    ["/schedule"
-    {:name ::schedule
-     :nav-title "Schedule an Appointment"}]])
+    {:name :schedule}]])
 
 (defn- init-routing! []
   (easy/start!
-   (reitit/router
-    ;; Build up our routes like this: ["/get-care" ["" {:name ::basic-info ...}] ...]
-    (concat ["/get-care"] routes))
+   (let [indexed-routes (map-indexed (fn [idx route]
+                                       (update route 1 #(assoc % :step idx)))
+                                     routes)]
+     (reitit/router
+     ;; Build up our routes like this: ["/get-care" ["" {:name :basic-info ...}] ...]
+      (concat ["/get-care"] indexed-routes)))
    (fn [match]
      (when match
        (rf/dispatch [::update-route (:data match)])))
@@ -136,28 +166,51 @@
  ;;                       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(rf/reg-sub ::current-view :current-view)
+(defn current-step [{:keys [step steps]}]
+  (get steps step))
+
+(defn current-questions [db]
+  (get (current-step db) :questions))
+
+(defn accessible-routes [{:keys [step viewed-up-to-step]} routes]
+  (map (fn [route]
+         (let [view (second route)]
+           (assoc view
+                  :current? (= step (:step view))
+                  :viewed? (>= viewed-up-to-step (:step view)))))
+       routes))
+
+(defn answer [{:keys [answers]} [_ k]]
+  (get answers k ""))
 
 ;; Get routes in a more easily consumable format
-(rf/reg-sub ::routes (fn [{:keys [current-view]}]
-                       (map (fn [route]
-                              ;; First extract the view data from the route
-                              (let [view (second route)]
-                                (assoc view :current? (= (:name current-view) (:name view)))))
-                            routes)))
-
+(rf/reg-sub ::routes (fn [db]
+                       (accessible-routes db routes)))
 (rf/reg-sub ::appointment-windows :appointment-windows)
-
-(rf/reg-sub ::questions (fn [{:keys [steps]} [_ view]]
-                          (get-in steps [view :questions])))
-
-(rf/reg-sub ::t (fn [{:keys [lang i18n]} [_ phrase]]
-                  (get-in i18n [lang phrase])))
+(rf/reg-sub ::current-step current-step)
+(rf/reg-sub ::questions current-questions)
+(rf/reg-sub ::answer answer)
+(rf/reg-sub ::i18n (fn [db [_ phrase-key]]
+                     (i18n/t db phrase-key)))
 
 (comment
   routes
-  @(rf/subscribe [::questions ::basic-info])
-  @(rf/subscribe [::current-view])
+  @(rf/subscribe [::questions])
+  @(rf/subscribe [::current-step])
+
+  @(rf/subscribe [::answer :name])
+  (rf/dispatch [::answer! :name "Coby"])
+
+  @(rf/subscribe [::answer :state])
+
+  ;; view heading for "Access Needs"
+  @(rf/subscribe [::i18n :access-needs])
+  ;; => "Access Needs"
+
+  ;; current view heading
+  (let [{phrase-key :name} @(rf/subscribe [::current-step])]
+    @(rf/subscribe [::i18n phrase-key]))
+
   @(rf/subscribe [::routes]))
 
 
@@ -169,12 +222,26 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+(defn update-route [db [_ {:keys [step]}]]
+  (assoc db :step step))
+
+(defn update-answer [db [_ k v]]
+  (assoc-in db [:answers k] v))
+
+(defn next-step [{:keys [step steps] :as db}]
+  (assoc db :step (min (inc step) (count steps))))
+
+(defn prev-step [{:keys [step] :as db}]
+  (assoc db :step (max (dec step) 0)))
+
+
 ;; Dispatched when the user visits a client-side route (including on
 ;; initial page load, once the router figures out what page we're on).
-(rf/reg-event-db
- ::update-route
- (fn [db [_ view]]
-   (assoc db :current-view view)))
+(rf/reg-event-db ::update-route update-route)
+
+(rf/reg-event-db ::answer! update-answer)
+(rf/reg-event-db ::prev-step prev-step)
+(rf/reg-event-db ::next-step next-step)
 
 ;; Dispatched on initial page load
 (defn- *generate-calendar-events [cnt]
@@ -185,7 +252,6 @@
                                     (.add (inc (rand-int 20)) "days"))
                                 start (.format m "YYYY-MM-DDTHH:00")
                                 end   (.format m "YYYY-MM-DDTHH:30")]
-                            (js/console.log start end)
                             {:start start
                              :end end
                              :allDay false}))
@@ -204,12 +270,21 @@
     (.add (rand-int 10) "days")
     (.add (rand-int 4) "hours"))
 
-  (rf/dispatch [::update-route {:name ::basic-info
-                                :nav-title "Basic Info"}])
-  (rf/dispatch [::update-route {:name ::contact-info
-                                :nav-title "Contact Info"}])
-  (rf/dispatch [::update-route {:name ::schedule
-                                :nav-title "Schedule an Appointment"}]))
+  (rf/dispatch [::update-route {:name :basic-info :step 0}])
+  (rf/dispatch [::update-route {:name :contact-info :step 1}])
+  (rf/dispatch [::update-route {:name :schedule :step 4}]))
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                       ;;
+  ;;        Helpers        ;;
+ ;;                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defn t [k]
+  @(rf/subscribe [::i18n k]))
 
 
 
@@ -228,28 +303,58 @@
    [:div
     content]
    [:footer
-    [:p "Back / Next buttons go here..."]]])
+    [:button {:on-click #(rf/dispatch [::prev-step])} "Back"]
+    [:button {:on-click #(rf/dispatch [::next-step])} "Next"]]])
 
-(defn- questions [step]
-  (let [qs @(rf/subscribe [::questions step])]
+(defn- question [{:keys [key type help required? placeholder options] :as q}]
+  [:div.question
+   [:label (t key)]
+   [:div.field
+    (case type
+      :text
+      [:input {:type :text
+               :value @(rf/subscribe [::answer key])
+               :placeholder (t placeholder)
+               :required required?
+               :on-change #(rf/dispatch [::answer! key (.. % -target -value)])}]
+
+      :email
+      [:input {:type :email
+               :value @(rf/subscribe [::answer key])
+               :placeholder (t placeholder)
+               :required required?
+               :on-change #(rf/dispatch [::answer! key (.. % -target -value)])}]
+
+      :radio
+      [:<>
+       (map (fn [{:keys [value label]}]
+              (let [id (str (name key) "-" value)]
+                ^{:key value}
+                [:<>
+                 [:input {:id id :name (name key) :type :radio}]
+                 [:label {:for id} label]]))
+            (t options))]
+
+      :select
+      [:select {:value @(rf/subscribe [::answer key])
+                :on-change #(rf/dispatch [::answer! key (.. % -target -value)])}
+       (map (fn [{:keys [value label]}]
+              ^{:key value}
+              [:option {:value value} label])
+            (t options))]
+
+      [:span "TODO"])]
+   (when help [:p.help (t help)])])
+
+(defn- questions []
+  (let [step (:name @(rf/subscribe [::current-step]))
+        qs @(rf/subscribe [::questions step])]
     [intake-step
-     {:heading "TODO heading here..."
-      :sub-heading "TODO sub-heading here..."
+     {:heading (t step)
       :content (map (fn [q]
-                      [:p (clj->js (:key q))])
+                      ^{:key (:key q)}
+                      [question q])
                     qs)}]))
-
-(defn- basic-info []
-  [:p "Basic questions..."])
-
-(defn- contact-info []
-  [:p "Contact questions..."])
-
-(defn- access-needs []
-  [:p "Access Needs..."])
-
-(defn- medical-needs []
-  [:p "Medical Needs..."])
 
 (defn- schedule []
   (let [windows @(rf/subscribe [::appointment-windows])]
@@ -268,26 +373,24 @@
   (let [nav-routes @(rf/subscribe [::routes])]
     [:nav
      [:ul
-      (map (fn [{:keys [name nav-title current?]}]
-             ^{:key name}
-             [:li {:class (when current? "current")}
-              [:a {:href (easy/href name)} nav-title]])
+      (map (fn [{:keys [name current?]}]
+             (let [nav-title (t name)]
+               ^{:key name}
+               [:li {:class (when current? "current")}
+                [:a {:href (easy/href name)} nav-title]]))
            nav-routes)]]))
 
 (defn intake-ui []
-  (let [{:keys [name nav-title]} @(rf/subscribe [::current-view])]
+  (let [{:keys [name]} @(rf/subscribe [::current-step])]
     [:div.container.container--get-care
      [:header
-      [:h2 nav-title]
+      [:h1 "Radical Telehealth Collective"]
+      [:h2 "Get Care"]
       [main-nav]]
      [:main
-      ;; TODO make this more extensible
-      (condp = name
-        ::basic-info [questions ::basic-info]
-        ::contact-info [contact-info]
-        ::access-needs [access-needs]
-        ::medical-needs [medical-needs]
-        ::schedule [schedule])]]))
+      (if (= :schedule name)
+        [schedule]
+        [questions])]]))
 
 
 (defn ^:dev/after-load mount! []
