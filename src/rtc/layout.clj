@@ -55,8 +55,10 @@
   (page
    (merge
     opts
-    {:head           [[:link {:rel "stylesheet" :href "/css/fullcalendar/main.min.css"}]
-                      [:link {:rel "stylesheet" :href "/css/fullcalendar/timegrid.min.css"}]]
+    {:title          "Get Care"
+     :head           [[:link {:rel "stylesheet" :href "/css/fullcalendar/main.min.css"}]
+                      [:link {:rel "stylesheet" :href "/css/fullcalendar/timegrid.min.css"}]
+                      [:link {:rel "stylesheet" :href "/css/intake.css"}]]
      :content        [:div#rtc-intake-app]
      :footer-content [:div
                       [:script {:src "/js/shared.js" :type "text/javascript"}]
