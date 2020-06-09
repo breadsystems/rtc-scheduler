@@ -195,6 +195,9 @@
 (defn current-questions [db]
   (get (current-step db) :questions))
 
+(defn can-go-prev? [{:keys [step]}]
+  (> step 0))
+
 (defn accessible-routes [{:keys [step viewed-up-to-step]} routes]
   (map (fn [route]
          (let [view (second route)]
@@ -212,6 +215,7 @@
 (rf/reg-sub ::appointment-windows :appointment-windows)
 (rf/reg-sub ::current-step current-step)
 (rf/reg-sub ::questions current-questions)
+(rf/reg-sub ::can-go-prev? can-go-prev?)
 (rf/reg-sub ::answer answer)
 (rf/reg-sub ::i18n (fn [db [_ phrase-key]]
                      (i18n/t db phrase-key)))
@@ -344,7 +348,8 @@
     content]
    [:footer.intake-footer
     ;; TODO toggle disabled
-    [:button.prev {:on-click #(rf/dispatch [::prev-step])} "Back"]
+    [:button.prev {:on-click #(rf/dispatch [::prev-step])
+                   :disabled (not @(rf/subscribe [::can-go-prev?]))} "Back"]
     [:button.next {:on-click #(rf/dispatch [::next-step])} "Next"]]])
 
 (defn- question [{:keys [key type help required? placeholder options] :as q}]

@@ -88,3 +88,10 @@
     (is (= 3 (::intake/location (intake/next-step (intake/prev-step cofx)))))
     (is (= 4 (::intake/location (intake/next-step cofx))))
     (is (= 4 (::intake/location (intake/next-step (intake/next-step cofx)))))))
+
+(deftest can-go-prev-limits-back-button
+  (is (false? (intake/can-go-prev? {:step 0})))
+  (is (false? (intake/can-go-prev? {:step -1})))
+  (is (true?  (intake/can-go-prev? {:step 1})))
+  (is (true?  (intake/can-go-prev? {:step 2})))
+  (is (true?  (intake/can-go-prev? {:step 3}))))
