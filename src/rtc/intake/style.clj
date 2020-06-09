@@ -6,7 +6,8 @@
 
 (def questions
   [[:.question {:margin "2em 0"}]
-   [:.field-label {:font-weight 700}]
+   [:.field-label {:font-weight 700
+                   :color core/dark-purple}]
    [:.intake-footer {:display :flex
                      :max-width "65em"
                      :margin "5em auto"
