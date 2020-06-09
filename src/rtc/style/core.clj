@@ -9,6 +9,8 @@
 (defcssfn calc)
 
 (def pink (rgb 255 26 79))
+(def muted-pink (rgb 185 90 115))
+(def off-white (rgb 255 230 250))
 (def purple "#b9a1fb")
 (def grey (rgb 100 100 100))
 
@@ -39,9 +41,12 @@
              :cursor :pointer
              :font-weight 700
              :text-transform :uppercase
-             :color pink
-             :background :black}
-    [:&.next {:text-align :right}]]
+             :color :white
+             :background pink}
+    [:&.next {:text-align :right}]
+    [:&:disabled {:background-color muted-pink
+                  :color off-white
+                  :cursor :not-allowed}]]
    [:select {:min-width "25rem"
              :border purple-border
              :border-radius "0.3em"
