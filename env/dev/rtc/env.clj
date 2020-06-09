@@ -36,13 +36,13 @@
                                   'foo
                                   'rtc.style.core})
 
+;; TODO use Thread.interrupt() or similar to :stop watch
 (defstate garden-watcher
   :start (do
            (println "Watching Garden for changes...")
            (style/watch! {:source-paths ["src/rtc/intake" "src/rtc/style"]
                           :styles 'rtc.intake.style/screen
-                          :compiler {:output-to "resources/public/css/intake.css"
-                                     :pretty-print? false}})))
+                          :compiler {:output-to "resources/public/css/intake.css"}})))
 
 
 (comment
