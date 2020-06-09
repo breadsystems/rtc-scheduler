@@ -3,8 +3,8 @@
    [clojure.string :refer [join]]
    ["moment" :as moment]
    ["@fullcalendar/react" :default FullCalendar]
-   ["@fullcalendar/daygrid" :default dayGridPlugin]
    ["@fullcalendar/timegrid" :default timeGridPlugin]
+   ["@fullcalendar/list" :default listPlugin]
    [reagent.dom :as dom]
    [re-frame.core :as rf]
    [reitit.frontend :as reitit]
@@ -95,7 +95,7 @@
           :name-help "Not required."
           :pronouns "Pronouns"
           :they-them "they/them/theirs"
-          :state "States"
+          :state "State"
           :state-help "Needed to find a provider who can legally provide care for you."
           :basic-info "Basic Info"
           :contact-info "Contact Info"
@@ -342,13 +342,14 @@
     (when sub-heading [:h4 sub-heading])]
    [:div
     content]
-   [:footer
-    [:button {:on-click #(rf/dispatch [::prev-step])} "Back"]
-    [:button {:on-click #(rf/dispatch [::next-step])} "Next"]]])
+   [:footer.intake-footer
+    ;; TODO toggle disabled
+    [:button.prev {:on-click #(rf/dispatch [::prev-step])} "Back"]
+    [:button.next {:on-click #(rf/dispatch [::next-step])} "Next"]]])
 
 (defn- question [{:keys [key type help required? placeholder options] :as q}]
   [:div.question
-   [:label (t key)]
+   [:label.field-label (t key)]
    [:div.field
     (case type
       :text
@@ -370,7 +371,7 @@
        (map (fn [{:keys [value label]}]
               (let [id (str (name key) "-" value)]
                 ^{:key value}
-                [:<>
+                [:span.radio-option
                  [:input {:id id :name (name key) :type :radio}]
                  [:label {:for id} label]]))
             (t options))]
@@ -385,7 +386,7 @@
             (t options))]
 
       [:span "TODO"])]
-   (when help [:p.help (t help)])])
+   (when help [:div.help (t help)])])
 
 (defn- questions []
   (let [step (:name @(rf/subscribe [::current-step]))
@@ -405,9 +406,9 @@
       :sub-heading
       "These are the appointment times available for residents of your state."
       :content
-      [:> FullCalendar {:default-view "timeGridWeek"
+      [:> FullCalendar {:default-view "listWeek"
                         :events windows
-                        :plugins [dayGridPlugin timeGridPlugin]}]})))
+                        :plugins [listPlugin timeGridPlugin]}]})))
 
 
 (defn- main-nav []
