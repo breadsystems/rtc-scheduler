@@ -57,6 +57,7 @@
     opts
     {:title          "Get Care"
      :head           [[:link {:rel "stylesheet" :href "/css/fullcalendar/main.min.css"}]
+                      [:link {:rel "stylesheet" :href "/css/fullcalendar/list.min.css"}]
                       [:link {:rel "stylesheet" :href "/css/fullcalendar/timegrid.min.css"}]
                       [:link {:rel "stylesheet" :href "/css/intake.css"}]]
      :content        [:div#rtc-intake-app]
