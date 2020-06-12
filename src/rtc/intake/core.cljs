@@ -35,6 +35,7 @@
  (fn [_]
    ;; Just make first view the default?
    {:step 0
+    :viewed-up-to-step 0
     :lang :en
     ;; Where we collect info about the Person Seeking Care.
     :careseeker-info {}
@@ -265,12 +266,17 @@
    (> (count steps) (inc step))
    (step-valid? db)))
 
-(defn accessible-routes [{:keys [step viewed-up-to-step]} routes]
+(defn accessible-routes [{:keys [step viewed-up-to-step] :as db} routes]
   (map (fn [route]
-         (let [view (second route)]
+         (let [view (second route)
+               current? (= step (:step view))
+               viewed? (>= viewed-up-to-step (:step view))
+               valid? (step-valid? db)
+               is-next? (= (inc step) (:step view))]
            (assoc view
-                  :current? (= step (:step view))
-                  :viewed? (>= viewed-up-to-step (:step view)))))
+                  :current? current?
+                  :accessible? (or (> step (:step view)) current? (and (or is-next? viewed?) valid?))
+                  :viewed? viewed?)))
        routes))
 
 (defn answer [{:keys [answers]} [_ k]]

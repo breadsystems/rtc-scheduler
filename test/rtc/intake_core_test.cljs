@@ -26,18 +26,48 @@
 (deftest accessible-routes
   (let [db {:step 2
             :viewed-up-to-step 3
-            :steps [{:name :zero} {:name :one} {:name :two}]}
+            :steps [{:name :zero}
+                    {:name :one}
+                    {:name :two
+                     :questions [{:key :required-q :required? true}]}
+                    {:name :three}
+                    {:name :four}]
+            :answers {:required-q ""}}
         routes [["/zero"  {:name :zero  :step 0}]
                 ["/one"   {:name :one   :step 1}]
                 ["/two"   {:name :two   :step 2}]
                 ["/three" {:name :three :step 3}]
                 ["/four"  {:name :four  :step 4}]]]
-    (is (= [{:name :zero  :step 0 :current? false :viewed? true}
-            {:name :one   :step 1 :current? false :viewed? true}
-            {:name :two   :step 2 :current? true  :viewed? true}
-            {:name :three :step 3 :current? false :viewed? true}
-            {:name :four  :step 4 :current? false :viewed? false}]
-           (intake/accessible-routes db routes)))))
+    ;; Future steps should be inaccessible if the current step is valid, even if
+    ;; they've already been viewed.
+    (is (= [{:name :zero  :step 0 :current? false :viewed? true  :accessible? true}
+            {:name :one   :step 1 :current? false :viewed? true  :accessible? true}
+            {:name :two   :step 2 :current? true  :viewed? true  :accessible? true}
+            {:name :three :step 3 :current? false :viewed? true  :accessible? false}
+            {:name :four  :step 4 :current? false :viewed? false :accessible? false}]
+           (intake/accessible-routes db routes)))
+    ;; Once the current step is valid, the next step should be accessible, even it
+    ;; it has NOT been viewed.
+    (is (= [{:name :zero  :step 0 :current? false :viewed? true  :accessible? true}
+            {:name :one   :step 1 :current? false :viewed? true  :accessible? true}
+            {:name :two   :step 2 :current? true  :viewed? true  :accessible? true}
+            {:name :three :step 3 :current? false :viewed? false :accessible? true}
+            {:name :four  :step 4 :current? false :viewed? false :accessible? false}]
+           (intake/accessible-routes (assoc db
+                                            :answers {:required-q "Answer!"}
+                                            :viewed-up-to-step 2)
+                                     routes)))
+    ;; Once the current step is valid, any future steps that have already been viewed
+    ;; should be accessible.
+    (is (= [{:name :zero  :step 0 :current? false :viewed? true :accessible? true}
+            {:name :one   :step 1 :current? false :viewed? true :accessible? true}
+            {:name :two   :step 2 :current? true  :viewed? true :accessible? true}
+            {:name :three :step 3 :current? false :viewed? true :accessible? true}
+            {:name :four  :step 4 :current? false :viewed? true :accessible? true}]
+           (intake/accessible-routes (assoc db
+                                            :viewed-up-to-step 4
+                                            :answers {:required-q "Answer!"})
+                                     routes)))))
 
 (deftest answer-gets-corresponding-answer-by-key
   (let [db {:answers {:two+two "Four"}}]
