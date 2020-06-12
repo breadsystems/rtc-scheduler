@@ -170,27 +170,24 @@
 (def ^:private parent-route "/get-care")
 (def ^:private routes
   [[""
-    {:name :basic-info}]
+    {:name :basic-info :step 0}]
    ["/contact"
-    {:name :contact-info}]
+    {:name :contact-info :step 1}]
    ["/access-needs"
-    {:name :access-needs}]
+    {:name :access-needs :step 2}]
    ["/medical-needs"
-    {:name :medical-needs}]
+    {:name :medical-needs :step 3}]
    ["/schedule"
-    {:name :schedule}]])
+    {:name :schedule :step 4}]])
 
 (defn- nested-route [child]
   (str parent-route child))
 
 (defn- init-routing! []
   (easy/start!
-   (let [indexed-routes (map-indexed (fn [idx route]
-                                       (update route 1 #(assoc % :step idx)))
-                                     routes)]
-     (reitit/router
-     ;; Build up our routes like this: ["/get-care" ["" {:name :basic-info ...}] ...]
-      (concat [parent-route] indexed-routes)))
+   (reitit/router
+    ;; Build up our routes like this: ["/get-care" ["" {:name :basic-info ...}] ...]
+    (concat [parent-route] routes))
    (fn [match]
      (when match
        (rf/dispatch [::update-route (:data match)])))
@@ -445,7 +442,6 @@
    [:div
     content]
    [:footer.intake-footer
-    ;; TODO toggle disabled
     [:button.prev {:on-click #(rf/dispatch [::prev-step])
                    :disabled (not @(rf/subscribe [::can-go-prev?]))} "Back"]
     [:button.next {:on-click #(rf/dispatch [::next-step])
@@ -529,15 +525,18 @@
                         :plugins [listPlugin timeGridPlugin]}]})))
 
 
-(defn- main-nav []
+(defn- progress-nav []
   (let [nav-routes @(rf/subscribe [::routes])]
     [:nav
-     [:ul
-      (map (fn [{:keys [name current? viewed?]}]
-             (let [nav-title (t name)]
+     [:ul.progress
+      (map (fn [{:keys [name accessible? current? viewed?]}]
+             (let [nav-title (t name)
+                   linkable? (and accessible? (not current?))]
                ^{:key name}
                [:li {:class (join " " [(when current? "current") (when viewed? "viewed")])}
-                [:a {:href (easy/href name)} nav-title]]))
+                [:a.step-link {:class (when-not accessible? "disabled")
+                               :href (when linkable? (easy/href name))}
+                 nav-title]]))
            nav-routes)]]))
 
 (defn intake-ui []
@@ -546,7 +545,7 @@
      [:header
       [:h1 "Radical Telehealth Collective"]
       [:h2 "Get Care"]
-      [main-nav]]
+      [progress-nav]]
      [:main
       (if (= :schedule name)
         [schedule]

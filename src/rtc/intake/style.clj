@@ -11,7 +11,18 @@
                   :width "100%"
                   :justify-content :space-around
                   :list-style :none}]
-   [:.step-link {:text-decoration :none}]])
+   [:.step-link {:font-size "1.2em"
+                 :text-decoration :none
+                 :font-weight 700}
+    [:&.disabled {:color core/purple}]]
+   [:.current
+    [:.step-link {:display :inline
+                  :text-shadow (str "-3px -3px white,"
+                                    "-3px 3px white,"
+                                    "3px -3px white,"
+                                    "3px 3px white")
+                  :background-size "1px 1em"
+                  :box-shadow "inset 0 3px white, inset 0 -2px currentColor"}]]])
 
 (def questions
   [[:.question {:margin "2em 0"}]

@@ -28,16 +28,27 @@
          :text-transform :uppercase}
     [:h2 :h3 :h4 :h5 :h6
      {:color dark-purple}]]
+   [:a {:color dark-purple}]
    [:.help {:color grey
             :font-style :italic}]])
 
 
-(def disabled-button {:background-color muted-pink
+(def button-base {:padding "0.7em 1.3em"
+                  :border :none
+                  :cursor :pointer
+                  :font-weight 700
+                  :text-transform :uppercase
+                  :color :white
+                  :background pink})
+
+(def button-secondary (merge button-base {:background purple}))
+
+(def button-disabled {:background-color muted-pink
                       :color off-white
                       :cursor :not-allowed})
 
-(def disabled-secondary-button
-  (merge disabled-button {:background-color muted-purple
+(def button-disabled-secondary
+  (merge button-disabled {:background-color muted-purple
                           :color off-white}))
 
 (def forms
@@ -57,17 +68,11 @@
              :padding "0.7em"
              :border-radius "0.3em"
              :border purple-border}]]
-   [:button :.button {:padding "0.7em 1.3em"
-                      :border :none
-                      :cursor :pointer
-                      :font-weight 700
-                      :text-transform :uppercase
-                      :color :white
-                      :background pink}
-    [:&.secondary {:background purple}
-     [:&:disabled :&.disabled disabled-secondary-button]]
+   [:button :.button button-base
+    [:&.secondary button-secondary
+     [:&:disabled :&.disabled button-disabled-secondary]]
     [:&.next {:text-align :right}]
-    [:&:disabled :&.disabled disabled-button]]
+    [:&:disabled :&.disabled button-disabled]]
    [:select {:min-width "25rem"
              :border purple-border
              :border-radius "0.3em"
@@ -84,4 +89,4 @@
                  :border :none
                  :font-weight 700
                  :text-transform :uppercase}
-    [:&:disabled disabled-secondary-button]]])
+    [:&:disabled button-disabled-secondary]]])
