@@ -14,7 +14,7 @@
    [:.step-link {:font-size "1.2em"
                  :text-decoration :none
                  :font-weight 700}
-    [:&.disabled {:color core/purple}]]
+    [:&.disabled {:color core/dark-grey}]]
    [:.current
     [:.step-link {:display :inline
                   :text-shadow (str "-3px -3px white,"
