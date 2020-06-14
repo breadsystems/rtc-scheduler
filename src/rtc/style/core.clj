@@ -26,9 +26,9 @@
 
 (def typography
   [[:h1 {:color pink
-         :text-transform :uppercase}
-    [:h2 :h3 :h4 :h5 :h6
-     {:color dark-purple}]]
+         :text-transform :uppercase}]
+   [:h2 :h3 :h4 :h5 :h6
+    {:color dark-purple}]
    [:a {:color dark-purple}]
    [:.help {:color grey
             :font-style :italic}]])
