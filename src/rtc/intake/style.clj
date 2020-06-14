@@ -30,8 +30,15 @@
                    :color core/dark-purple}]
    [:.intake-footer {:display :flex
                      :max-width "65em"
-                     :margin "3em auto"
+                     :margin "3em auto 5em"
                      :justify-content :space-between}]])
+
+
+(def i18n
+  [[:.lang-selector {:position :fixed
+                     :right "1em"
+                     :bottom "1em"
+                     :width "10rem"}]])
 
 
 (defstyles screen
@@ -39,4 +46,5 @@
   core/typography
   core/forms
   nav
-  questions)
+  questions
+  i18n)

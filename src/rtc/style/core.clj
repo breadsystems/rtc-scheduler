@@ -74,7 +74,8 @@
      [:&:disabled :&.disabled button-disabled-secondary]]
     [:&.next {:text-align :right}]
     [:&:disabled :&.disabled button-disabled]]
-   [:select {:min-width "25rem"
+   [:select {:width "25rem"
+             :max-width "100%"
              :border purple-border
              :border-radius "0.3em"
              :background-color :lavender

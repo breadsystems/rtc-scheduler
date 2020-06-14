@@ -37,6 +37,8 @@
    {:step 0
     :viewed-up-to-step 0
     :lang :en
+    :lang-options [{:value :en :label "English"}
+                   {:value :es :label "Español"}]
     ;; Where we collect info about the Person Seeking Care.
     :careseeker-info {}
     :appointment-windows []
@@ -82,10 +84,10 @@
       [{:key :interpreter-lang
         :help :interpreter-lang-help
         :type :select
-        :options :lang-options}
+        :options :interpreter-options}
        {:key :other-access-needs
         :type :text
-        :options :lang-options}]}
+        :options :interpreter-options}]}
      {:name :medical-needs
       :questions
       [{:key :description-of-needs
@@ -102,6 +104,10 @@
                    {:value 0 :label "No"}]
           :communication-methods [{:value "phone" :label "Phone"}
                                   {:value "email" :label "Email"}]
+          :basic-info "Basic Info"
+          :contact-info "Contact Info"
+          :access-needs "Access Needs"
+          :medical-needs "Medical Needs"
           :name "Name"
           :name-help "Not required."
           :anonymous "Anonymous"
@@ -109,10 +115,6 @@
           :they-them "they/them/theirs"
           :state "State"
           :state-help "Needed to find a provider who can legally provide care for you."
-          :basic-info "Basic Info"
-          :contact-info "Contact Info"
-          :access-needs "Access Needs"
-          :medical-needs "Medical Needs"
           :email "Email"
           :phone "Phone"
           :email-or-phone "Please enter your Email, Phone, or both."
@@ -123,22 +125,22 @@
           :schedule "Schedule an Appointment"
           :interpreter-lang "Do you need an interpreter?"
           :interpreter-lang-help "Let us know which language you are most comfortable speaking. If you speak English, leave this blank."
-          :lang-options [{:value nil :label "Choose..."}
-                         "Amharic"
-                         "Arabic"
-                         "ASL - American Sign Language"
-                         "Chinese Cantonese"
-                         "Chinese Madorin"
-                         "Khmer"
-                         "Korean"
-                         "Punjabi"
-                         "Russian"
-                         "Spanish"
-                         "Somali"
-                         "Tagalog"
-                         "Ukrainian"
-                         "Vietnamese"
-                         {:value :other :label "Other..."}]
+          :interpreter-options [{:value nil :label "Choose..."}
+                                "Amharic"
+                                "Arabic"
+                                "ASL - American Sign Language"
+                                "Chinese Cantonese"
+                                "Chinese Madorin"
+                                "Khmer"
+                                "Korean"
+                                "Punjabi"
+                                "Russian"
+                                "Spanish"
+                                "Somali"
+                                "Tagalog"
+                                "Ukrainian"
+                                "Vietnamese"
+                                {:value :other :label "Other..."}]
           :other-access-needs "Any other access needs we can assist you with?"
           :description-of-needs "Short Description of Medical Needs"
           :description-of-needs-help "For example, \"fever and sore throat for 3 days,\" or \"insulin prescription\""
@@ -150,13 +152,58 @@
            {:value "WA" :label "Washington"}
            {:value "NY" :label "New York"}
            {:value "CA" :label "California"}]}
+     ;; Sorry, Ramsey!!
      :es {:yes-no [{:value 1 :label "Si"}
-                   {:value 0 :label "Yes"}]
-          :communication-methods [{:value "phone" :label "Telefono"}
-                                  {:value "email" :label "Email"}]
+                   {:value 0 :label "No"}]
+          :communication-methods [{:value "phone" :label "Teléfono"}
+                                  {:value "email" :label "Dirección de Correo Electrónica"}]
+          :basic-info "TODO Basic Info"
+          :contact-info "TODO Contact Info"
+          :access-needs "TODO Access Needs"
+          :medical-needs "TODO Medical Needs"
           :name "Nombre"
+          :anonymous "Anónimo"
           :pronouns "Pronombres"
-          :state "Estado"}}}))
+          :they-them "elles/elle"
+          :state "Estado"
+          :state-help "Se requiere para que le conectamos a un proveedor de atención médica que pueda proporcionarle servicios de telemedicina legalmente"
+          :email "Dirección de Correo Electrónica"
+          :phone "Teléfono"
+          :email-or-phone "TODO Please enter your Email, Phone, or both."
+          :email-or-phone-help "TODO Email or Phone is required."
+          :text-ok "¿Está bien enviar un mensaje de texto?"
+          :text-ok-help "Le pedimos esto ya que dependiendo de su operador puede incurrir en cargos."
+          :preferred-communication-method "TODO Preferred Communcation Method"
+          :interpreter-lang "¿Necesitas un intérprete?"
+          :interpreter-lang-help "Seleccione un idioma o proporcione como \"otro\" a continuación"
+          :interpreter-options [{:value nil :label "Choose..."}
+                                "Amárico"
+                                "Arabe"
+                                "Lenguaje de Señas - Americano"
+                                "Chino Cantonés"
+                                "Chino Mandarín"
+                                "Khmer"
+                                "Coreano"
+                                "Punjabi"
+                                "Russo"
+                                "Español"
+                                "Somali"
+                                "Tagalo"
+                                "Ucranio"
+                                "Vietnamita"
+                                {:value :other :label "Otro..."}]
+          :other-access-needs "¿Alguna otra necesidad de acceso que pueda ayudarnos a apoyarlo mejor?"
+          :description-of-needs "Descripción breve de la necesidad médica"
+          :description-of-needs-help "Por ejemplo, fiebre y síntomas de dolor de garganta durante 3 días, o necesita una receta para insulina, hormonas"
+          :please-describe-medical-needs "TODO please briefly describe your medical needs"
+          :anything-else "¿Algo que olvidamos preguntar?"
+          :please-enter "TODO Please enter your"
+          :schedule "TODO Schedule an Appointment"
+          :states
+          [{:value ""   :label "Choose a state"}
+           {:value "WA" :label "Washington"}
+           {:value "NY" :label "New York"}
+           {:value "CA" :label "California"}]}}}))
 
 ;;
 ;; Client-side routing, via Reitit.
@@ -294,6 +341,8 @@
 (rf/reg-sub ::answer answer)
 (rf/reg-sub ::i18n (fn [db [_ phrase-key]]
                      (i18n/t db phrase-key)))
+(rf/reg-sub ::lang :lang)
+(rf/reg-sub ::lang-options :lang-options)
 
 (comment
   routes
@@ -319,6 +368,10 @@
   ;; view heading for "Access Needs"
   @(rf/subscribe [::i18n :access-needs])
   ;; => "Access Needs"
+
+  @(rf/subscribe [::i18n :states])
+
+  @(rf/subscribe [::lang])
 
   ;; current view heading
   (let [{phrase-key :name} @(rf/subscribe [::current-step])]
@@ -374,6 +427,9 @@
 (rf/reg-event-fx ::next-step next-step)
 (rf/reg-event-db ::touch! touch)
 
+(rf/reg-event-db ::update-lang (fn [db [_ lang]]
+                                 (assoc db :lang lang)))
+
 ;; Dispatched on initial page load
 (defn- *generate-calendar-events [cnt]
   (doall (distinct (map (fn [_]
@@ -403,7 +459,10 @@
 
   (rf/dispatch [::update-route {:name :basic-info :step 0}])
   (rf/dispatch [::update-route {:name :contact-info :step 1}])
-  (rf/dispatch [::update-route {:name :schedule :step 4}]))
+  (rf/dispatch [::update-route {:name :schedule :step 4}])
+  
+  (rf/dispatch [::update-lang :en])
+  (rf/dispatch [::update-lang :es]))
 
 
 
@@ -540,7 +599,9 @@
            nav-routes)]]))
 
 (defn intake-ui []
-  (let [{:keys [name]} @(rf/subscribe [::current-step])]
+  (let [{:keys [name]} @(rf/subscribe [::current-step])
+        lang @(rf/subscribe [::lang])
+        lang-options @(rf/subscribe [::lang-options])]
     [:div.container.container--get-care
      [:header
       [:h1 "Radical Telehealth Collective"]
@@ -549,7 +610,14 @@
      [:main
       (if (= :schedule name)
         [schedule]
-        [questions])]]))
+        [questions])]
+     [:div.lang-selector
+      [:select {:value lang
+                :on-change #(rf/dispatch [::update-lang (keyword (.. % -target -value))])}
+       (map (fn [{:keys [value label]}]
+              ^{:key value}
+              [:option {:value value} label])
+            lang-options)]]]))
 
 
 (defn ^:dev/after-load mount! []
