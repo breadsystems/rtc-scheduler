@@ -11,10 +11,13 @@
                   :width "100%"
                   :justify-content :space-around
                   :list-style :none}]
-   [:.step-link {:font-size "1.2em"
+   [:.step-link {:color core/dark-purple
+                 :cursor :pointer
+                 :font-size "1.2em"
                  :text-decoration :none
                  :font-weight 700}
-    [:&.disabled {:color core/dark-grey}]]
+    [:&.disabled {:color core/dark-grey
+                  :cursor :not-allowed}]]
    [:.current
     [:.step-link {:display :inline
                   :text-shadow (str "-3px -3px white,"
@@ -33,12 +36,15 @@
                      :margin "3em auto 5em"
                      :justify-content :space-between}]])
 
+(def calendar
+  [[:.fc-list-item {:cursor :pointer}]])
 
 (def i18n
   [[:.lang-selector {:position :fixed
                      :right "1em"
                      :bottom "1em"
-                     :width "10rem"}]])
+                     :width "10rem"
+                     :z-index 2}]])
 
 
 (defstyles screen
@@ -47,4 +53,5 @@
   core/forms
   nav
   questions
+  calendar
   i18n)

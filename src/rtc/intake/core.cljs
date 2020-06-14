@@ -7,7 +7,6 @@
    ["@fullcalendar/list" :default listPlugin]
    [reagent.dom :as dom]
    [re-frame.core :as rf]
-   [reitit.frontend :as reitit]
    [reitit.frontend.easy :as easy]
    [rtc.api.core :as api]
    [rtc.i18n.core :as i18n]
@@ -97,7 +96,8 @@
         :type :text}
        {:key :anything-else
         :type :text}]}
-     {:name :schedule}]
+     {:name :schedule}
+     {:name :confirm}]
     :i18n
     ;; TODO how to deal with groupings like this?
     {:en {:yes-no [{:value 1 :label "Yes"}
@@ -108,6 +108,8 @@
           :contact-info "Contact Info"
           :access-needs "Access Needs"
           :medical-needs "Medical Needs"
+          :schedule "Schedule an Appointment"
+          :confirm "Confirm"
           :name "Name"
           :name-help "Not required."
           :anonymous "Anonymous"
@@ -122,7 +124,6 @@
           :text-ok "OK to text?"
           :text-ok-help "Depending on your carrier, you may incur charges."
           :preferred-communication-method "Preferred Communcation Method"
-          :schedule "Schedule an Appointment"
           :interpreter-lang "Do you need an interpreter?"
           :interpreter-lang-help "Let us know which language you are most comfortable speaking. If you speak English, leave this blank."
           :interpreter-options [{:value nil :label "Choose..."}
@@ -205,42 +206,6 @@
            {:value "NY" :label "New York"}
            {:value "CA" :label "California"}]}}}))
 
-;;
-;; Client-side routing, via Reitit.
-;; This manages navigation, including browser history.
-;; https://metosin.github.io/reitit/frontend/browser.html
-;;
-;; We don't use Controllers here, but if this starts to get messy,
-;; we may want to.
-;; https://metosin.github.io/reitit/frontend/controllers.html
-;;
-(def ^:private parent-route "/get-care")
-(def ^:private routes
-  [[""
-    {:name :basic-info :step 0}]
-   ["/contact"
-    {:name :contact-info :step 1}]
-   ["/access-needs"
-    {:name :access-needs :step 2}]
-   ["/medical-needs"
-    {:name :medical-needs :step 3}]
-   ["/schedule"
-    {:name :schedule :step 4}]])
-
-(defn- nested-route [child]
-  (str parent-route child))
-
-(defn- init-routing! []
-  (easy/start!
-   (reitit/router
-    ;; Build up our routes like this: ["/get-care" ["" {:name :basic-info ...}] ...]
-    (concat [parent-route] routes))
-   (fn [match]
-     (when match
-       (rf/dispatch [::update-route (:data match)])))
-   ;; Use the HTML5 History API, not URL fragments
-   {:use-fragment false}))
-
 
 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -310,25 +275,23 @@
    (> (count steps) (inc step))
    (step-valid? db)))
 
-(defn accessible-routes [{:keys [step viewed-up-to-step] :as db} routes]
-  (map (fn [route]
-         (let [view (second route)
-               current? (= step (:step view))
-               viewed? (>= viewed-up-to-step (:step view))
-               valid? (step-valid? db)
-               is-next? (= (inc step) (:step view))]
-           (assoc view
-                  :current? current?
-                  :accessible? (or (> step (:step view)) current? (and (or is-next? viewed?) valid?))
-                  :viewed? viewed?)))
-       routes))
+(defn accessible-steps [{:keys [step steps viewed-up-to-step] :as db}]
+  (map-indexed (fn [idx view]
+                 (let [current? (= step idx)
+                       viewed? (>= viewed-up-to-step idx)
+                       valid? (step-valid? db)
+                       is-next? (= (inc step) idx)]
+                   (assoc view
+                          :step idx
+                          :current? current?
+                          :accessible? (or (> step idx) current? (and (or is-next? viewed?) valid?))
+                          :viewed? viewed?)))
+               steps))
 
 (defn answer [{:keys [answers]} [_ k]]
   (get answers k ""))
 
-;; Get routes in a more easily consumable format
-(rf/reg-sub ::routes (fn [db]
-                       (accessible-routes db routes)))
+(rf/reg-sub ::steps accessible-steps)
 (rf/reg-sub ::appointment-windows :appointment-windows)
 (rf/reg-sub ::current-step current-step)
 (rf/reg-sub ::questions current-questions)
@@ -345,8 +308,8 @@
 (rf/reg-sub ::lang-options :lang-options)
 
 (comment
-  routes
   @(rf/dispatch [::init-db])
+  @(rf/subscribe [::steps])
   @(rf/subscribe [::questions])
   @(rf/subscribe [::current-step])
   @(rf/subscribe [::errors])
@@ -377,7 +340,7 @@
   (let [{phrase-key :name} @(rf/subscribe [::current-step])]
     @(rf/subscribe [::i18n phrase-key]))
 
-  @(rf/subscribe [::routes]))
+  @(rf/subscribe [::steps]))
 
 
 
@@ -388,43 +351,28 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defn update-route [db [_ {:keys [step]}]]
+(defn update-step [db [_ {:keys [step]}]]
   (assoc db :step step))
-
-(defn update-location!
-  "Related to update-route, but only responsible for (effectfully) updating window Location.
-   Does not affect the db."
-  [step]
-  (let [route (nested-route (first (get routes step)))]
-    (.pushState js/window.history #js {} nil route)))
 
 (defn update-answer [db [_ k v]]
   (assoc-in db [:answers k] v))
 
-(defn next-step [{:keys [db]}]
-  (let [{:keys [step steps viewed-up-to-step]} db
-        new-step (min (inc step) (dec (count steps)))]
-    {:db (assoc db
-                :step new-step
-                :viewed-up-to-step (max viewed-up-to-step new-step))
-     ::location new-step}))
+(defn next-step [{:keys [step steps viewed-up-to-step] :as db}]
+  (let [new-step (min (inc step) (dec (count steps)))]
+    (assoc db
+           :step new-step
+           :viewed-up-to-step (max viewed-up-to-step new-step))))
 
-(defn prev-step [{:keys [db]}]
-  (let [{:keys [step]} db
-        new-step (max (dec step) 0)]
-    {:db (assoc db :step new-step)
-     ::location new-step}))
+(defn prev-step [{:keys [step] :as db}]
+  (let [new-step (max (dec step) 0)]
+    (assoc db :step new-step)))
 
 
-;; Dispatched when the user visits a client-side route (including on
-;; initial page load, once the router figures out what page we're on).
-(rf/reg-event-db ::update-route update-route)
-
-(rf/reg-fx ::location update-location!)
+(rf/reg-event-db ::update-step update-step)
 
 (rf/reg-event-db ::answer! update-answer)
-(rf/reg-event-fx ::prev-step prev-step)
-(rf/reg-event-fx ::next-step next-step)
+(rf/reg-event-db ::prev-step prev-step)
+(rf/reg-event-db ::next-step next-step)
 (rf/reg-event-db ::touch! touch)
 
 (rf/reg-event-db ::update-lang (fn [db [_ lang]]
@@ -457,9 +405,9 @@
     (.add (rand-int 10) "days")
     (.add (rand-int 4) "hours"))
 
-  (rf/dispatch [::update-route {:name :basic-info :step 0}])
-  (rf/dispatch [::update-route {:name :contact-info :step 1}])
-  (rf/dispatch [::update-route {:name :schedule :step 4}])
+  (rf/dispatch [::update-step {:name :basic-info :step 0}])
+  (rf/dispatch [::update-step {:name :contact-info :step 1}])
+  (rf/dispatch [::update-step {:name :schedule :step 4}])
   
   (rf/dispatch [::update-lang :en])
   (rf/dispatch [::update-lang :es]))
@@ -580,22 +528,23 @@
       :content
       [:> FullCalendar {:default-view "listWeek"
                         :events windows
+                        :eventClick (fn [info] (js/console.log info))
                         :plugins [listPlugin timeGridPlugin]}]})))
 
 
 (defn- progress-nav []
-  (let [nav-routes @(rf/subscribe [::routes])]
+  (let [nav-steps @(rf/subscribe [::steps])]
     [:nav
      [:ul.progress
-      (map (fn [{:keys [name accessible? current? viewed?]}]
+      (map (fn [{:keys [name accessible? current? viewed?] :as step}]
              (let [nav-title (t name)
                    linkable? (and accessible? (not current?))]
                ^{:key name}
                [:li {:class (join " " [(when current? "current") (when viewed? "viewed")])}
-                [:a.step-link {:class (when-not accessible? "disabled")
-                               :href (when linkable? (easy/href name))}
+                [:span.step-link {:class (when-not accessible? "disabled")
+                                  :on-click #(when linkable? (rf/dispatch [::update-step step]))}
                  nav-title]]))
-           nav-routes)]]))
+           nav-steps)]]))
 
 (defn intake-ui []
   (let [{:keys [name]} @(rf/subscribe [::current-step])
@@ -625,6 +574,5 @@
   (dom/render [intake-ui] (.getElementById js/document "rtc-intake-app")))
 
 (defn init! []
-  (init-routing!)
   (rf/dispatch-sync [::init-db])
   (mount!))

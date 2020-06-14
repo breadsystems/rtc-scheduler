@@ -23,51 +23,44 @@
             :steps [{:name :zero} {:name :one} {:name :two}]}]
     (is (= {:name :two} (intake/current-step db)))))
 
-(deftest accessible-routes
-  (let [db {:step 2
+(deftest accessible-steps
+  (let [qs [{:key :required-q :required? true}]
+        db {:step 2
             :viewed-up-to-step 3
-            :steps [{:name :zero}
-                    {:name :one}
-                    {:name :two
-                     :questions [{:key :required-q :required? true}]}
-                    {:name :three}
-                    {:name :four}]
-            :answers {:required-q ""}}
-        routes [["/zero"  {:name :zero  :step 0}]
-                ["/one"   {:name :one   :step 1}]
-                ["/two"   {:name :two   :step 2}]
-                ["/three" {:name :three :step 3}]
-                ["/four"  {:name :four  :step 4}]]]
+            :steps [{:name :zero  :questions []}
+                    {:name :one   :questions []}
+                    {:name :two   :questions qs}
+                    {:name :three :questions []}
+                    {:name :four  :questions []}]
+            :answers {:required-q ""}}]
     ;; Future steps should be inaccessible if the current step is valid, even if
     ;; they've already been viewed.
-    (is (= [{:name :zero  :step 0 :current? false :viewed? true  :accessible? true}
-            {:name :one   :step 1 :current? false :viewed? true  :accessible? true}
-            {:name :two   :step 2 :current? true  :viewed? true  :accessible? true}
-            {:name :three :step 3 :current? false :viewed? true  :accessible? false}
-            {:name :four  :step 4 :current? false :viewed? false :accessible? false}]
-           (intake/accessible-routes db routes)))
+    (is (= [{:name :zero  :step 0 :current? false :viewed? true  :accessible? true  :questions []}
+            {:name :one   :step 1 :current? false :viewed? true  :accessible? true  :questions []}
+            {:name :two   :step 2 :current? true  :viewed? true  :accessible? true  :questions qs}
+            {:name :three :step 3 :current? false :viewed? true  :accessible? false :questions []}
+            {:name :four  :step 4 :current? false :viewed? false :accessible? false :questions []}]
+           (intake/accessible-steps db)))
     ;; Once the current step is valid, the next step should be accessible, even it
     ;; it has NOT been viewed.
-    (is (= [{:name :zero  :step 0 :current? false :viewed? true  :accessible? true}
-            {:name :one   :step 1 :current? false :viewed? true  :accessible? true}
-            {:name :two   :step 2 :current? true  :viewed? true  :accessible? true}
-            {:name :three :step 3 :current? false :viewed? false :accessible? true}
-            {:name :four  :step 4 :current? false :viewed? false :accessible? false}]
-           (intake/accessible-routes (assoc db
-                                            :answers {:required-q "Answer!"}
-                                            :viewed-up-to-step 2)
-                                     routes)))
+    (is (= [{:name :zero  :step 0 :current? false :viewed? true  :accessible? true  :questions []}
+            {:name :one   :step 1 :current? false :viewed? true  :accessible? true  :questions []}
+            {:name :two   :step 2 :current? true  :viewed? true  :accessible? true  :questions qs}
+            {:name :three :step 3 :current? false :viewed? false :accessible? true  :questions []}
+            {:name :four  :step 4 :current? false :viewed? false :accessible? false :questions []}]
+           (intake/accessible-steps (assoc db
+                                           :answers {:required-q "Answer!"}
+                                           :viewed-up-to-step 2))))
     ;; Once the current step is valid, any future steps that have already been viewed
     ;; should be accessible.
-    (is (= [{:name :zero  :step 0 :current? false :viewed? true :accessible? true}
-            {:name :one   :step 1 :current? false :viewed? true :accessible? true}
-            {:name :two   :step 2 :current? true  :viewed? true :accessible? true}
-            {:name :three :step 3 :current? false :viewed? true :accessible? true}
-            {:name :four  :step 4 :current? false :viewed? true :accessible? true}]
-           (intake/accessible-routes (assoc db
-                                            :viewed-up-to-step 4
-                                            :answers {:required-q "Answer!"})
-                                     routes)))))
+    (is (= [{:name :zero  :step 0 :current? false :viewed? true :accessible? true :questions []}
+            {:name :one   :step 1 :current? false :viewed? true :accessible? true :questions []}
+            {:name :two   :step 2 :current? true  :viewed? true :accessible? true :questions qs}
+            {:name :three :step 3 :current? false :viewed? true :accessible? true :questions []}
+            {:name :four  :step 4 :current? false :viewed? true :accessible? true :questions []}]
+           (intake/accessible-steps (assoc db
+                                           :viewed-up-to-step 4
+                                           :answers {:required-q "Answer!"}))))))
 
 (deftest answer-gets-corresponding-answer-by-key
   (let [db {:answers {:two+two "Four"}}]
@@ -90,34 +83,26 @@
                    [:answers :two+two])))))
 
 (deftest next-and-previous-steps-work
-  (let [cofx {:db {:steps [0 1 2 3 4]
-                   :viewed-up-to-step 3
-                   :step 3}}]
+  (let [db {:steps [0 1 2 3 4]
+            :viewed-up-to-step 3
+            :step 3}]
     ;; The main thing next/prev-step do is update the currect :step in the db.
-    (is (= 0 (:step (:db (intake/prev-step (intake/prev-step (intake/prev-step (intake/prev-step cofx))))))))
-    (is (= 0 (:step (:db (intake/prev-step (intake/prev-step (intake/prev-step cofx)))))))
-    (is (= 1 (:step (:db (intake/prev-step (intake/prev-step cofx))))))
-    (is (= 2 (:step (:db (intake/prev-step cofx)))))
-    (is (= 3 (:step (:db (intake/next-step (intake/prev-step cofx))))))
-    (is (= 4 (:step (:db (intake/next-step cofx)))))
-    (is (= 4 (:step (:db (intake/next-step (intake/next-step cofx))))))
+    (is (= 0 (:step (intake/prev-step (intake/prev-step (intake/prev-step (intake/prev-step db)))))))
+    (is (= 0 (:step (intake/prev-step (intake/prev-step (intake/prev-step db))))))
+    (is (= 1 (:step (intake/prev-step (intake/prev-step db)))))
+    (is (= 2 (:step (intake/prev-step db))))
+    (is (= 3 (:step (intake/next-step (intake/prev-step db)))))
+    (is (= 4 (:step (intake/next-step db))))
+    (is (= 4 (:step (intake/next-step (intake/next-step db)))))
 
     ;; We also keep track of the max step the user has navigated to, so they can jump
     ;; forward to a step they've already reached if they want to.
-    (is (= 3 (:viewed-up-to-step (:db (intake/prev-step (intake/prev-step (intake/prev-step cofx)))))))
-    (is (= 3 (:viewed-up-to-step (:db (intake/prev-step (intake/prev-step cofx))))))
-    (is (= 3 (:viewed-up-to-step (:db (intake/prev-step cofx)))))
-    (is (= 3 (:viewed-up-to-step (:db (intake/next-step (intake/prev-step cofx))))))
-    (is (= 4 (:viewed-up-to-step (:db (intake/next-step cofx)))))
-    (is (= 4 (:viewed-up-to-step (:db (intake/next-step (intake/next-step cofx))))))
-
-    ;; Finally, we also dispatch a ::location, effect to update the current URL.
-    (is (= 0 (::intake/location (intake/prev-step (intake/prev-step (intake/prev-step cofx))))))
-    (is (= 1 (::intake/location (intake/prev-step (intake/prev-step cofx)))))
-    (is (= 2 (::intake/location (intake/prev-step cofx))))
-    (is (= 3 (::intake/location (intake/next-step (intake/prev-step cofx)))))
-    (is (= 4 (::intake/location (intake/next-step cofx))))
-    (is (= 4 (::intake/location (intake/next-step (intake/next-step cofx)))))))
+    (is (= 3 (:viewed-up-to-step (intake/prev-step (intake/prev-step (intake/prev-step db))))))
+    (is (= 3 (:viewed-up-to-step (intake/prev-step (intake/prev-step db)))))
+    (is (= 3 (:viewed-up-to-step (intake/prev-step db))))
+    (is (= 3 (:viewed-up-to-step (intake/next-step (intake/prev-step db)))))
+    (is (= 4 (:viewed-up-to-step (intake/next-step db))))
+    (is (= 4 (:viewed-up-to-step (intake/next-step (intake/next-step db)))))))
 
 (deftest can-go-prev-limits-back-button
   (is (false? (intake/can-go-prev? {:step 0})))
