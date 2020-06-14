@@ -496,7 +496,6 @@
 (defn- intake-step [{:keys [heading sub-heading content]}]
   [:section
    [:header
-    [:h3 heading]
     (when sub-heading [:h4 sub-heading])]
    [:div
     content]
