@@ -62,19 +62,29 @@
                                            :viewed-up-to-step 4
                                            :answers {:required-q "Answer!"}))))))
 
+(deftest last-step-returns-true
+  (let [db {:step 3
+            :steps [:zero :one :two :three]}]
+    (is (false? (intake/last-step? (assoc db :step -42))))
+    (is (false? (intake/last-step? (assoc db :step 0))))
+    (is (false? (intake/last-step? (assoc db :step 1))))
+    (is (false? (intake/last-step? (assoc db :step 2))))
+    (is (intake/last-step? db))
+    (is (intake/last-step? (assoc db :step 42)))))
+
 (deftest answer-gets-corresponding-answer-by-key
   (let [db {:answers {:two+two "Four"}}]
     (is (= "Four" (intake/answer db [:_ :two+two])))
     (is (= "" (intake/answer db [:_ :one+one])))))
 
 
-(deftest update-route
+(deftest update-step
   (let [db {:step 0}]
     (is (= 42
-           (:step (intake/update-route
+           (:step (intake/update-step
                    db
-                   [::intake/update-route {:name :whatever
-                                           :step 42}]))))))
+                   [::intake/update-step {:name :whatever
+                                          :step 42}]))))))
 
 (deftest update-answer
   (let [db {:answers {:two+two ""}}]

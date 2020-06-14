@@ -275,6 +275,9 @@
    (> (count steps) (inc step))
    (step-valid? db)))
 
+(defn last-step? [{:keys [step steps]}]
+  (>= step (dec (count steps))))
+
 (defn accessible-steps [{:keys [step steps viewed-up-to-step] :as db}]
   (map-indexed (fn [idx view]
                  (let [current? (= step idx)
@@ -297,6 +300,7 @@
 (rf/reg-sub ::questions current-questions)
 (rf/reg-sub ::can-go-prev? can-go-prev?)
 (rf/reg-sub ::can-go-next? can-go-next?)
+(rf/reg-sub ::last-step? last-step?)
 (rf/reg-sub ::errors current-errors)
 (rf/reg-sub ::errors-for errors-for)
 (rf/reg-sub ::touched :touched)
@@ -312,6 +316,7 @@
   @(rf/subscribe [::steps])
   @(rf/subscribe [::questions])
   @(rf/subscribe [::current-step])
+  #(rf/subscribe [::last-step?])
   @(rf/subscribe [::errors])
 
   @(rf/subscribe [::can-go-next?])
@@ -442,16 +447,18 @@
 
 
 (defn- intake-step [{:keys [heading sub-heading content]}]
-  [:section
-   [:header
-    (when sub-heading [:h4 sub-heading])]
-   [:div
-    content]
-   [:footer.intake-footer
-    [:button.prev {:on-click #(rf/dispatch [::prev-step])
-                   :disabled (not @(rf/subscribe [::can-go-prev?]))} "Back"]
-    [:button.next {:on-click #(rf/dispatch [::next-step])
-                   :disabled (not @(rf/subscribe [::can-go-next?]))} "Next"]]])
+  (let [show-next? (not @(rf/subscribe [::last-step?]))]
+    [:section
+     [:header
+      (when sub-heading [:h4 sub-heading])]
+     [:div
+      content]
+     [:footer.intake-footer
+      [:button.prev {:on-click #(rf/dispatch [::prev-step])
+                     :disabled (not @(rf/subscribe [::can-go-prev?]))} "Back"]
+      (when show-next?
+        [:button.next {:on-click #(rf/dispatch [::next-step])
+                       :disabled (not @(rf/subscribe [::can-go-next?]))} "Next"])]]))
 
 (defn- question [{:keys [key type help required? required-without-any? placeholder options] :as q}]
   (let [errors @(rf/subscribe [::errors-for key])
@@ -528,7 +535,9 @@
       :content
       [:> FullCalendar {:default-view "listWeek"
                         :events windows
-                        :eventClick (fn [info] (js/console.log info))
+                        :eventClick (fn [info]
+                                      (js/console.log (.-event info))
+                                      (rf/dispatch [::next-step]))
                         :plugins [listPlugin timeGridPlugin]}]})))
 
 
