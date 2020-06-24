@@ -32,7 +32,8 @@
    [:a {:color dark-purple}]
    [:.help {:color grey
             :font-style :italic}]
-   [:.center {:text-align :center}]])
+   [:.center {:text-align :center}]
+   [:.highlight {:color pink}]])
 
 
 (def button-base {:padding "0.7em 1.3em"

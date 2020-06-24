@@ -633,7 +633,7 @@
 
 (defn- confirmed []
   [:div
-   [:h3.center (t :appointment-confirmed)]
+   [:h3.highlight.center (t :appointment-confirmed)]
    [confirmation-details]])
 
 
