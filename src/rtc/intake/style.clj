@@ -1,7 +1,8 @@
 (ns rtc.intake.style
   (:require
    [rtc.style.core :as core]
-   [garden.def :refer [defstyles]]))
+   [garden.def :refer [defstyles]]
+   [garden.stylesheet :refer [at-media]]))
 
 
 (def nav
@@ -39,6 +40,16 @@
 (def calendar
   [[:.fc-list-item {:cursor :pointer}]])
 
+(def confirmation
+  [[:.detail {:display :block
+              :margin "0.7em 0"}
+    (at-media {:min-width "740px"}
+              [:& {:display :flex}
+               [:div {:flex "0 0 35%"
+                      :padding-right "2em"}]])]
+   [:.confirm-container {:text-align :center}]
+   [:.confirm-btn {:font-size "1.2em"}]])
+
 (def i18n
   [[:.lang-selector {:position :fixed
                      :right "1em"
@@ -54,4 +65,5 @@
   nav
   questions
   calendar
+  confirmation
   i18n)

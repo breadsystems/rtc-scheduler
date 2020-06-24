@@ -7,7 +7,6 @@
    ["@fullcalendar/list" :default listPlugin]
    [reagent.dom :as dom]
    [re-frame.core :as rf]
-   [reitit.frontend.easy :as easy]
    [rtc.api.core :as api]
    [rtc.i18n.core :as i18n]
    [rtc.util :refer [->opt]]))
@@ -43,6 +42,7 @@
     :appointment-windows []
     :answers {}
     :touched #{}
+    :confirmed-info nil
     ;; TODO farm this out to an EDN file to make it more configurable?
     :steps
     [{:name :basic-info
@@ -50,6 +50,7 @@
       [{:key :name
         :help :name-help
         :placeholder :anonymous
+        :confirm-fallback :anonymous
         :type :text}
        {:key :pronouns
         :placeholder :they-them
@@ -97,10 +98,11 @@
        {:key :anything-else
         :type :text}]}
      {:name :schedule}
-     {:name :confirm}]
+     {:name :confirmation}]
     :i18n
     ;; TODO how to deal with groupings like this?
-    {:en {:yes-no [{:value 1 :label "Yes"}
+    {:en {:get-care "Get Care"
+          :yes-no [{:value 1 :label "Yes"}
                    {:value 0 :label "No"}]
           :communication-methods [{:value "phone" :label "Phone"}
                                   {:value "email" :label "Email"}]
@@ -109,7 +111,10 @@
           :access-needs "Access Needs"
           :medical-needs "Medical Needs"
           :schedule "Schedule an Appointment"
-          :confirm "Confirm"
+          :confirmation "Confirm"
+          :confirm-details "Please confirm your details"
+          :appointment-confirmed "Your appointment is confirmed!"
+          :select-appointment-time "Please select an appointment time"
           :name "Name"
           :name-help "Not required."
           :anonymous "Anonymous"
@@ -143,7 +148,7 @@
                                 "Vietnamese"
                                 {:value :other :label "Other..."}]
           :other-access-needs "Any other access needs we can assist you with?"
-          :description-of-needs "Short Description of Medical Needs"
+          :description-of-needs "Short description of medical needs"
           :description-of-needs-help "For example, \"fever and sore throat for 3 days,\" or \"insulin prescription\""
           :please-describe-medical-needs "Please briefly describe your medical needs."
           :anything-else "Anything we forgot to ask?"
@@ -154,7 +159,8 @@
            {:value "NY" :label "New York"}
            {:value "CA" :label "California"}]}
      ;; Sorry, Ramsey!!
-     :es {:yes-no [{:value 1 :label "Si"}
+     :es {:get-care "TODO Get Care"
+          :yes-no [{:value 1 :label "Si"}
                    {:value 0 :label "No"}]
           :communication-methods [{:value "phone" :label "Teléfono"}
                                   {:value "email" :label "Dirección de Correo Electrónica"}]
@@ -162,6 +168,10 @@
           :contact-info "TODO Contact Info"
           :access-needs "TODO Access Needs"
           :medical-needs "TODO Medical Needs"
+          :schedule "TODO Schedule an Appointment"
+          :confirmation "TODO Confirm"
+          :confirm-details "TODO Please confirm your details"
+          :select-appointment-time "TODO Please select an appointment time"
           :name "Nombre"
           :anonymous "Anónimo"
           :pronouns "Pronombres"
@@ -199,7 +209,6 @@
           :please-describe-medical-needs "TODO please briefly describe your medical needs"
           :anything-else "¿Algo que olvidamos preguntar?"
           :please-enter "TODO Please enter your"
-          :schedule "TODO Schedule an Appointment"
           :states
           [{:value ""   :label "Choose a state"}
            {:value "WA" :label "Washington"}
@@ -294,6 +303,22 @@
 (defn answer [{:keys [answers]} [_ k]]
   (get answers k ""))
 
+(defn confirmation-values [{:keys [answers steps] :as db}]
+  (let [question->value (fn [{:keys [key confirm-fallback]}]
+                          ;; User answered in their own language...
+                          (or (get answers key)
+                              ;; ...OR we translate the fallback key
+                              (i18n/t db confirm-fallback)))
+        questions->values (fn [values q]
+                            (conj values (let [v (question->value q)]
+                                           (when v {(:key q) v}))))
+        questions (reduce (fn [qs {:keys [questions]}]
+                            (concat qs questions))
+                          {}
+                          steps)]
+    (reduce questions->values {} questions)))
+
+
 (rf/reg-sub ::steps accessible-steps)
 (rf/reg-sub ::appointment-windows :appointment-windows)
 (rf/reg-sub ::current-step current-step)
@@ -306,17 +331,20 @@
 (rf/reg-sub ::touched :touched)
 (rf/reg-sub ::answers :answers)
 (rf/reg-sub ::answer answer)
+(rf/reg-sub ::confirmation-values confirmation-values)
 (rf/reg-sub ::i18n (fn [db [_ phrase-key]]
                      (i18n/t db phrase-key)))
 (rf/reg-sub ::lang :lang)
 (rf/reg-sub ::lang-options :lang-options)
+
+(rf/reg-sub ::confirmed-info :confirmed-info)
 
 (comment
   @(rf/dispatch [::init-db])
   @(rf/subscribe [::steps])
   @(rf/subscribe [::questions])
   @(rf/subscribe [::current-step])
-  #(rf/subscribe [::last-step?])
+  @(rf/subscribe [::last-step?])
   @(rf/subscribe [::errors])
 
   @(rf/subscribe [::can-go-next?])
@@ -338,6 +366,7 @@
   ;; => "Access Needs"
 
   @(rf/subscribe [::i18n :states])
+  @(rf/subscribe [::i18n :description-of-needs])
 
   @(rf/subscribe [::lang])
 
@@ -402,6 +431,31 @@
  (fn [db [_ windows]]
    (assoc db :appointment-windows windows)))
 
+(rf/reg-fx
+ ::query
+ (fn [[query event]]
+   (api/query! query event)))
+
+(rf/reg-event-fx
+ ::confirm!
+ (fn [{:keys [db]}]
+   (let [answers (:answers db)]
+     {:db (assoc db :loading? true)
+      ;; TODO refine this mutation query
+      ::query [[:mutation [:schedule (merge answers {:provider_id 123
+                                                     :start_time "TODO"
+                                                     :end_time "TODO"})
+                           :email]]
+               ::confirmed]})))
+
+(rf/reg-event-db
+ ::confirmed
+ (fn [db [_ response]]
+   (js/console.log (clj->js response))
+   (assoc db
+          :loading? false
+          :confirmed-info response)))
+
 (comment
   ;; Moment.js experiments
   (moment)
@@ -413,6 +467,7 @@
   (rf/dispatch [::update-step {:name :basic-info :step 0}])
   (rf/dispatch [::update-step {:name :contact-info :step 1}])
   (rf/dispatch [::update-step {:name :schedule :step 4}])
+  (rf/dispatch [::update-step {:name :confirmation :step 5}])
   
   (rf/dispatch [::update-lang :en])
   (rf/dispatch [::update-lang :es]))
@@ -446,11 +501,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defn- intake-step [{:keys [heading sub-heading content]}]
+(defn- intake-step [{:keys [sub-heading content]}]
   (let [show-next? (not @(rf/subscribe [::last-step?]))]
     [:section
      [:header
-      (when sub-heading [:h4 sub-heading])]
+      (when sub-heading [:h3 (t sub-heading)])]
      [:div
       content]
      [:footer.intake-footer
@@ -463,7 +518,6 @@
 (defn- question [{:keys [key type help required? required-without-any? placeholder options] :as q}]
   (let [errors @(rf/subscribe [::errors-for key])
         messages (->> errors (map (comp t* :message)) (join "; "))
-        error-class (when (seq errors) "has-errors")
         on-blur #(rf/dispatch [::touch! key])]
     [:div.question
      [:label.field-label
@@ -530,8 +584,7 @@
     (intake-step
      {:heading
       "Select a time by clicking on one of the available appointment windows"
-      :sub-heading
-      "These are the appointment times available for residents of your state."
+      :sub-heading :select-appointment-time
       ;; TODO figure out how to switch locale
       ;; TODO month abbrev. names?
       :content
@@ -541,6 +594,31 @@
                                       (js/console.log (.-event info))
                                       (rf/dispatch [::next-step]))
                         :plugins [listPlugin timeGridPlugin]}]})))
+
+(defn- confirmation-details []
+  (let [answers @(rf/subscribe [::confirmation-values])]
+    [:<> (map (fn [[k v]]
+                ^{:key k}
+                [:div.detail
+                 [:div [:label.field-label @(rf/subscribe [::i18n k])]]
+                 [:div v]])
+              answers)]))
+
+(defn- confirmation []
+  (intake-step
+   {:sub-heading :confirm-details
+    :content
+    [:div.intake-step--confirmation
+     [confirmation-details]
+     [:div [:p "TODO appointment deets here"]]
+     [:div.confirm-container
+      [:button.confirm-btn {:on-click #(rf/dispatch [::confirm!])}
+       "Book appointment"]]]}))
+
+(defn- confirmed []
+  [:div
+   [:h3.center (t :appointment-confirmed)]
+   [confirmation-details]])
 
 
 (defn- progress-nav []
@@ -560,16 +638,20 @@
 (defn intake-ui []
   (let [{:keys [name]} @(rf/subscribe [::current-step])
         lang @(rf/subscribe [::lang])
-        lang-options @(rf/subscribe [::lang-options])]
+        lang-options @(rf/subscribe [::lang-options])
+        confirmed-info @(rf/subscribe [::confirmed-info])]
     [:div.container.container--get-care
      [:header
       [:h1 "Radical Telehealth Collective"]
-      [:h2 "Get Care"]
-      [progress-nav]]
+      [:h2 (t :get-care)]
+      (when (not confirmed-info) [progress-nav])]
      [:main
-      (if (= :schedule name)
-        [schedule]
-        [questions])]
+      (if confirmed-info
+        [confirmed]
+        (case name
+          :schedule     [schedule]
+          :confirmation [confirmation]
+          [questions]))]
      [:div.lang-selector
       [:select {:value lang
                 :on-change #(rf/dispatch [::update-lang (keyword (.. % -target -value))])}

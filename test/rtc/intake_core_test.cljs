@@ -200,3 +200,19 @@
     (is (= [] (intake/errors-for db [:_ :c])))
     ;; :d is required, but untouched
     (is (= [] (intake/errors-for db [:_ :d])))))
+
+(deftest confirmation-values-honors-confirm-fallbacks
+  (let [db {:answers {:a "Ayy" :b "Bee"}
+            ;; :a has an answer, so its fallback text shouldn't show up
+            :steps [{:questions [{:key :a :confirm-fallback "This shouldn't show"}
+                                 ;; :b has no fallback but its answer should show up
+                                 {:key :b}
+                                 ;; :c has no answer OR fallback, so it should NOT show up
+                                 {:key :c}]}
+                    ;; :d has a fallback and no answer, so its fallback should show up
+                    {:questions [{:key :d :confirm-fallback :anonymous}]}]
+            ;; We need i18n here because we may need to translate :confirm-fallback values (keywords)
+            :lang :en
+            :i18n {:en {:anonymous "Anon"}}}]
+    (is (= {:a "Ayy" :b "Bee" :d "Anon"}
+           (intake/confirmation-values db)))))
