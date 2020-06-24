@@ -93,3 +93,7 @@
                  :font-weight 700
                  :text-transform :uppercase}
     [:&:disabled button-disabled-secondary]]])
+
+(def states
+  [[:.loading {:opacity 0.5
+               :cursor :wait}]])

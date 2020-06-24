@@ -35,8 +35,10 @@
    {:step 0
     :viewed-up-to-step 0
     :lang :en
+    ;; TODO load these from i18n
     :lang-options [{:value :en :label "English"}
                    {:value :es :label "Español"}]
+    :loading? false
     ;; Where we collect info about the Person Seeking Care.
     :careseeker-info {}
     :appointment-windows []
@@ -319,6 +321,7 @@
     (reduce questions->values {} questions)))
 
 
+(rf/reg-sub ::loading? :loading?)
 (rf/reg-sub ::steps accessible-steps)
 (rf/reg-sub ::appointment-windows :appointment-windows)
 (rf/reg-sub ::current-step current-step)
@@ -374,7 +377,16 @@
   (let [{phrase-key :name} @(rf/subscribe [::current-step])]
     @(rf/subscribe [::i18n phrase-key]))
 
-  @(rf/subscribe [::steps]))
+  @(rf/subscribe [::steps])
+
+  ;; Fill out required stuff and jump to last step
+  (do
+    (rf/dispatch [::answer! :state "WA"])
+    (rf/dispatch [::answer! :email "coby@tamayo.email"])
+    (rf/dispatch [::answer! :description-of-needs "Life is pain"])
+    (rf/dispatch [::update-step {:name :confirmation :step 5}]))
+  
+  (rf/dispatch [::confirm!]))
 
 
 
@@ -439,14 +451,18 @@
 (rf/reg-event-fx
  ::confirm!
  (fn [{:keys [db]}]
-   (let [answers (:answers db)]
-     {:db (assoc db :loading? true)
-      ;; TODO refine this mutation query
-      ::query [[:mutation [:schedule (merge answers {:provider_id 123
-                                                     :start_time "TODO"
-                                                     :end_time "TODO"})
-                           :email]]
-               ::confirmed]})))
+   (let [{:keys [answers loading? confirmed-info]} db
+         should-mutate? (and (not loading?) (not confirmed-info))]
+     ;; Dispatching this event when the UI is already loading or an appointment
+     ;; has already been confirmed is a noop.
+     (when should-mutate?
+       {:db (assoc db :loading? true)
+        ;; TODO refine this mutation query
+        ::query [[:mutation [:schedule (merge answers {:provider_id 123
+                                                       :start_time "TODO"
+                                                       :end_time "TODO"})
+                             :email]]
+                 ::confirmed]}))))
 
 (rf/reg-event-db
  ::confirmed
@@ -640,7 +656,7 @@
         lang @(rf/subscribe [::lang])
         lang-options @(rf/subscribe [::lang-options])
         confirmed-info @(rf/subscribe [::confirmed-info])]
-    [:div.container.container--get-care
+    [:div.container.container--get-care {:class (when @(rf/subscribe [::loading?]) "loading")}
      [:header
       [:h1 "Radical Telehealth Collective"]
       [:h2 (t :get-care)]
