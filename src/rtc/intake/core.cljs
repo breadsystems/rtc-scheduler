@@ -532,6 +532,8 @@
       "Select a time by clicking on one of the available appointment windows"
       :sub-heading
       "These are the appointment times available for residents of your state."
+      ;; TODO figure out how to switch locale
+      ;; TODO month abbrev. names?
       :content
       [:> FullCalendar {:default-view "listWeek"
                         :events windows
