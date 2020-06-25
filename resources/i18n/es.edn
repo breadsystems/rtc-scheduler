@@ -1,17 +1,20 @@
 {:lang :es
- :get-care "TODO Get Care"
+ :get-care "Recibe Atencion Médica"
  :yes-no [{:value 1 :label "Si"}
           {:value 0 :label "No"}]
  :communication-methods [{:value "phone" :label "Teléfono"}
                          {:value "email" :label "Dirección de Correo Electrónica"}]
- :basic-info "TODO Basic Info"
- :contact-info "TODO Contact Info"
- :access-needs "TODO Access Needs"
- :medical-needs "TODO Medical Needs"
- :schedule "TODO Schedule an Appointment"
- :confirmation "TODO Confirm"
- :confirm-details "TODO Please confirm your details"
+ :basic-info "Información Basica"
+ :contact-info "Información de Contacto"
+ :access-needs "Necesidades de Accesso"
+ :medical-needs "Necesidades Médicas"
+ :schedule "Programar una Cita"
+ :confirmation "Confirmar"
+ :confirm-details "Por favor confirmar"
  :select-appointment-time "TODO Please select an appointment time"
+ :book-appointment "Reserve su cita"
+ :back "Atrás"
+ :next "Siguiente"
  :name "Nombre"
  :anonymous "Anónimo"
  :pronouns "Pronombres"
@@ -20,14 +23,14 @@
  :state-help "Se requiere para que le conectamos a un proveedor de atención médica que pueda proporcionarle servicios de telemedicina legalmente"
  :email "Dirección de Correo Electrónica"
  :phone "Teléfono"
- :email-or-phone "TODO Please enter your Email, Phone, or both."
- :email-or-phone-help "TODO Email or Phone is required."
+ :email-or-phone "Por favor indique su correo electrónico, número de teléfono, o los dos."
+ :email-or-phone-help "Se requiere su correo electrónico o número de teléfono."
  :text-ok "¿Está bien enviar un mensaje de texto?"
  :text-ok-help "Le pedimos esto ya que dependiendo de su operador puede incurrir en cargos."
- :preferred-communication-method "TODO Preferred Communcation Method"
+ :preferred-communication-method "Método preferido de contacto"
  :interpreter-lang "¿Necesitas un intérprete?"
  :interpreter-lang-help "Seleccione un idioma o proporcione como \"otro\" a continuación"
- :interpreter-options [{:value nil :label "Choose..."}
+ :interpreter-options [{:value nil :label "Seleccione..."}
                        "Amárico"
                        "Arabe"
                        "Lenguaje de Señas - Americano"
@@ -46,11 +49,11 @@
  :other-access-needs "¿Alguna otra necesidad de acceso que pueda ayudarnos a apoyarlo mejor?"
  :description-of-needs "Descripción breve de la necesidad médica"
  :description-of-needs-help "Por ejemplo, fiebre y síntomas de dolor de garganta durante 3 días, o necesita una receta para insulina, hormonas"
- :please-describe-medical-needs "TODO please briefly describe your medical needs"
+ :please-describe-medical-needs "Por favor proporcione una descripción breve de la necesidad médica"
  :anything-else "¿Algo que olvidamos preguntar?"
- :please-enter "TODO Please enter your"
+ :please-enter "Por favor indique su"
  :states
- [{:value ""   :label "Choose a state"}
+ [{:value ""   :label "Seleccione..."}
   {:value "WA" :label "Washington"}
   {:value "NY" :label "New York"}
   {:value "CA" :label "California"}]}

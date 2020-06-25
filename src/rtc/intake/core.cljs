@@ -414,10 +414,10 @@
       content]
      [:footer.intake-footer
       [:button.prev {:on-click #(rf/dispatch [::prev-step])
-                     :disabled (not @(rf/subscribe [::can-go-prev?]))} "Back"]
+                     :disabled (not @(rf/subscribe [::can-go-prev?]))} (t :back)]
       (when show-next?
         [:button.next {:on-click #(rf/dispatch [::next-step])
-                       :disabled (not @(rf/subscribe [::can-go-next?]))} "Next"])]]))
+                       :disabled (not @(rf/subscribe [::can-go-next?]))} (t :next)])]]))
 
 (defn- question [{:keys [key type help required? required-without-any? placeholder options] :as q}]
   (let [errors @(rf/subscribe [::errors-for key])
@@ -517,7 +517,7 @@
      [:div [:p "TODO appointment deets here"]]
      [:div.confirm-container
       [:button.confirm-btn {:on-click #(rf/dispatch [::confirm!])}
-       "Book appointment"]]]}))
+       (t :book-appointment)]]]}))
 
 (defn- confirmed []
   [:div
@@ -529,15 +529,15 @@
   (let [nav-steps @(rf/subscribe [::steps])]
     [:nav
      [:ul.progress
-      (map (fn [{:keys [name accessible? current? viewed?] :as step}]
-             (let [nav-title (t name)
-                   linkable? (and accessible? (not current?))]
-               ^{:key name}
-               [:li {:class (join " " [(when current? "current") (when viewed? "viewed")])}
-                [:span.step-link {:class (when-not accessible? "disabled")
-                                  :on-click #(when linkable? (rf/dispatch [::update-step step]))}
-                 nav-title]]))
-           nav-steps)]]))
+      (doall (map (fn [{:keys [name accessible? current? viewed?] :as step}]
+                    (let [nav-title @(rf/subscribe [::i18n name])
+                          linkable? (and accessible? (not current?))]
+                      ^{:key name}
+                      [:li {:class (join " " [(when current? "current") (when viewed? "viewed")])}
+                       [:span.step-link {:class (when-not accessible? "disabled")
+                                         :on-click #(when linkable? (rf/dispatch [::update-step step]))}
+                        nav-title]]))
+                  nav-steps))]]))
 
 (defn intake-ui []
   (let [{:keys [name]} @(rf/subscribe [::current-step])
