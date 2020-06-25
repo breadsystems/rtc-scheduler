@@ -422,7 +422,8 @@
 (defn- question [{:keys [key type help required? required-without-any? placeholder options] :as q}]
   (let [errors @(rf/subscribe [::errors-for key])
         messages (->> errors (map (comp t* :message)) (join "; "))
-        on-blur #(rf/dispatch [::touch! key])]
+        on-blur #(rf/dispatch [::touch! key])
+        answer @(rf/subscribe [::answer key])]
     [:div.question
      [:label.field-label
       (t key)
@@ -454,7 +455,12 @@
                 (let [id (str (name key) "-" value)]
                   ^{:key value}
                   [:span.radio-option {:class (when (seq errors) "has-errors")}
-                   [:input {:id id :name (name key) :type :radio :on-blur on-blur}]
+                   [:input {:id id
+                            :name (name key)
+                            :type :radio
+                            :on-blur on-blur
+                            :on-change #(rf/dispatch [::answer! key value])
+                            :checked (= answer value)}]
                    [:label {:for id} label]]))
               (t options))]
 
