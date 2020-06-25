@@ -202,7 +202,7 @@
     (is (= [] (intake/errors-for db [:_ :d])))))
 
 (deftest confirmation-values-honors-confirm-fallbacks
-  (let [db {:answers {:a "Ayy" :b "Bee"}
+  (let [db {:answers {:a "Ayy" :b "Bee" :e 1}
             ;; :a has an answer, so its fallback text shouldn't show up
             :steps [{:questions [{:key :a :confirm-fallback "This shouldn't show"}
                                  ;; :b has no fallback but its answer should show up
@@ -210,9 +210,14 @@
                                  ;; :c has no answer OR fallback, so it should NOT show up
                                  {:key :c}]}
                     ;; :d has a fallback and no answer, so its fallback should show up
-                    {:questions [{:key :d :confirm-fallback :anonymous}]}]
-            ;; We need i18n here because we may need to translate :confirm-fallback values (keywords)
+                    {:questions [{:key :d :confirm-fallback :anonymous}
+                                 ;; :e has options, so we should use the corresponding :label
+                                 {:key :e :options :yes-no}]}]
+            ;; We need i18n here because we may need to translate
+            ;; :confirm-fallback values (keywords)
             :lang :en
-            :i18n {:en {:anonymous "Anon"}}}]
-    (is (= {:a "Ayy" :b "Bee" :d "Anon"}
+            :i18n {:en {:anonymous "Anon"
+                        :yes-no [{:value 1 :label "Yes"}
+                                 {:value 0 :label "No"}]}}}]
+    (is (= {:a "Ayy" :b "Bee" :d "Anon" :e "Yes"}
            (intake/confirmation-values db)))))

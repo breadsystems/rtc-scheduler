@@ -193,11 +193,18 @@
   (get answers k ""))
 
 (defn confirmation-values [{:keys [answers steps] :as db}]
-  (let [question->value (fn [{:keys [key confirm-fallback]}]
-                          ;; User answered in their own language...
-                          (or (get answers key)
-                              ;; ...OR we translate the fallback key
-                              (i18n/t db confirm-fallback)))
+  (let [question->value (fn [{:keys [key confirm-fallback options]}]
+                          (let [answer (get answers key)]
+                            (if options
+                              ;; Translate option value back into its human-readable label
+                              (let [value->label (reduce #(assoc %1 (:value %2) (:label %2))
+                                                         {}
+                                                         (i18n/t db options))]
+                                (get value->label answer))
+                              ;; User answered in their own language...
+                              (or answer
+                                  ;; ...OR we translate the fallback key
+                                  (i18n/t db confirm-fallback)))))
         questions->values (fn [values q]
                             (conj values (let [v (question->value q)]
                                            (when v {(:key q) v}))))
@@ -527,7 +534,7 @@
 
 (defn- confirmed []
   [:div
-   [:h3.highlight.center (t :appointment-confirmed)]
+   [:h3.highlight.spacious (t :appointment-confirmed)]
    [confirmation-details]])
 
 

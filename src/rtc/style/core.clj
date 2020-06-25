@@ -33,7 +33,9 @@
    [:.help {:color grey
             :font-style :italic}]
    [:.center {:text-align :center}]
-   [:.highlight {:color pink}]])
+   [:.highlight {:color pink}]
+   [:.spacious {:margin-top "3em"
+                :margin-bottom "3em"}]])
 
 
 (def button-base {:padding "0.7em 1.3em"

@@ -48,7 +48,8 @@
                [:div {:flex "0 0 35%"
                       :padding-right "2em"}]])]
    [:.confirm-container {:text-align :center}]
-   [:.confirm-btn {:font-size "1.2em"}]])
+   [:.confirm-btn {:font-size "1.2em"
+                   :background core/dark-purple}]])
 
 (def i18n
   [[:.lang-selector {:position :fixed
