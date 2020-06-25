@@ -4,7 +4,7 @@
    [rtc.i18n.core :refer [t]]))
 
 
-(deftest honors-curren-lang
+(deftest honors-current-lang
   (let [db {:lang :es
             :i18n {:es {:hello-world "Hola, Mundo!"}}}]
     (is (= "Hola, Mundo!"

@@ -1,0 +1,56 @@
+{:lang :es
+ :get-care "TODO Get Care"
+ :yes-no [{:value 1 :label "Si"}
+          {:value 0 :label "No"}]
+ :communication-methods [{:value "phone" :label "Teléfono"}
+                         {:value "email" :label "Dirección de Correo Electrónica"}]
+ :basic-info "TODO Basic Info"
+ :contact-info "TODO Contact Info"
+ :access-needs "TODO Access Needs"
+ :medical-needs "TODO Medical Needs"
+ :schedule "TODO Schedule an Appointment"
+ :confirmation "TODO Confirm"
+ :confirm-details "TODO Please confirm your details"
+ :select-appointment-time "TODO Please select an appointment time"
+ :name "Nombre"
+ :anonymous "Anónimo"
+ :pronouns "Pronombres"
+ :they-them "elles/elle"
+ :state "Estado"
+ :state-help "Se requiere para que le conectamos a un proveedor de atención médica que pueda proporcionarle servicios de telemedicina legalmente"
+ :email "Dirección de Correo Electrónica"
+ :phone "Teléfono"
+ :email-or-phone "TODO Please enter your Email, Phone, or both."
+ :email-or-phone-help "TODO Email or Phone is required."
+ :text-ok "¿Está bien enviar un mensaje de texto?"
+ :text-ok-help "Le pedimos esto ya que dependiendo de su operador puede incurrir en cargos."
+ :preferred-communication-method "TODO Preferred Communcation Method"
+ :interpreter-lang "¿Necesitas un intérprete?"
+ :interpreter-lang-help "Seleccione un idioma o proporcione como \"otro\" a continuación"
+ :interpreter-options [{:value nil :label "Choose..."}
+                       "Amárico"
+                       "Arabe"
+                       "Lenguaje de Señas - Americano"
+                       "Chino Cantonés"
+                       "Chino Mandarín"
+                       "Khmer"
+                       "Coreano"
+                       "Punjabi"
+                       "Russo"
+                       "Español"
+                       "Somali"
+                       "Tagalo"
+                       "Ucranio"
+                       "Vietnamita"
+                       {:value :other :label "Otro..."}]
+ :other-access-needs "¿Alguna otra necesidad de acceso que pueda ayudarnos a apoyarlo mejor?"
+ :description-of-needs "Descripción breve de la necesidad médica"
+ :description-of-needs-help "Por ejemplo, fiebre y síntomas de dolor de garganta durante 3 días, o necesita una receta para insulina, hormonas"
+ :please-describe-medical-needs "TODO please briefly describe your medical needs"
+ :anything-else "¿Algo que olvidamos preguntar?"
+ :please-enter "TODO Please enter your"
+ :states
+ [{:value ""   :label "Choose a state"}
+  {:value "WA" :label "Washington"}
+  {:value "NY" :label "New York"}
+  {:value "CA" :label "California"}]}

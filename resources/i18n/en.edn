@@ -1,0 +1,59 @@
+{;; English versions of all phrases used on the frontend
+ :lang :en
+ :get-care "Get Care"
+ :yes-no [{:value 1 :label "Yes"}
+          {:value 0 :label "No"}]
+ :communication-methods [{:value "phone" :label "Phone"}
+                         {:value "email" :label "Email"}]
+ :basic-info "Basic Info"
+ :contact-info "Contact Info"
+ :access-needs "Access Needs"
+ :medical-needs "Medical Needs"
+ :schedule "Schedule an Appointment"
+ :confirmation "Confirm"
+ :confirm-details "Please confirm your details"
+ :appointment-confirmed "Your appointment is confirmed!"
+ :select-appointment-time "Please select an appointment time"
+ :name "Name"
+ :name-help "Not required."
+ :anonymous "Anonymous"
+ :pronouns "Pronouns"
+ :they-them "they/them/theirs"
+ :state "State"
+ :state-help "Needed to find a provider who can legally provide care for you."
+ :email "Email"
+ :phone "Phone"
+ :email-or-phone "Please enter your Email, Phone, or both."
+ :email-or-phone-help "Email or Phone is required."
+ :text-ok "OK to text?"
+ :text-ok-help "Depending on your carrier, you may incur charges."
+ :preferred-communication-method "Preferred Communcation Method"
+ :interpreter-lang "Do you need an interpreter?"
+ :interpreter-lang-help "Let us know which language you are most comfortable speaking. If you speak English, leave this blank."
+ :interpreter-options [{:value nil :label "Choose..."}
+                       "Amharic"
+                       "Arabic"
+                       "ASL - American Sign Language"
+                       "Chinese Cantonese"
+                       "Chinese Madorin"
+                       "Khmer"
+                       "Korean"
+                       "Punjabi"
+                       "Russian"
+                       "Spanish"
+                       "Somali"
+                       "Tagalog"
+                       "Ukrainian"
+                       "Vietnamese"
+                       {:value :other :label "Other..."}]
+ :other-access-needs "Any other access needs we can assist you with?"
+ :description-of-needs "Short description of medical needs"
+ :description-of-needs-help "For example, \"fever and sore throat for 3 days,\" or \"insulin prescription\""
+ :please-describe-medical-needs "Please briefly describe your medical needs."
+ :anything-else "Anything we forgot to ask?"
+ :please-enter "Please enter your"
+ :states
+ [{:value ""   :label "Choose a state"}
+  {:value "WA" :label "Washington"}
+  {:value "NY" :label "New York"}
+  {:value "CA" :label "California"}]}

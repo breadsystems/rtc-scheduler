@@ -16,4 +16,5 @@
                  :target :browser-test
                  :ns-regexp "-test$"
                  :devtools {:http-root "resources/public/test"
-                            :http-port 3002}}}}
+                            :http-port 3002}}}
+ :cache-blockers #{rtc.i18n.data}}

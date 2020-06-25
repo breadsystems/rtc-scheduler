@@ -9,6 +9,7 @@
    [re-frame.core :as rf]
    [rtc.api.core :as api]
    [rtc.i18n.core :as i18n]
+   [rtc.i18n.data :as i18n-data]
    [rtc.util :refer [->opt]]))
 
 
@@ -101,121 +102,7 @@
         :type :text}]}
      {:name :schedule}
      {:name :confirmation}]
-    :i18n
-    ;; TODO how to deal with groupings like this?
-    {:en {:get-care "Get Care"
-          :yes-no [{:value 1 :label "Yes"}
-                   {:value 0 :label "No"}]
-          :communication-methods [{:value "phone" :label "Phone"}
-                                  {:value "email" :label "Email"}]
-          :basic-info "Basic Info"
-          :contact-info "Contact Info"
-          :access-needs "Access Needs"
-          :medical-needs "Medical Needs"
-          :schedule "Schedule an Appointment"
-          :confirmation "Confirm"
-          :confirm-details "Please confirm your details"
-          :appointment-confirmed "Your appointment is confirmed!"
-          :select-appointment-time "Please select an appointment time"
-          :name "Name"
-          :name-help "Not required."
-          :anonymous "Anonymous"
-          :pronouns "Pronouns"
-          :they-them "they/them/theirs"
-          :state "State"
-          :state-help "Needed to find a provider who can legally provide care for you."
-          :email "Email"
-          :phone "Phone"
-          :email-or-phone "Please enter your Email, Phone, or both."
-          :email-or-phone-help "Email or Phone is required."
-          :text-ok "OK to text?"
-          :text-ok-help "Depending on your carrier, you may incur charges."
-          :preferred-communication-method "Preferred Communcation Method"
-          :interpreter-lang "Do you need an interpreter?"
-          :interpreter-lang-help "Let us know which language you are most comfortable speaking. If you speak English, leave this blank."
-          :interpreter-options [{:value nil :label "Choose..."}
-                                "Amharic"
-                                "Arabic"
-                                "ASL - American Sign Language"
-                                "Chinese Cantonese"
-                                "Chinese Madorin"
-                                "Khmer"
-                                "Korean"
-                                "Punjabi"
-                                "Russian"
-                                "Spanish"
-                                "Somali"
-                                "Tagalog"
-                                "Ukrainian"
-                                "Vietnamese"
-                                {:value :other :label "Other..."}]
-          :other-access-needs "Any other access needs we can assist you with?"
-          :description-of-needs "Short description of medical needs"
-          :description-of-needs-help "For example, \"fever and sore throat for 3 days,\" or \"insulin prescription\""
-          :please-describe-medical-needs "Please briefly describe your medical needs."
-          :anything-else "Anything we forgot to ask?"
-          :please-enter "Please enter your"
-          :states
-          [{:value ""   :label "Choose a state"}
-           {:value "WA" :label "Washington"}
-           {:value "NY" :label "New York"}
-           {:value "CA" :label "California"}]}
-     ;; Sorry, Ramsey!!
-     :es {:get-care "TODO Get Care"
-          :yes-no [{:value 1 :label "Si"}
-                   {:value 0 :label "No"}]
-          :communication-methods [{:value "phone" :label "Teléfono"}
-                                  {:value "email" :label "Dirección de Correo Electrónica"}]
-          :basic-info "TODO Basic Info"
-          :contact-info "TODO Contact Info"
-          :access-needs "TODO Access Needs"
-          :medical-needs "TODO Medical Needs"
-          :schedule "TODO Schedule an Appointment"
-          :confirmation "TODO Confirm"
-          :confirm-details "TODO Please confirm your details"
-          :select-appointment-time "TODO Please select an appointment time"
-          :name "Nombre"
-          :anonymous "Anónimo"
-          :pronouns "Pronombres"
-          :they-them "elles/elle"
-          :state "Estado"
-          :state-help "Se requiere para que le conectamos a un proveedor de atención médica que pueda proporcionarle servicios de telemedicina legalmente"
-          :email "Dirección de Correo Electrónica"
-          :phone "Teléfono"
-          :email-or-phone "TODO Please enter your Email, Phone, or both."
-          :email-or-phone-help "TODO Email or Phone is required."
-          :text-ok "¿Está bien enviar un mensaje de texto?"
-          :text-ok-help "Le pedimos esto ya que dependiendo de su operador puede incurrir en cargos."
-          :preferred-communication-method "TODO Preferred Communcation Method"
-          :interpreter-lang "¿Necesitas un intérprete?"
-          :interpreter-lang-help "Seleccione un idioma o proporcione como \"otro\" a continuación"
-          :interpreter-options [{:value nil :label "Choose..."}
-                                "Amárico"
-                                "Arabe"
-                                "Lenguaje de Señas - Americano"
-                                "Chino Cantonés"
-                                "Chino Mandarín"
-                                "Khmer"
-                                "Coreano"
-                                "Punjabi"
-                                "Russo"
-                                "Español"
-                                "Somali"
-                                "Tagalo"
-                                "Ucranio"
-                                "Vietnamita"
-                                {:value :other :label "Otro..."}]
-          :other-access-needs "¿Alguna otra necesidad de acceso que pueda ayudarnos a apoyarlo mejor?"
-          :description-of-needs "Descripción breve de la necesidad médica"
-          :description-of-needs-help "Por ejemplo, fiebre y síntomas de dolor de garganta durante 3 días, o necesita una receta para insulina, hormonas"
-          :please-describe-medical-needs "TODO please briefly describe your medical needs"
-          :anything-else "¿Algo que olvidamos preguntar?"
-          :please-enter "TODO Please enter your"
-          :states
-          [{:value ""   :label "Choose a state"}
-           {:value "WA" :label "Washington"}
-           {:value "NY" :label "New York"}
-           {:value "CA" :label "California"}]}}}))
+    :i18n (i18n-data/i18n-data)}))
 
 
 
@@ -343,7 +230,8 @@
 (rf/reg-sub ::confirmed-info :confirmed-info)
 
 (comment
-  @(rf/dispatch [::init-db])
+  (rf/dispatch [::init-db])
+
   @(rf/subscribe [::steps])
   @(rf/subscribe [::questions])
   @(rf/subscribe [::current-step])
@@ -385,7 +273,7 @@
     (rf/dispatch [::answer! :email "coby@tamayo.email"])
     (rf/dispatch [::answer! :description-of-needs "Life is pain"])
     (rf/dispatch [::update-step {:name :confirmation :step 5}]))
-  
+
   (rf/dispatch [::confirm!]))
 
 
