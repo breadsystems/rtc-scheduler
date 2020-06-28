@@ -432,7 +432,7 @@
         on-blur #(rf/dispatch [::touch! key])
         answer @(rf/subscribe [::answer key])]
     [:div.question
-     [:label.field-label
+     [:label.field-label {:for (name key)}
       (t key)
       (when (or required? required-without-any?)
         [:span.required " *"])]
@@ -440,6 +440,7 @@
       (case type
         :text
         [:input {:class (when (seq errors) "has-errors")
+                 :id (name key)
                  :type :text
                  :value @(rf/subscribe [::answer key])
                  :placeholder (t placeholder)
