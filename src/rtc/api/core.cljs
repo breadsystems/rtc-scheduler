@@ -8,8 +8,26 @@
    [cljs.core.async.macros :refer [go]]))
 
 
-(defn query! [query event]
+(defn query->then [query f]
   (go (let [req {:body (->query-string query)
                  :headers {"Content-Type" "application/graphql"}}
             response (<! (http/post "/api/graphql" req))]
-        (rf/dispatch [event (apply hash-map (:body response))]))))
+        (f response))))
+
+(defn query! [query event]
+  (query->then
+   query
+   (fn [response]
+     (rf/dispatch [event (apply hash-map (:body response))]))))
+
+(defn debug-query! [query]
+  (query->then
+   query
+   (fn [response]
+     (js/console.log (clj->js (:body response))))))
+
+
+(comment
+  (debug-query! [:mutation
+                 [:invite {:email "abc@example.email"}
+                  :code :email]]))
