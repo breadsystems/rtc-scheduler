@@ -5,6 +5,7 @@
   (:require
    [clj-time.coerce :as c]
    [honeysql.core :as sql]
+   [java-time :as t]
    [rtc.db :as d]))
 
 
@@ -35,6 +36,8 @@
 
 (comment
   (d/bind!)
+
+  (t/sql-timestamp (t/local-date "yyyy-MM-dd" "2020-01-01"))
 
   (sql/format {:select [:*]
                :from [:appointments]

@@ -24,7 +24,9 @@
   (query->then
    query
    (fn [response]
-     (js/console.log (clj->js (:body response))))))
+     (let [body (apply hash-map (:body response))]
+       (js/console.log (clj->js body))
+       body))))
 
 
 (comment

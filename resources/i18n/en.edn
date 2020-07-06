@@ -15,6 +15,7 @@
  :appointment-confirmed "Your appointment is confirmed!"
  :select-appointment-time "Please select an appointment time"
  :book-appointment "Book your appointment"
+ :appointment-details "Appointment details"
  :back "Back"
  :next "Next"
  :name "Name"

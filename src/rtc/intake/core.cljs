@@ -371,9 +371,10 @@
   ;; Moment.js experiments
   (moment)
   (.format (moment) "YYYY-MM-DD")
-  (doto (moment)
-    (.add (rand-int 10) "days")
-    (.add (rand-int 4) "hours"))
+  (.format (doto (moment)
+             (.add (rand-int 10) "days")
+             (.add (rand-int 4) "hours"))
+           "dddd, MMMM Do")
 
   (rf/dispatch [::update-step {:name :basic-info :step 0}])
   (rf/dispatch [::update-step {:name :contact-info :step 1}])
@@ -528,7 +529,10 @@
     :content
     [:div.intake-step--confirmation
      [confirmation-details]
-     [:div [:p "TODO appointment deets here"]]
+     [:div.detail
+      [:div [:label.field-label (t :appointment-details)]]
+      ;; TODO set the actual time
+      [:div (.format (moment) "h:00a dddd, MMM Do")]]
      [:div.confirm-container
       [:button.confirm-btn {:on-click #(rf/dispatch [::confirm!])}
        (t :book-appointment)]]]}))

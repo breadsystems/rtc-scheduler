@@ -1,9 +1,9 @@
 {:lang :es
  :get-care "Recibe Atencion Médica"
- :yes-no [{:value 1 :label "Si"}
+ :yes-no [{:value 1 :label "Sí"}
           {:value 0 :label "No"}]
  :communication-methods [{:value "phone" :label "Teléfono"}
-                         {:value "email" :label "Dirección de Correo Electrónica"}]
+                         {:value "email" :label "Dirección de correo electrónica"}]
  :basic-info "Información Basica"
  :contact-info "Información de Contacto"
  :access-needs "Necesidades de Accesso"
@@ -11,8 +11,10 @@
  :schedule "Programar una Cita"
  :confirmation "Confirmar"
  :confirm-details "Por favor confirmar"
- :select-appointment-time "TODO Please select an appointment time"
+ :appointment-confirmed "Su cita está confirmada!"
+ :select-appointment-time "Por favor seleccione una cita"
  :book-appointment "Reserve su cita"
+ :appointment-details "Detailes de la cita"
  :back "Atrás"
  :next "Siguiente"
  :name "Nombre"
@@ -21,7 +23,7 @@
  :they-them "elles/elle"
  :state "Estado"
  :state-help "Se requiere para que le conectamos a un proveedor de atención médica que pueda proporcionarle servicios de telemedicina legalmente"
- :email "Dirección de Correo Electrónica"
+ :email "Dirección de correo electrónica"
  :phone "Teléfono"
  :email-or-phone "Por favor indique su correo electrónico, número de teléfono, o los dos."
  :email-or-phone-help "Se requiere su correo electrónico o número de teléfono."
