@@ -2,6 +2,7 @@
   (:require
    [clojure.string :refer [join]]
    ["moment" :as moment]
+   ["moment/locale/es"]
    ["@fullcalendar/react" :default FullCalendar]
    ["@fullcalendar/timegrid" :default timeGridPlugin]
    ["@fullcalendar/list" :default listPlugin]
@@ -267,8 +268,6 @@
   @(rf/subscribe [::lang])
   @(rf/subscribe [::confirmed-info])
   @(rf/subscribe [::appointment])
-  (let [{:keys [start]} @(rf/subscribe [::appointment])]
-    (.format (moment start) "h:mma"))
 
   ;; current view heading
   (let [{phrase-key :name} @(rf/subscribe [::current-step])]
@@ -331,8 +330,12 @@
 (rf/reg-event-db ::touch! touch)
 (rf/reg-event-db ::update-appointment update-appointment)
 
-(rf/reg-event-db ::update-lang (fn [db [_ lang]]
-                                 (assoc db :lang lang)))
+(rf/reg-event-fx ::update-lang (fn [{:keys [db]} [_ lang]]
+                                 {:db (assoc db :lang lang)
+                                  :moment-locale lang}))
+
+(rf/reg-fx :moment-locale (fn [lang]
+                            (.locale moment (name lang))))
 
 ;; Dispatched on initial page load
 (defn- *generate-calendar-events [cnt]
@@ -345,7 +348,8 @@
                                 end   (.format m "YYYY-MM-DDTHH:30")]
                             {:start start
                              :end end
-                             :allDay false}))
+                             :allDay false
+                             :provider_id 123}))
                         (range 0 cnt)))))
 
 (rf/reg-event-db
@@ -414,10 +418,18 @@
 (defn t* [ks]
   (join " " (map t ks)))
 
+(defn appointment->str [{:keys [start end]}]
+  (let [s (moment start "en_US")
+        e (moment end "en_US")]
+    (str (.format s "h:mma - ") (.format e "h:mma ") (.format s "dddd, MMM Do"))))
+
 (comment
   (t :name)
   (t* [:please-enter :name])
-  (map (comp t* :message) @(rf/subscribe [::errors-for :state])))
+  (map (comp t* :message) @(rf/subscribe [::errors-for :state]))
+  
+  (appointment->str {:start "2020-07-06 16:00:00"
+                     :end "2020-07-06 16:30:00"}))
 
 
 
@@ -541,8 +553,7 @@
               answers)]))
 
 (defn- confirmation []
-  (let [{:keys [start]} @(rf/subscribe [::appointment])
-        start-moment (moment start)]
+  (let [appt @(rf/subscribe [::appointment])]
     (intake-step
      {:sub-heading :confirm-details
       :content
@@ -550,7 +561,7 @@
        [confirmation-details]
        [:div.detail
         [:div [:label.field-label (t :appointment-details)]]
-        [:div (.format start-moment "h:mma dddd, MMM Do")]]
+        [:div [:b (appointment->str appt)]]]
        [:div.confirm-container
         [:button.confirm-btn {:on-click #(rf/dispatch [::confirm!])}
          (t :book-appointment)]]]})))
