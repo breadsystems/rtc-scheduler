@@ -1,5 +1,6 @@
 {:lang :es
  :get-care "Recibe Atencion Médica"
+ :choose-a-language "Seleccione un idioma"
  :yes-no [{:value 1 :label "Sí"}
           {:value 0 :label "No"}]
  :communication-methods [{:value "phone" :label "Teléfono"}

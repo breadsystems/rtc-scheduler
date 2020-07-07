@@ -57,7 +57,12 @@
                      :right "1em"
                      :bottom "1em"
                      :width "10rem"
-                     :z-index 2}]])
+                     :padding "1em"
+                     :z-index 2
+                     :background :white
+                     :border core/purple-border
+                     :border-radius core/border-radius}
+    [:div {:margin-bottom "1em"}]]])
 
 
 (defstyles screen

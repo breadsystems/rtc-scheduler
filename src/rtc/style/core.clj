@@ -19,6 +19,7 @@
 (def dark-grey (rgb 115 105 135))
 
 (def purple-border (str "2px solid " purple))
+(def border-radius "0.3em")
 
 
 (def base
@@ -71,7 +72,7 @@
             (& (attr :type=password))
             {:min-width "25rem"
              :padding "0.7em"
-             :border-radius "0.3em"
+             :border-radius border-radius
              :border purple-border}]]
    [:button :.button button-base
     [:&.secondary button-secondary
@@ -81,7 +82,7 @@
    [:select {:width "25rem"
              :max-width "100%"
              :border purple-border
-             :border-radius "0.3em"
+             :border-radius border-radius
              :background-color :lavender
              :background-image (url "/img/caret-down.svg")
              :background-position "right 10px bottom 12px"

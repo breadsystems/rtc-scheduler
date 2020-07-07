@@ -1,6 +1,7 @@
 {;; English versions of all phrases used on the frontend
  :lang :en
  :get-care "Get Care"
+ :choose-a-language "Choose a language"
  :yes-no [{:value 1 :label "Yes"}
           {:value 0 :label "No"}]
  :communication-methods [{:value "phone" :label "Phone"}

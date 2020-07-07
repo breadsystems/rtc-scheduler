@@ -597,20 +597,23 @@
       [:h1 "Radical Telehealth Collective"]
       [:h2 (t :get-care)]
       (when (not confirmed-info) [progress-nav])]
+     [:div.lang-selector
+      [:div [:label.field-label {:for "select-language"}
+             (t :choose-a-language)]]
+      [:select {:value lang
+                :id "select-language"
+                :on-change #(rf/dispatch [::update-lang (keyword (.. % -target -value))])}
+       (map (fn [{:keys [value label]}]
+              ^{:key value}
+              [:option {:value value} label])
+            lang-options)]]
      [:main
       (if confirmed-info
         [confirmed]
         (case name
           :schedule     [schedule]
           :confirmation [confirmation]
-          [questions]))]
-     [:div.lang-selector
-      [:select {:value lang
-                :on-change #(rf/dispatch [::update-lang (keyword (.. % -target -value))])}
-       (map (fn [{:keys [value label]}]
-              ^{:key value}
-              [:option {:value value} label])
-            lang-options)]]]))
+          [questions]))]]))
 
 
 (defn ^:dev/after-load mount! []
