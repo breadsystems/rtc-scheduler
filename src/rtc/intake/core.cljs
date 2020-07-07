@@ -530,18 +530,19 @@
         on-event-click (fn [info]
                          (rf/dispatch [::update-appointment (fc-event->appointment
                                                              (.-event info))])
-                         (rf/dispatch [::next-step]))]
+                         (rf/dispatch [::next-step]))
+        lang @(rf/subscribe [::lang])]
     (intake-step
      {:heading
       "Select a time by clicking on one of the available appointment windows"
       :sub-heading :select-appointment-time
-      ;; TODO figure out how to switch locale
-      ;; TODO month abbrev. names?
       :content
       [:> FullCalendar {:default-view "listWeek"
                         :events windows
                         :eventClick on-event-click
-                        :plugins [listPlugin timeGridPlugin]}]})))
+                        :plugins [listPlugin timeGridPlugin]
+                        ;; TODO why is "TODAY" text not switching on locale?
+                        :locale lang}]})))
 
 (defn- confirmation-details []
   (let [answers @(rf/subscribe [::confirmation-values])]
