@@ -158,9 +158,6 @@
 (defn display-errors-for? [{:keys [touched]} k]
   (contains? touched k))
 
-(defn touch [db [_ k]]
-  (update db :touched conj k))
-
 (defn step-valid? [{:keys [answers] :as db}]
   ;; Each validator returns a list of errors. Check that each list is empty.
   (empty? (questions->errors (current-questions db) answers)))
@@ -234,6 +231,7 @@
 (rf/reg-sub ::lang :lang)
 (rf/reg-sub ::lang-options :lang-options)
 
+(rf/reg-sub ::appointment :appointment)
 (rf/reg-sub ::confirmed-info :confirmed-info)
 
 (comment
@@ -267,6 +265,10 @@
   @(rf/subscribe [::i18n :description-of-needs])
 
   @(rf/subscribe [::lang])
+  @(rf/subscribe [::confirmed-info])
+  @(rf/subscribe [::appointment])
+  (let [{:keys [start]} @(rf/subscribe [::appointment])]
+    (.format (moment start) "h:mma"))
 
   ;; current view heading
   (let [{phrase-key :name} @(rf/subscribe [::current-step])]
@@ -308,6 +310,18 @@
   (let [new-step (max (dec step) 0)]
     (assoc db :step new-step)))
 
+(defn touch [db [_ k]]
+  (update db :touched conj k))
+
+
+(defn fc-event->appointment [fc-event]
+  {:start (.-start fc-event)
+   :end   (.-end fc-event)
+   :provider_id (.. fc-event -extendedProps -provider_id)})
+
+(defn update-appointment [db [_ appt]]
+  (assoc db :appointment appt))
+
 
 (rf/reg-event-db ::update-step update-step)
 
@@ -315,6 +329,7 @@
 (rf/reg-event-db ::prev-step prev-step)
 (rf/reg-event-db ::next-step next-step)
 (rf/reg-event-db ::touch! touch)
+(rf/reg-event-db ::update-appointment update-appointment)
 
 (rf/reg-event-db ::update-lang (fn [db [_ lang]]
                                  (assoc db :lang lang)))
@@ -499,7 +514,11 @@
                     qs)}]))
 
 (defn- schedule []
-  (let [windows @(rf/subscribe [::appointment-windows])]
+  (let [windows @(rf/subscribe [::appointment-windows])
+        on-event-click (fn [info]
+                         (rf/dispatch [::update-appointment (fc-event->appointment
+                                                             (.-event info))])
+                         (rf/dispatch [::next-step]))]
     (intake-step
      {:heading
       "Select a time by clicking on one of the available appointment windows"
@@ -509,9 +528,7 @@
       :content
       [:> FullCalendar {:default-view "listWeek"
                         :events windows
-                        :eventClick (fn [info]
-                                      (js/console.log (.-event info))
-                                      (rf/dispatch [::next-step]))
+                        :eventClick on-event-click
                         :plugins [listPlugin timeGridPlugin]}]})))
 
 (defn- confirmation-details []
@@ -524,18 +541,19 @@
               answers)]))
 
 (defn- confirmation []
-  (intake-step
-   {:sub-heading :confirm-details
-    :content
-    [:div.intake-step--confirmation
-     [confirmation-details]
-     [:div.detail
-      [:div [:label.field-label (t :appointment-details)]]
-      ;; TODO set the actual time
-      [:div (.format (moment) "h:00a dddd, MMM Do")]]
-     [:div.confirm-container
-      [:button.confirm-btn {:on-click #(rf/dispatch [::confirm!])}
-       (t :book-appointment)]]]}))
+  (let [{:keys [start]} @(rf/subscribe [::appointment])
+        start-moment (moment start)]
+    (intake-step
+     {:sub-heading :confirm-details
+      :content
+      [:div.intake-step--confirmation
+       [confirmation-details]
+       [:div.detail
+        [:div [:label.field-label (t :appointment-details)]]
+        [:div (.format start-moment "h:mma dddd, MMM Do")]]
+       [:div.confirm-container
+        [:button.confirm-btn {:on-click #(rf/dispatch [::confirm!])}
+         (t :book-appointment)]]]})))
 
 (defn- confirmed []
   [:div
