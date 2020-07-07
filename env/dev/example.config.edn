@@ -3,5 +3,8 @@
 ;; Copy this to a file called `config.edn` somewhere on the classpath
 ;; and it will be detected automatically on startup.
 {:database-url "jdbc:postgresql://localhost/rtc"
+ ;; The wrap-reload middleware will cause you to get logged out of the
+ ;; backend if you're actively making changes to it, which can be
+ ;; annoying. You can short-circuit this behavior by setting this to true:
  :dev-disable-auth false
  :authy-api-key "API KEY HERE"}
