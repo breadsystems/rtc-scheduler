@@ -582,8 +582,8 @@
                           linkable? (and accessible? (not current?))]
                       ^{:key name}
                       [:li {:class (join " " [(when current? "current") (when viewed? "viewed")])}
-                       [:span.step-link {:class (when-not accessible? "disabled")
-                                         :on-click #(when linkable? (rf/dispatch [::update-step step]))}
+                       [:span.nav-link {:class (when-not accessible? "disabled")
+                                        :on-click #(when linkable? (rf/dispatch [::update-step step]))}
                         nav-title]]))
                   nav-steps))]]))
 

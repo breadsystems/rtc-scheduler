@@ -13,6 +13,7 @@
    [re-frame.core :as rf]
    [reitit.frontend :as reitit]
    [reitit.frontend.easy :as easy]
+   [rtc.admin.calendar :as cal]
    [rtc.api.core :as api]
    [rtc.users.invites.ui :as invites]))
 
@@ -63,10 +64,6 @@
    ["/schedule"
     {:name ::schedule
      :heading "Care Schedule"}]
-   ["/calendar"
-    {:name ::calendar
-     :heading "Calendar"
-     :restrict-to-roles #{:doc :kin}}]
    ["/invites"
     {:name ::invites
      :heading "Invites"}]
@@ -173,9 +170,10 @@
      [:ul
       (map (fn [{:keys [name heading nav-title]}]
              ^{:key name}
-             [:li [:a {:href (easy/href name)} (or nav-title heading)]])
+             [:li {}
+              [:a.nav-link {:href (easy/href name)} (or nav-title heading)]])
            my-routes)
-      [:li [:a.logout {:href "/logout"} "Logout"]]]]))
+      [:li [:a.nav-link.logout {:href "/logout"} "Logout"]]]]))
 
 (defn admin-ui []
   (let [{:keys [name heading]} @(rf/subscribe [::current-view])]
@@ -187,8 +185,7 @@
       (condp = name
         ::welcome [:p "Welcome!"]
         ::new-careseekers [:p "TODO NEW CARESEEKERS"]
-        ::schedule [:p "TODO SCHEDULE HERE"]
-        ::calendar [:p "TODO MY CALENDAR"]
+        ::schedule [cal/care-schedule]
         ::invites [invites/invites]
         ::settings [:p "TODO SETTINGS HERE"]
         [:p "DASH"])]]))

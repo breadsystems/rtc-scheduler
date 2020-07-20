@@ -42,7 +42,10 @@
            (println "Watching Garden for changes...")
            (style/watch! {:source-paths ["src/rtc/intake" "src/rtc/style"]
                           :styles 'rtc.intake.style/screen
-                          :compiler {:output-to "resources/public/css/intake.css"}})))
+                          :compiler {:output-to "resources/public/css/intake.css"}})
+           (style/watch! {:source-paths ["src/rtc/admin" "src/rtc/style"]
+                          :styles 'rtc.admin.style/screen
+                          :compiler {:output-to "resources/public/css/admin.css"}})))
 
 
 (comment
