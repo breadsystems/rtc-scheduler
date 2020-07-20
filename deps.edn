@@ -30,8 +30,7 @@
         ring/ring-defaults        {:mvn/version "0.3.2"}
         yogthos/config            {:mvn/version "1.1.7"}}
  
- :aliases {:dev {:main-opts ["-m" "rtc.app"]
-                 :extra-paths ["env/dev" "test"]
+ :aliases {:dev {:extra-paths ["env/dev" "test"]
                  :extra-deps {nrepl/nrepl          {:mvn/version "0.7.0"}
                               thheller/shadow-cljs {:mvn/version "2.9.6"}}}
            :test {:main-opts ["-m" "kaocha.runner"]
