@@ -8,12 +8,14 @@
                                      :init-fn rtc.register.core/init!}
                           :intake   {:depends-on #{:shared}
                                      :init-fn rtc.intake.core/init!}}
+                :js-options {:ignore-asset-requires true}
                 :devtools {:http-root "public"
                            :http-port 3001
                            :watch-dir "resources/public"}}
 
           :test {:test-dir "resources/public/test"
                  :target :browser-test
+                 :js-options {:ignore-asset-requires true}
                  :ns-regexp "-test$"
                  :devtools {:http-root "resources/public/test"
                             :http-port 3002}}}
