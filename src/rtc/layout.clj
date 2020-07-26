@@ -72,9 +72,11 @@
   (page
    (merge
     opts
-    {:head           []
+    {:head           [[:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/fullcalendar@5.1.0/main.min.css"}]
+                      [:link {:rel "stylesheet" :href "/css/admin.css"}]]
      :content        [:div#rtc-admin-app]
      :footer-content [:div
+                      [:script {:src "https://cdn.jsdelivr.net/npm/fullcalendar@5.1.0/main.min.js" :type "text/javascript"}]
                       [:script {:src "/js/shared.js" :type "text/javascript"}]
                       [:script {:src "/js/admin.js" :type "text/javascript"}]]})))
 
