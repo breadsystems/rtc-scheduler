@@ -2,6 +2,7 @@
 ;; This is the code that Java invokes on application startup.
 (ns rtc.app
   (:require
+   [clojure.string :refer [ends-with? replace]]
    [mount.core :as mount :refer [defstate]]
    [org.httpkit.server :as http]
    [reitit.ring :as ring]
@@ -61,7 +62,11 @@
                         (layout/admin-page {:title "Comrades"}))}]
        ["/comrades"
         ["" conf]
-        ["/*" conf]])])
+        ["*" {:get (fn [{:keys [uri]}]
+                     (if (ends-with? uri "/")
+                       {:headers {"Location" (clojure.string/replace uri #"/$" "")}
+                        :status 302}
+                       (layout/admin-page {:title "Comrades"})))}]])])
 
    (ring/routes
     (ring/create-resource-handler {:path "/"})

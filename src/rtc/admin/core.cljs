@@ -55,21 +55,14 @@
 ;;
 (def ^:private routes
   [[""
-    {:name ::welcome
-     :heading "Welcome, Comrade!"
-     :nav-title "Welcome"}]
-   ["/new-careseekers"
-    {:name ::new-careseekers
-     :heading "New Careseekers"}]
-   ["/schedule"
     {:name ::schedule
-     :heading "Care Schedule"}]
+     :heading "📆 Care Schedule"}]
    ["/invites"
     {:name ::invites
-     :heading "Invites"}]
+     :heading "🎉 Invites"}]
    ["/settings"
     {:name ::settings
-     :heading "Account Settings"}]])
+     :heading "⚙ Account Settings"}]])
 
 (defn- init-routing! []
   (easy/start!
@@ -173,7 +166,7 @@
              [:li {}
               [:a.nav-link {:href (easy/href name)} (or nav-title heading)]])
            my-routes)
-      [:li [:a.nav-link.logout {:href "/logout"} "Logout"]]]]))
+      [:li [:a.nav-link.logout {:href "/logout"} "⏻ Logout"]]]]))
 
 (defn admin-ui []
   (let [{:keys [name heading]} @(rf/subscribe [::current-view])]
@@ -188,7 +181,7 @@
         ::schedule [cal/care-schedule]
         ::invites [invites/invites]
         ::settings [:p "TODO SETTINGS HERE"]
-        [:p "DASH"])]]))
+        [:p "Uh oh, that page was not found!"])]]))
 
 
 
