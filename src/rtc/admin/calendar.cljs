@@ -66,10 +66,10 @@
 
 
 (rf/reg-sub ::my-availabilities (fn [{:keys [availabilities user-id]}]
-                                  (filter-by-id availabilities user-id)))
+                                  (filter-by-id (vals availabilities) user-id)))
 
 (rf/reg-sub ::my-appointments (fn [{:keys [appointments user-id]}]
-                                (filter-by-id appointments user-id)))
+                                (filter-by-id (vals appointments) user-id)))
 
 (comment
   @(rf/subscribe [::my-availabilities])
@@ -88,16 +88,18 @@
                                (.refetchEvents full-calendar)
                                (.render full-calendar)))
 
-(rf/reg-event-db ::create-availability (fn [{:keys [availabilities user] :as db} [_ fc-event]]
-                                         (let [avail {:start (.-start fc-event)
+(rf/reg-event-db ::create-availability (fn [{:keys [availabilities user-id] :as db} [_ fc-event]]
+                                         (let [id (inc (apply max (keys availabilities)))
+                                               avail {:id id
+                                                      :start (.-start fc-event)
                                                       :end (.-end fc-event)
                                                       :event/type :availability
-                                                      :user/id (:id user)}]
-                                           (if (overlaps-any? avail availabilities)
+                                                      :user/id user-id}]
+                                           (if (overlaps-any? avail (vals availabilities))
                                              ;; Overlap in availability is not allowed!
                                              db
                                              ;; No overlaps; update db
-                                             (update db :availabilities conj avail)))))
+                                             (assoc-in db [:availabilities id] avail)))))
 
 (comment
   (rf/dispatch [::create-availability {:start "2020-07-31T10:00"

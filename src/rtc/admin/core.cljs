@@ -41,51 +41,61 @@
    {:view :schedule
     ;; TODO get this stuff from GraphQL
     :user-id 3
-    :availabilities [{:start #inst "2020-07-27T09:00:00-07:00"
-                      :end #inst "2020-07-27T16:00:00-07:00"
-                      :event/type :availability
-                      :user/id 3}
-                     {:start #inst "2020-07-29T09:00:00-07:00"
-                      :end #inst "2020-07-29T16:00:00-07:00"
-                      :event/type :availability
-                      :user/id 3}
-                     {:start #inst "2020-07-30T10:00:00-07:00"
-                      :end #inst "2020-07-30T15:00:00-07:00"
-                      :event/type :availability
-                      :user/id 3}
-                     {:start #inst "2020-08-01T11:00:00-07:00"
-                      :end #inst "2020-08-01T15:00:00-07:00"
-                      :event/type :availability
-                      :user/id 3}
-                     {:start #inst "2020-08-02T10:00:00-07:00"
-                      :end #inst "2020-08-02T16:00:00-07:00"
-                      :event/type :availability
-                      :user/id 2}
-                     {:start #inst "2020-08-01T11:00:00-07:00"
-                      :end #inst "2020-08-01T15:00:00-07:00"
-                      :title "AVAIL"
-                      :event/type :availability
-                      :user/id 2}]
-    :appointments [{:start #inst "2020-08-01T12:00:00-07:00"
-                    :end #inst   "2020-08-01T12:30:00-07:00"
-                    :name "Octavia"
-                    :event/type :appointment
-                    :user/id 3}
-                   {:start #inst "2020-07-30T13:00:00-07:00"
-                    :end #inst   "2020-07-30T13:30:00-07:00"
-                    :name "Malcom"
-                    :event/type :appointment
-                    :user/id 3}
-                   {:start #inst "2020-08-02T14:00:00-07:00"
-                    :end #inst   "2020-08-02T14:30:00-07:00"
-                    :name "Angela"
-                    :event/type :appointment
-                    :user/id 2}
-                   {:start #inst "2020-07-28T11:00:00-07:00"
-                    :end #inst   "2020-07-28T11:30:00-07:00"
-                    :name "Ursula"
-                    :event/type :appointment
-                    :user/id 1}]
+    :availabilities {1 {:id 1
+                        :start #inst "2020-07-27T09:00:00-07:00"
+                        :end #inst "2020-07-27T16:00:00-07:00"
+                        :event/type :availability
+                        :user/id 3}
+                     2 {:id 2
+                        :start #inst "2020-07-29T09:00:00-07:00"
+                        :end #inst "2020-07-29T16:00:00-07:00"
+                        :event/type :availability
+                        :user/id 3}
+                     3 {:id 3
+                        :start #inst "2020-07-30T10:00:00-07:00"
+                        :end #inst "2020-07-30T15:00:00-07:00"
+                        :event/type :availability
+                        :user/id 3}
+                     4 {:id 4
+                        :start #inst "2020-08-01T11:00:00-07:00"
+                        :end #inst "2020-08-01T15:00:00-07:00"
+                        :event/type :availability
+                        :user/id 3}
+                     5 {:id 5
+                        :start #inst "2020-08-02T10:00:00-07:00"
+                        :end #inst "2020-08-02T16:00:00-07:00"
+                        :event/type :availability
+                        :user/id 2}
+                     6 {:id 6
+                        :start #inst "2020-08-01T11:00:00-07:00"
+                        :end #inst "2020-08-01T15:00:00-07:00"
+                        :title "AVAIL"
+                        :event/type :availability
+                        :user/id 2}}
+    :appointments {10 {:id 10
+                       :start #inst "2020-08-01T12:00:00-07:00"
+                       :end #inst   "2020-08-01T12:30:00-07:00"
+                       :name "Octavia"
+                       :event/type :appointment
+                       :user/id 3}
+                   11 {:id 11
+                       :start #inst "2020-07-30T13:00:00-07:00"
+                       :end #inst   "2020-07-30T13:30:00-07:00"
+                       :name "Malcom"
+                       :event/type :appointment
+                       :user/id 3}
+                   12 {:id 12
+                       :start #inst "2020-08-02T14:00:00-07:00"
+                       :end #inst   "2020-08-02T14:30:00-07:00"
+                       :name "Angela"
+                       :event/type :appointment
+                       :user/id 2}
+                   13 {:id 13
+                       :start #inst "2020-07-28T11:00:00-07:00"
+                       :end #inst   "2020-07-28T11:30:00-07:00"
+                       :name "Ursula"
+                       :event/type :appointment
+                       :user/id 1}}
     :users {3 {:id 3
                :first_name "Coby"
                :last_name "Tamayo"

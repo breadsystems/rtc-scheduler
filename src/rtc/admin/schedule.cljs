@@ -44,8 +44,10 @@
          :classNames ["rtc-appointment"]))
 
 
-(rf/reg-sub ::all-appointments :appointments)
-(rf/reg-sub ::all-availabilities :availabilities)
+(rf/reg-sub ::all-appointments (fn [{:keys [appointments]}]
+                                 (vals appointments)))
+(rf/reg-sub ::all-availabilities (fn [{:keys [availabilities]}]
+                                   (vals availabilities)))
 
 (rf/reg-sub ::user current-user)
 
