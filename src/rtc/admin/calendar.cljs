@@ -42,6 +42,9 @@
 (defn update-availability [db [_ id avail-data]]
   (update-in db [:availabilities id] merge avail-data))
 
+(defn delete-availability [db [_ id]]
+  (update db :availabilities dissoc (js/parseInt id)))
+
 (defmulti ->fc-event :event/type)
 
 (defmethod ->fc-event :default [e] e)
@@ -105,6 +108,7 @@
                                              (assoc-in db [:availabilities id] avail)))))
 
 (rf/reg-event-db ::update-availability update-availability)
+(rf/reg-event-db ::delete-availability delete-availability)
 
 (comment
   (rf/dispatch [::create-availability {:start "2020-07-31T10:00"
@@ -138,6 +142,19 @@
                      ;; * DELETE
                      #js {:selectable true
                           :editable true
+                          :eventDidMount (fn [info]
+                                           (when (= "availability" (.. info -event -extendedProps -type))
+                                             (let [event (.-event info)
+                                                   elem (.-el info)
+                                                   delete-btn (js/document.createElement "i")
+                                                   on-click (fn [_]
+                                                              (rf/dispatch-sync [::delete-availability (.-id event)])
+                                                              (.refetchEvents @!calendar)
+                                                              (.render @!calendar))]
+                                               (.addEventListener delete-btn "click" on-click)
+                                               (set! (.-innerText delete-btn) "×")
+                                               (.add (.-classList delete-btn) "rtc-delete")
+                                               (.appendChild elem delete-btn))))
                           :eventChange (fn [info]
                                          (let [e (.-event info)
                                                id (js/parseInt (.-id e))]

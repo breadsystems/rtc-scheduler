@@ -54,3 +54,10 @@
     (is (= {:id 3 :user/id 13 :start "new start date"}
            (get-in (cal/update-availability db [:_ 3 {:start "new start date"}])
                    [:availabilities 3])))))
+
+(deftest test-delete-availability
+  (let [db {:availabilities {1 {:id 1 :user/id 11}
+                             2 {:id 2 :user/id 12}
+                             3 {:id 3 :user/id 13}}}]
+    (is (= [1 3]
+           (keys (:availabilities (cal/delete-availability db [:_ "2"])))))))
