@@ -6,19 +6,18 @@
   ;;  ["@fullcalendar/timegrid" :default timeGridPlugin]
    [reagent.core :as r]
    [re-frame.core :as rf]
-   [rtc.api.core :as api]
-   [rtc.admin.events :as e]))
+   [rtc.api.core :as api]))
 
 
 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;                           ;;
-  ;;    Availability Logic     ;;
+  ;;         Core Logic        ;;
  ;;                           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;
-;; Core logic for availabilities
+;; Core logic for availabilities, appointments, and calendar events
 ;;
 
 (defn overlaps-any? [{:keys [start end]} existing]
@@ -36,16 +35,53 @@
 (defn filter-by-id [avails id]
   (filter #(= id (:user/id %)) avails))
 
+(defn can-overlap? [a b]
+  (not (and (= "availability" (.. a -extendedProps -type))
+            (= "availability" (.. b -extendedProps -type)))))
 
-(rf/reg-sub ::my-availabilities (fn [{:keys [availabilities user]}]
-                                  (filter-by-id availabilities (:id user))))
+(defmulti ->fc-event :event/type)
 
-(rf/reg-sub ::my-appointments (fn [{:keys [appointments user]}]
-                                (filter-by-id appointments (:id user))))
+(defmethod ->fc-event :default [e] e)
+
+(defmethod ->fc-event :availability [event]
+  (assoc event
+         :title "Available"
+         :editable true
+         :backgroundColor "#325685"
+         :classNames ["rtc-availability"]))
+
+(defmethod ->fc-event :appointment [appt]
+  (assoc appt
+         :title (:name appt)
+         :editable false
+         :classNames ["rtc-appointment"]))
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                           ;;
+  ;;      Subscriptions        ;;
+ ;;                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(rf/reg-sub ::my-availabilities (fn [{:keys [availabilities user-id]}]
+                                  (filter-by-id availabilities user-id)))
+
+(rf/reg-sub ::my-appointments (fn [{:keys [appointments user-id]}]
+                                (filter-by-id appointments user-id)))
 
 (comment
   @(rf/subscribe [::my-availabilities])
   @(rf/subscribe [::my-appointments]))
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                           ;;
+  ;;      Event Handlers       ;;
+ ;;                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (rf/reg-fx ::render-calendar (fn [[full-calendar]]
@@ -70,11 +106,6 @@
                                        :user/id 3}]))
 
 
-(defn can-overlap? [a b]
-  (not (and (= "availability" (.. a -extendedProps -type))
-            (= "availability" (.. b -extendedProps -type)))))
-
-
 (defn calendar []
   (let [!ref (atom nil)
         !calendar (atom nil)]
@@ -89,7 +120,7 @@
           (let [events-fn (fn [_info on-success _on-error]
                             (on-success
                              (clj->js
-                              (map e/->fc-event
+                              (map ->fc-event
                                    (concat @(rf/subscribe [::my-appointments])
                                            @(rf/subscribe [::my-availabilities]))))))
                 cal (js/FullCalendar.Calendar.

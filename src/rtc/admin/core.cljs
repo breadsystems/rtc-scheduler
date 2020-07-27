@@ -40,8 +40,7 @@
  (fn [_]
    {:view :schedule
     ;; TODO get this stuff from GraphQL
-    :user {:id 3
-           :roles #{:doc :kin}}
+    :user-id 3
     :availabilities [{:start #inst "2020-07-27T09:00:00-07:00"
                       :end #inst "2020-07-27T16:00:00-07:00"
                       :event/type :availability
@@ -69,21 +68,28 @@
                       :user/id 2}]
     :appointments [{:start #inst "2020-08-01T12:00:00-07:00"
                     :end #inst   "2020-08-01T12:30:00-07:00"
+                    :name "Octavia"
                     :event/type :appointment
                     :user/id 3}
                    {:start #inst "2020-07-30T13:00:00-07:00"
                     :end #inst   "2020-07-30T13:30:00-07:00"
+                    :name "Malcom"
                     :event/type :appointment
                     :user/id 3}
                    {:start #inst "2020-08-02T14:00:00-07:00"
                     :end #inst   "2020-08-02T14:30:00-07:00"
+                    :name "Angela"
                     :event/type :appointment
                     :user/id 2}
                    {:start #inst "2020-07-28T11:00:00-07:00"
                     :end #inst   "2020-07-28T11:30:00-07:00"
+                    :name "Ursula"
                     :event/type :appointment
                     :user/id 1}]
-    :users []
+    :users {3 {:id 3
+               :first_name "Coby"
+               :last_name "Tamayo"
+               :roles #{:doc :kin}}}
     :current-invite {:email ""}
     :my-invitations []}))
 
@@ -151,10 +157,13 @@
                          (map second $)
                          (filter (partial accessible-by? (:my-roles db)) $))))
 
+(rf/reg-sub :admin/users :users)
+
 (comment
   routes
   @(rf/subscribe [::current-view])
-  @(rf/subscribe [::routes routes]))
+  @(rf/subscribe [::routes routes])
+  @(rf/subscribe [:admin/users]))
 
 
 

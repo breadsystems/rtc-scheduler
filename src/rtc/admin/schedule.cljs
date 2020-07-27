@@ -7,12 +7,52 @@
    ["moment" :as moment]
    [reagent.core :as r]
    [re-frame.core :as rf]
-   [rtc.api.core :as api]
-   [rtc.admin.events :as e]))
+   [rtc.api.core :as api]))
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                           ;;
+  ;;         Core Logic        ;;
+ ;;                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;
+;; Core logic for availabilities, appointments, and calendar events
+;;
+
+(defn current-user [{:keys [users user-id]}]
+  (get users user-id))
+
+(defn user->name [{:keys [first_name last_name]}]
+  (str first_name " " last_name))
+
+(defmulti ->fc-event :event/type)
+
+(defmethod ->fc-event :default [e] e)
+
+(defmethod ->fc-event :availability [event]
+  (assoc event
+         :title "Available"
+         :editable true
+         :backgroundColor "#325685"
+         :classNames ["rtc-availability"]))
+
+(defmethod ->fc-event :appointment [appt doc]
+  (assoc appt
+         :title (str (:name appt) " / " (user->name doc))
+         :editable false
+         :classNames ["rtc-appointment"]))
 
 
 (rf/reg-sub ::all-appointments :appointments)
 (rf/reg-sub ::all-availabilities :availabilities)
+
+(rf/reg-sub ::user current-user)
+
+(comment
+  (current-user {:users {123 {:current :user}}
+                 :user-id 123})
+  @(rf/subscribe [::user]))
 
 
 (defn calendar []
@@ -28,12 +68,12 @@
           (let [events-fn (fn [_info on-success _on-error]
                             (on-success
                              (clj->js
-                              (map e/->fc-event @(rf/subscribe [::all-appointments])))))
+                               (let [doc @(rf/subscribe [::user])]
+                                 (map #(->fc-event % doc)
+                                      @(rf/subscribe [::all-appointments]))))))
                 cal (js/FullCalendar.Calendar.
                      @!ref
                      #js {:selectable true
-                          :select (fn [info]
-                                    (js/console.log info))
                           :dateClick (fn [info]
                                        (js/console.log info))
                           :events events-fn
