@@ -6,25 +6,13 @@
   ;;  ["@fullcalendar/timegrid" :default timeGridPlugin]
    ["moment" :as moment]
    [reagent.core :as r]
-   [reagent.dom :as dom]
    [re-frame.core :as rf]
-   [rtc.api.core :as api]))
+   [rtc.api.core :as api]
+   [rtc.admin.events :as e]))
 
 
-;; Dispatched on initial page load
-(defn- *generate-calendar-events [cnt]
-  (doall (distinct (map (fn [_]
-                          (let [m (doto (moment)
-                                    (.add (rand-int 3) "hours")
-                                    (.subtract (rand-int 6) "hours")
-                                    (.add (inc (rand-int 20)) "days"))
-                                start (.format m "YYYY-MM-DDTHH:00")
-                                end   (.format m "YYYY-MM-DDTHH:30")]
-                            #js {:start start
-                                 :end end
-                                 :allDay false
-                                 :provider_id 123}))
-                        (range 0 cnt)))))
+(rf/reg-sub ::all-appointments :appointments)
+(rf/reg-sub ::all-availabilities :availabilities)
 
 
 (defn calendar []
@@ -37,14 +25,18 @@
       :component-did-mount
       (fn []
         (when @!ref 
-          (let [cal (js/FullCalendar.Calendar.
+          (let [events-fn (fn [_info on-success _on-error]
+                            (on-success
+                             (clj->js
+                              (map e/->fc-event @(rf/subscribe [::all-appointments])))))
+                cal (js/FullCalendar.Calendar.
                      @!ref
                      #js {:selectable true
                           :select (fn [info]
                                     (js/console.log info))
                           :dateClick (fn [info]
                                        (js/console.log info))
-                          :events (*generate-calendar-events 50)
+                          :events events-fn
                           :initialView "listWeek"})]
 
             (.render cal))))})))

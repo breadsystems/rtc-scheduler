@@ -4,38 +4,47 @@
   ;;  ["@fullcalendar/list" :default listPlugin]
   ;;  ["@fullcalendar/react" :default FullCalendar]
   ;;  ["@fullcalendar/timegrid" :default timeGridPlugin]
-   ["moment" :as moment]
    [reagent.core :as r]
    [re-frame.core :as rf]
-   [rtc.api.core :as api]))
+   [rtc.api.core :as api]
+   [rtc.admin.events :as e]))
 
 
 
-(rf/reg-sub ::my-availabilities (fn [{:keys [availabilities]}]
-                                  (conj availabilities
-                                        {:start "2020-07-27T09:00"
-                                         :end "2020-07-27T16:00"
-                                         :event/type :availability}
-                                        {:start "2020-07-29T09:00"
-                                         :end "2020-07-29T16:00"
-                                         :event/type :availability}
-                                        {:start "2020-07-30T10:00"
-                                         :end "2020-07-30T15:00"
-                                         :event/type :availability}
-                                        {:start "2020-08-01T11:00"
-                                         :end "2020-08-01T15:00"
-                                         :event/type :availability})))
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                           ;;
+  ;;    Availability Logic     ;;
+ ;;                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;
+;; Core logic for availabilities
+;;
+
+(defn overlaps-any? [{:keys [start end]} existing]
+  (let [avail-start (inst-ms start)
+        avail-end (inst-ms end)
+        overlaps? (fn [{:keys [start end]}]
+                    (let [start (inst-ms start)
+                          end (inst-ms end)]
+                      (or
+                       (< avail-start start avail-end)
+                       (< avail-start end avail-end)
+                       (< start avail-start end))))]
+    (not (empty? (filter overlaps? existing)))))
+
+(defn filter-by-id [avails id]
+  (filter #(= id (:user/id %)) avails))
 
 
-(defn filter-my-appointments [{:keys [appointments]}]
-  (conj appointments {:start "2020-08-01T12:00"
-                      :end "2020-08-01T12:30"
-                      :event/type :appointment}))
+(rf/reg-sub ::my-availabilities (fn [{:keys [availabilities user]}]
+                                  (filter-by-id availabilities (:id user))))
 
-;; (api/query! )
-(rf/reg-sub ::my-appointments filter-my-appointments)
+(rf/reg-sub ::my-appointments (fn [{:keys [appointments user]}]
+                                (filter-by-id appointments (:id user))))
 
 (comment
+  @(rf/subscribe [::my-availabilities])
   @(rf/subscribe [::my-appointments]))
 
 
@@ -43,27 +52,23 @@
                                (.refetchEvents full-calendar)
                                (.render full-calendar)))
 
-(rf/reg-event-db ::create-availability (fn [db [_ fc-event]]
+(rf/reg-event-db ::create-availability (fn [{:keys [availabilities user] :as db} [_ fc-event]]
                                          (let [avail {:start (.-start fc-event)
                                                       :end (.-end fc-event)
-                                                      :event/type :availability}]
-                                           (update db :availabilities conj avail))))
+                                                      :event/type :availability
+                                                      :user/id (:id user)}]
+                                           (if (overlaps-any? avail availabilities)
+                                             ;; Overlap in availability is not allowed!
+                                             db
+                                             ;; No overlaps; update db
+                                             (update db :availabilities conj avail)))))
 
 (comment
   (rf/dispatch [::create-availability {:start "2020-07-31T10:00"
                                        :end "2020-07-31T17:00"
-                                       :event/type :availability}]))
+                                       :event/type :availability
+                                       :user/id 3}]))
 
-
-(defmulti ->fc-event :event/type)
-(defmethod ->fc-event :default [e] e)
-(defmethod ->fc-event :availability [event]
-  (assoc event
-         :editable true
-         :backgroundColor "#325685"))
-(defmethod ->fc-event :appointment [event]
-  (assoc event
-         :editable false))
 
 (defn can-overlap? [a b]
   (not (and (= "availability" (.. a -extendedProps -type))
@@ -84,11 +89,15 @@
           (let [events-fn (fn [_info on-success _on-error]
                             (on-success
                              (clj->js
-                              (map ->fc-event
+                              (map e/->fc-event
                                    (concat @(rf/subscribe [::my-appointments])
                                            @(rf/subscribe [::my-availabilities]))))))
                 cal (js/FullCalendar.Calendar.
                      @!ref
+                     ;; TODO:
+                     ;; * update availability on drag
+                     ;; * deal with overlap on create
+                     ;; * DELETE
                      #js {:selectable true
                           :editable true
                           :select (fn [info]

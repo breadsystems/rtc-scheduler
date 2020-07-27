@@ -39,10 +39,50 @@
  ::init-db
  (fn [_]
    {:view :schedule
-    ;; TODO get this from admin data
-    :my-roles #{:doc :kin}
-    :availabilities []
-    :appointments []
+    ;; TODO get this stuff from GraphQL
+    :user {:id 3
+           :roles #{:doc :kin}}
+    :availabilities [{:start #inst "2020-07-27T09:00:00-07:00"
+                      :end #inst "2020-07-27T16:00:00-07:00"
+                      :event/type :availability
+                      :user/id 3}
+                     {:start #inst "2020-07-29T09:00:00-07:00"
+                      :end #inst "2020-07-29T16:00:00-07:00"
+                      :event/type :availability
+                      :user/id 3}
+                     {:start #inst "2020-07-30T10:00:00-07:00"
+                      :end #inst "2020-07-30T15:00:00-07:00"
+                      :event/type :availability
+                      :user/id 3}
+                     {:start #inst "2020-08-01T11:00:00-07:00"
+                      :end #inst "2020-08-01T15:00:00-07:00"
+                      :event/type :availability
+                      :user/id 3}
+                     {:start #inst "2020-08-02T10:00:00-07:00"
+                      :end #inst "2020-08-02T16:00:00-07:00"
+                      :event/type :availability
+                      :user/id 2}
+                     {:start #inst "2020-08-01T11:00:00-07:00"
+                      :end #inst "2020-08-01T15:00:00-07:00"
+                      :title "AVAIL"
+                      :event/type :availability
+                      :user/id 2}]
+    :appointments [{:start #inst "2020-08-01T12:00:00-07:00"
+                    :end #inst   "2020-08-01T12:30:00-07:00"
+                    :event/type :appointment
+                    :user/id 3}
+                   {:start #inst "2020-07-30T13:00:00-07:00"
+                    :end #inst   "2020-07-30T13:30:00-07:00"
+                    :event/type :appointment
+                    :user/id 3}
+                   {:start #inst "2020-08-02T14:00:00-07:00"
+                    :end #inst   "2020-08-02T14:30:00-07:00"
+                    :event/type :appointment
+                    :user/id 2}
+                   {:start #inst "2020-07-28T11:00:00-07:00"
+                    :end #inst   "2020-07-28T11:30:00-07:00"
+                    :event/type :appointment
+                    :user/id 1}]
     :users []
     :current-invite {:email ""}
     :my-invitations []}))
@@ -151,8 +191,9 @@
      (js/console.error errors)
      (assoc db
             :my-invitations (:invitations data)
-            :availabilities (:availabilities data)
-            :appointments   (:appointments data)))))
+            ;; :availabilities (:availabilities data)
+            ;; :appointments   (:appointments data)
+            ))))
 
 (comment
   (rf/dispatch [::init-admin]))
