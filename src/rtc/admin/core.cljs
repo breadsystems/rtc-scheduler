@@ -13,7 +13,8 @@
    [re-frame.core :as rf]
    [reitit.frontend :as reitit]
    [reitit.frontend.easy :as easy]
-   [rtc.admin.calendar :as cal]
+   [rtc.admin.calendar :as calendar]
+   [rtc.admin.schedule :as schedule]
    [rtc.api.core :as api]
    [rtc.users.invites.ui :as invites]))
 
@@ -40,6 +41,8 @@
    {:view :schedule
     ;; TODO get this from admin data
     :my-roles #{:doc :kin}
+    :availabilities []
+    :appointments []
     :users []
     :current-invite {:email ""}
     :my-invitations []}))
@@ -57,6 +60,9 @@
   [[""
     {:name ::schedule
      :heading "📆 Care Schedule"}]
+   ["/availability"
+    {:name ::availability
+     :heading "🕒 Availability"}]
    ["/invites"
     {:name ::invites
      :heading "🎉 Invites"}]
@@ -143,7 +149,10 @@
    (if (seq errors)
      ;; TODO some kind of real error handling
      (js/console.error errors)
-     (assoc db :my-invitations (:invitations data)))))
+     (assoc db
+            :my-invitations (:invitations data)
+            :availabilities (:availabilities data)
+            :appointments   (:appointments data)))))
 
 (comment
   (rf/dispatch [::init-admin]))
@@ -166,7 +175,7 @@
              [:li {}
               [:a.nav-link {:href (easy/href name)} (or nav-title heading)]])
            my-routes)
-      [:li [:a.nav-link.logout {:href "/logout"} "⏻ Logout"]]]]))
+      [:li [:a.nav-link.logout {:href "/logout"} "🔑 Logout"]]]]))
 
 (defn admin-ui []
   (let [{:keys [name heading]} @(rf/subscribe [::current-view])]
@@ -178,7 +187,8 @@
       (condp = name
         ::welcome [:p "Welcome!"]
         ::new-careseekers [:p "TODO NEW CARESEEKERS"]
-        ::schedule [cal/care-schedule]
+        ::schedule [schedule/care-schedule]
+        ::availability [calendar/availability-schedule]
         ::invites [invites/invites]
         ::settings [:p "TODO SETTINGS HERE"]
         [:p "Uh oh, that page was not found!"])]]))
