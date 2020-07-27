@@ -46,3 +46,11 @@
                          :end   #inst "2020-08-03T17:00:00-00:00"
                          :user/id 3}]]
     (is (= 2 (count (cal/filter-by-id availabilities 3))))))
+
+(deftest test-update-availability
+  (let [db {:availabilities {1 {:id 1 :user/id 11}
+                             2 {:id 2 :user/id 12}
+                             3 {:id 3 :user/id 13}}}]
+    (is (= {:id 3 :user/id 13 :start "new start date"}
+           (get-in (cal/update-availability db [:_ 3 {:start "new start date"}])
+                   [:availabilities 3])))))

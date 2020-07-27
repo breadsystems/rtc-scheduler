@@ -39,6 +39,9 @@
   (not (and (= "availability" (.. a -extendedProps -type))
             (= "availability" (.. b -extendedProps -type)))))
 
+(defn update-availability [db [_ id avail-data]]
+  (update-in db [:availabilities id] merge avail-data))
+
 (defmulti ->fc-event :event/type)
 
 (defmethod ->fc-event :default [e] e)
@@ -90,7 +93,7 @@
 
 (rf/reg-event-db ::create-availability (fn [{:keys [availabilities user-id] :as db} [_ fc-event]]
                                          (let [id (inc (apply max (keys availabilities)))
-                                               avail {:id id
+                                               avail {:availability/id id
                                                       :start (.-start fc-event)
                                                       :end (.-end fc-event)
                                                       :event/type :availability
@@ -100,6 +103,8 @@
                                              db
                                              ;; No overlaps; update db
                                              (assoc-in db [:availabilities id] avail)))))
+
+(rf/reg-event-db ::update-availability update-availability)
 
 (comment
   (rf/dispatch [::create-availability {:start "2020-07-31T10:00"
@@ -133,6 +138,12 @@
                      ;; * DELETE
                      #js {:selectable true
                           :editable true
+                          :eventChange (fn [info]
+                                         (let [e (.-event info)
+                                               id (js/parseInt (.-id e))]
+                                           (rf/dispatch-sync [::update-availability id {:start (.-start e)
+                                                                                        :end (.-end e)}])
+                                           (.refetchEvents @!calendar)))
                           :select (fn [info]
                                     (rf/dispatch-sync [::create-availability info])
                                     (.refetchEvents @!calendar)
