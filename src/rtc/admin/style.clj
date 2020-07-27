@@ -1,4 +1,4 @@
-(ns rtc.intake.style
+(ns rtc.admin.style
   (:require
    [rtc.style.core :as core]
    [garden.def :refer [defstyles]]
