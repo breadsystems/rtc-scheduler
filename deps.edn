@@ -34,6 +34,6 @@
                  :extra-deps {nrepl/nrepl          {:mvn/version "0.7.0"}
                               thheller/shadow-cljs {:mvn/version "2.9.6"}}}
            :test {:main-opts ["-m" "kaocha.runner"]
-                  :extra-paths ["test"]
+                  :extra-paths ["env/test" "test"]
                   :extra-deps {lambdaisland/kaocha  {:mvn/version "0.0-529"}}}
            :prod {:extra-paths ["env/prod"]}}}
