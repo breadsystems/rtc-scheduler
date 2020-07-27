@@ -64,7 +64,7 @@
         ["" conf]
         ["*" {:get (fn [{:keys [uri]}]
                      (if (ends-with? uri "/")
-                       {:headers {"Location" (clojure.string/replace uri #"/$" "")}
+                       {:headers {"Location" (replace uri #"/$" "")}
                         :status 302}
                        (layout/admin-page {:title "Comrades"})))}]])])
 

@@ -31,6 +31,7 @@
    :query/provider       (id-resolver db/get-provider)
    :query/appointment    (id-resolver db/get-appointment)
    :query/availabilities (fn [_context args _value]
+                           ;; TODO filter by query params
                            (db/get-availabilities (select-keys args [:start :end :state])))
    :query/appointments   (fn [_context args _value]
                            ;; TODO
