@@ -313,3 +313,24 @@
               {:id 4 :color "red"}
               {:id 5 :color "blue"}]
              (cal/providers db))))))
+
+(deftest test-access-needs-filter-summary
+  (let [db {:filters {:access-needs #{}}
+            :needs {1 {:id 1 :name "Love"}
+                    2 {:id 2 :name "Fulfillment"}
+                    3 {:id 3 :name "Food"}
+                    4 {:id 4 :name "Shelter"}}}
+        with-needs (fn [needs]
+                     (assoc-in db [:filters :access-needs] needs))]
+    (is (= "Showing all appointments"
+           (cal/access-needs-filter-summary db)))
+    (is (= "Showing appointments that need Love"
+           (cal/access-needs-filter-summary (with-needs #{1}))))
+    (is (= "Showing appointments that need Food"
+           (cal/access-needs-filter-summary (with-needs #{3}))))
+    (is (= "Showing appointments that need Love OR Fulfillment"
+           (cal/access-needs-filter-summary (with-needs #{1 2}))))
+    (is (= "Showing appointments that need Love, Fulfillment, OR Food"
+           (cal/access-needs-filter-summary (with-needs #{1 2 3}))))
+    (is (= "Showing appointments that need Love, Fulfillment, Food, OR Shelter"
+           (cal/access-needs-filter-summary (with-needs #{1 2 3 4}))))))

@@ -80,6 +80,19 @@
 (defn- access-needs [db]
   (vals (:needs db)))
 
+(defn- oxford-comma [phrases]
+  (if (> (count phrases) 2)
+    (join ", OR " [(join ", " (butlast phrases)) (last phrases)])
+    (join " OR " phrases)))
+
+(defn access-needs-filter-summary [{:keys [filters needs]}]
+  (let [filtered (:access-needs filters)]
+    (if (seq filtered)
+      (let [labels (map :name (filter #(contains? filtered (:id %)) (vals needs)))
+            oxford-comma (oxford-comma labels)]
+        (str "Showing appointments that need " oxford-comma))
+      "Showing all appointments")))
+
 (defn- fulfilled? [appt need]
   (contains? (set (map :need/id (:fulfillments appt))) need))
 
@@ -224,6 +237,7 @@
 (rf/reg-sub ::filters :filters)
 (rf/reg-sub ::providers providers)
 (rf/reg-sub ::access-needs access-needs)
+(rf/reg-sub ::access-needs-filter-summary access-needs-filter-summary)
 
 
 
@@ -295,6 +309,7 @@
   @(rf/subscribe [::focused-appointment])
   @(rf/subscribe [::filters])
   @(rf/subscribe [::providers])
+  @(rf/subscribe [::access-needs-filter-summary])
 
   (rf/dispatch [::create-availability {:db {:start "2020-07-31T10:00"
                                             :end "2020-07-31T17:00"
@@ -323,6 +338,7 @@
 (defn filter-controls []
   (let [filters @(rf/subscribe [::filters])
         access-needs @(rf/subscribe [::access-needs])
+        summary @(rf/subscribe [::access-needs-filter-summary])
         providers @(rf/subscribe [::providers])]
     [:div.filter-controls
      [:div.filter-group
@@ -352,7 +368,8 @@
                                 :style {}}]
                        [:label.filter-label {:for html-id}
                         (str "Needs " name)]]))
-                  access-needs))]
+                  access-needs))
+      [:p.instruct summary]]
      [:div.filter-group
       [:h4 "Filter by type"]
       [:div.filter-field

@@ -36,7 +36,10 @@
    [:.center {:text-align :center}]
    [:.highlight {:color pink}]
    [:.spacious {:margin-top "3em"
-                :margin-bottom "3em"}]])
+                :margin-bottom "3em"}]
+   [:.instruct {:font-size "0.9em"
+                :color dark-grey
+                :font-style :italic}]])
 
 (def nav
   [[:nav
