@@ -2,7 +2,7 @@
 ;; This is the code that Java invokes on application startup.
 (ns rtc.app
   (:require
-   [clojure.string :refer [ends-with? replace]]
+   [clojure.string :as string]
    [mount.core :as mount :refer [defstate]]
    [org.httpkit.server :as http]
    [reitit.ring :as ring]
@@ -63,8 +63,8 @@
        ["/comrades"
         ["" conf]
         ["*" {:get (fn [{:keys [uri]}]
-                     (if (ends-with? uri "/")
-                       {:headers {"Location" (replace uri #"/$" "")}
+                     (if (string/ends-with? uri "/")
+                       {:headers {"Location" (string/replace uri #"/$" "")}
                         :status 302}
                        (layout/admin-page {:title "Comrades"})))}]])])
 
