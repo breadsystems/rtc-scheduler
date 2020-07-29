@@ -41,6 +41,10 @@
    {:view :schedule
     ;; TODO get this stuff from GraphQL
     :user-id 3
+    :filters {:availabilities? true
+              :appointments? true
+              :providers #{3} ;; TODO
+              :access-needs #{}}
     :availabilities {1 {:id 1
                         :start #inst "2020-07-27T09:00:00-07:00"
                         :end #inst "2020-07-27T16:00:00-07:00"
@@ -101,7 +105,8 @@
                :last_name "Tamayo"
                :roles #{:doc :kin}}}
     :current-invite {:email ""}
-    :my-invitations []}))
+    :my-invitations []
+    :focused-appointment nil}))
 
 ;;
 ;; Client-side routing, via Reitit.
@@ -116,9 +121,6 @@
   [[""
     {:name ::schedule
      :heading "📆 Care Schedule"}]
-   ["/availability"
-    {:name ::availability
-     :heading "🕒 Availability"}]
    ["/invites"
     {:name ::invites
      :heading "🎉 Invites"}]
@@ -247,8 +249,7 @@
       (condp = name
         ::welcome [:p "Welcome!"]
         ::new-careseekers [:p "TODO NEW CARESEEKERS"]
-        ::schedule [schedule/care-schedule]
-        ::availability [calendar/availability-schedule]
+        ::schedule [calendar/care-schedule]
         ::invites [invites/invites]
         ::settings [:p "TODO SETTINGS HERE"]
         [:p "Uh oh, that page was not found!"])]]))

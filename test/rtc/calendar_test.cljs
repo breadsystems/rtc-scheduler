@@ -1,6 +1,6 @@
 (ns rtc.calendar-test
   (:require
-   [clojure.test :refer [deftest is]]
+   [clojure.test :refer [deftest is testing]]
    [rtc.admin.calendar :as cal]))
 
 
@@ -61,3 +61,239 @@
                              3 {:id 3 :user/id 13}}}]
     (is (= [1 3]
            (keys (:availabilities (cal/delete-availability db [:_ "2"])))))))
+
+(deftest test-appointment?
+  (is (true? (cal/appointment? {:event/type :appointment})))
+  (is (true? (cal/appointment? #js {:extendedProps #js {:type "appointment"}}))))
+
+(deftest test-availability?
+  (is (true? (cal/availability? {:event/type :availability})))
+  (is (true? (cal/availability? #js {:extendedProps #js {:type "availability"}}))))
+
+(deftest test-visible-events
+
+  (let [db {:availabilities {1 {:id 1 :user/id 2}
+                             2 {:id 2 :user/id 2}
+                             3 {:id 3 :user/id 2}
+                             4 {:id 4 :user/id 3}
+                             5 {:id 5 :user/id 3}
+                             6 {:id 6 :user/id 3}
+                             7 {:id 7 :user/id 4}
+                             8 {:id 8 :user/id 4}}
+            :appointments {;; Octavia needs CC, so should show up
+                           ;; when filtering by access need/CC.
+                           1 {:id 1 :user/id 3 :name "Octavia"
+                              :access-needs #{{:need/id 10}}}
+                           ;; Usula needs Spanish interpretation, so should show up
+                           ;; when filtering by access need/interpreter.
+                           2 {:id 2 :user/id 2 :name "Ursula"
+                              :access-needs #{{:need/id 11 :interpreter-lang "Khmer"}}}
+                           ;; Anon needs Spanish interpretation, so should show up
+                           ;; when filtering by access need/interpreter.
+                           3 {:id 3 :user/id 4 :name "Anonymous"
+                              :access-needs #{{:need/id 11 :interpreter-lang "Español"}}}
+                           ;; Kim has no access needs to accommodate, so should not show up
+                           ;; when filtering by access need.
+                           4 {:id 4 :user/id 2 :name "Kim"
+                              :access-needs #{}}
+                           ;; Janelle needs a Somali interpreter, but that has been fulfilled
+                           ;; by contact 14 (Weglot), so this should not show up when filtering
+                           ;; by access need.
+                           5 {:id 5 :user/id 2 :name "Janelle"
+                              :access-needs #{{:need/id 11 :interpreter-lang "Somali"}}
+                              :fulfillments #{{:need/id 11 :contact/id 14}}}}
+            :users {2 {:id 2 :first_name "Lauren" :last_name "Olamina"}
+                    3 {:id 3 :first_name "Shevek"}
+                    4 {:id 4 :first_name "Genly" :last_name "Ai"}}
+            :filters {:appointments? true
+                      :availabilities? true
+                      :providers #{2 3 4}
+                      :access-needs #{}}
+            :needs {10 {:id 10 :name "Closed Captioning"}
+                    11 {:id 11 :name "Interpreter"}
+                    12 {:id 12 :name "VRT"}}
+            :contacts {13 {:id 13 :name "Language Link"}
+                       14 {:id 14 :name "Weglot"}}
+            :user-id 3}
+        with-filters (fn [db filters]
+                       (update db :filters merge filters))
+        ;; Make tests more scannable!
+        simplify (fn [events]
+                   (map #(select-keys % [:id :event/type]) events))]
+
+    (testing "when displaying all calendar events"
+      (is (= [{:id 1 :event/type :availability}
+              {:id 2 :event/type :availability}
+              {:id 3 :event/type :availability}
+              {:id 4 :event/type :availability}
+              {:id 5 :event/type :availability}
+              {:id 6 :event/type :availability}
+              {:id 7 :event/type :availability}
+              {:id 8 :event/type :availability}
+              {:id 1 :event/type :appointment}
+              {:id 2 :event/type :appointment}
+              {:id 3 :event/type :appointment}
+              {:id 4 :event/type :appointment}
+              {:id 5 :event/type :appointment}]
+             (simplify (cal/visible-events db)))))
+    (testing "when filtering to availabilities only"
+      (is (= [{:id 1 :event/type :availability}
+              {:id 2 :event/type :availability}
+              {:id 3 :event/type :availability}
+              {:id 4 :event/type :availability}
+              {:id 5 :event/type :availability}
+              {:id 6 :event/type :availability}
+              {:id 7 :event/type :availability}
+              {:id 8 :event/type :availability}]
+             (simplify (cal/visible-events (with-filters db {:appointments? false}))))))
+    (testing "when filtering to appointments only"
+      (is (= [{:id 1 :event/type :appointment}
+              {:id 2 :event/type :appointment}
+              {:id 3 :event/type :appointment}
+              {:id 4 :event/type :appointment}
+              {:id 5 :event/type :appointment}]
+             (simplify (cal/visible-events (with-filters db {:availabilities? false}))))))
+    (testing "when filtering by provider"
+      (is (= [{:id 1 :event/type :availability}
+              {:id 2 :event/type :availability}
+              {:id 3 :event/type :availability}
+              {:id 4 :event/type :availability}
+              {:id 5 :event/type :availability}
+              {:id 6 :event/type :availability}
+              {:id 1 :event/type :appointment}
+              {:id 2 :event/type :appointment}
+              {:id 4 :event/type :appointment}
+              {:id 5 :event/type :appointment}]
+             (simplify (cal/visible-events (with-filters db {:providers #{2 3}}))))))
+    (testing "when filtering by access need"
+      (is (= [{:id 2 :event/type :appointment}
+              {:id 3 :event/type :appointment}]
+             ;; Filter by Needs Interpreter and Needs VRT
+             (simplify (cal/visible-events (with-filters db {:access-needs #{11 12}
+                                                             :availabilities? false})))))
+      (is (= [{:id 1 :event/type :appointment}
+              {:id 2 :event/type :appointment}
+              {:id 3 :event/type :appointment}]
+             ;; Filter by Needs CC and Needs Interpreter
+             (simplify (cal/visible-events (with-filters db {:access-needs #{10 11}
+                                                             :availabilities? false})))))
+      (is (= [{:id 1 :event/type :appointment}]
+             ;; Filter by Needs CC only
+             (simplify (cal/visible-events (with-filters db {:access-needs #{10}
+                                                             :availabilities? false})))))
+      (is (= []
+             ;; Filter by Needs VRT only
+             (simplify (cal/visible-events (with-filters db {:access-needs #{12}
+                                                             :availabilities? false})))))
+      (is (= []
+             ;; Filter by a non-existent access need
+             (simplify (cal/visible-events (with-filters db {:access-needs #{42}
+                                                             :availabilities? false})))))
+      (is (= [{:id 1 :event/type :appointment}
+              {:id 2 :event/type :appointment}
+              {:id 3 :event/type :appointment}
+              {:id 4 :event/type :appointment}
+              {:id 5 :event/type :appointment}]
+             ;; Clear access need filters
+             (simplify (cal/visible-events (with-filters db {:access-needs #{}
+                                                             :availabilities? false}))))))
+
+    ;; {:availabilities {1 {:id 1 :user/id 2} Lauren Olamina
+    ;;                   2 {:id 2 :user/id 2}
+    ;;                   3 {:id 3 :user/id 2}
+    ;;                   4 {:id 4 :user/id 3} Shevek
+    ;;                   5 {:id 5 :user/id 3}
+    ;;                   6 {:id 6 :user/id 3}
+    ;;                   7 {:id 7 :user/id 4} Genly Ai
+    ;;                   8 {:id 8 :user/id 4}}
+    ;;  :appointments {1 {:id 1 :user/id 3 :name "Octavia"}
+    ;;                 2 {:id 2 :user/id 2 :name "Ursula"}
+    ;;                 3 {:id 3 :user/id 4 :name "Anonymous"}
+    ;;                 4 {:id 4 :user/id 2 :name "Kim"}
+    ;;                 5 {:id 5 :user/id 2 :name "Janelle"}}}
+    (testing "Availabilities and Appointments display the correct title"
+      (is (= [;; Availabilities display the providers's name
+              "Lauren Olamina"
+              "Lauren Olamina"
+              "Lauren Olamina"
+              "Shevek"
+              "Shevek"
+              "Shevek"
+              "Genly Ai"
+              "Genly Ai"
+              ;; Appointments display the careseeker's name
+              "Octavia"
+              "Ursula"
+              "Anonymous"
+              "Kim"
+              "Janelle"]
+             (map :title (cal/visible-events db)))))
+
+    (testing "the current user's availabilities are deletable for them"
+      (is (= [false false false true true true false false nil nil nil nil nil]
+             (map :deletable (cal/visible-events db)))))))
+
+(deftest test-filter-by
+
+  (let [db {:filters {:appointments? true
+                      :availabilities? true
+                      :providers #{1 2 3}
+                      :access-needs #{4 5 6}}}]
+    ;; Appointments/Availabilities filters are just normal, boring toggles.
+    (is (false? (-> db
+                    (cal/update-filter [:_ :appointments? nil])
+                    (get-in [:filters :appointments?]))))
+    (is (true? (-> db
+                   (cal/update-filter [:_ :appointments? nil])
+                   (cal/update-filter [:_ :appointments? nil])
+                   (get-in [:filters :appointments?]))))
+    (is (false? (-> db
+                    (cal/update-filter [:_ :appointments? nil])
+                    (cal/update-filter [:_ :appointments? nil])
+                    (cal/update-filter [:_ :appointments? nil])
+                    (get-in [:filters :appointments?]))))
+
+    (is (false? (-> db
+                    (cal/update-filter [:_ :availabilities? nil])
+                    (get-in [:filters :availabilities?]))))
+    (is (true? (-> db
+                   (cal/update-filter [:_ :availabilities? nil])
+                   (cal/update-filter [:_ :availabilities? nil])
+                   (get-in [:filters :availabilities?]))))
+    (is (false? (-> db
+                    (cal/update-filter [:_ :availabilities? nil])
+                    (cal/update-filter [:_ :availabilities? nil])
+                    (cal/update-filter [:_ :availabilities? nil])
+                    (get-in [:filters :availabilities?]))))
+
+    ;; Updating a Provider filter toggles membership in the
+    ;; set of selected providers.
+    (is (= #{1 2}
+           (-> db
+               (cal/update-filter [:_ :providers 3])
+               (get-in [:filters :providers]))))
+    (is (= #{1 2 3}
+           (-> db
+               (cal/update-filter [:_ :providers 3])
+               (cal/update-filter [:_ :providers 3])
+               (get-in [:filters :providers]))))
+    (is (= #{1 2 3 4}
+           (-> db
+               (cal/update-filter [:_ :providers 4])
+               (get-in [:filters :providers]))))
+
+    ;; Updating an Access Need filter toggles membership in the
+    ;; set of selected needs.
+    (is (= #{4 5}
+           (-> db
+               (cal/update-filter [:_ :access-needs 6])
+               (get-in [:filters :access-needs]))))
+    (is (= #{4 5 6}
+           (-> db
+               (cal/update-filter [:_ :access-needs 6])
+               (cal/update-filter [:_ :access-needs 6])
+               (get-in [:filters :access-needs]))))
+    (is (= #{4 5 6 7}
+           (-> db
+               (cal/update-filter [:_ :access-needs 7])
+               (get-in [:filters :access-needs]))))))
