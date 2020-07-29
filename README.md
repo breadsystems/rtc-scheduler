@@ -91,7 +91,7 @@ If the app is able to start up correctly, you should be able to see it running a
 #### Tests
 
 ```sh
-clojure -A:dev -m kaocha.runner
+clojure -A:test
 ```
 
 Add the `--watch` option to rerun tests when CLJ files change (Ctrl+C to exit).
