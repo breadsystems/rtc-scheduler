@@ -5,7 +5,12 @@
    [garden.color :refer [rgba]]))
 
 (def calendar
-  [[:.rtc-appointment {:cursor :pointer}]
+  [[:.care-schedule {:display :grid
+                     :grid-template-columns "1fr 4fr"
+                     :grid-gap "1em"}]
+   [:.rtc-appointment {:cursor :pointer}]
+   [:.fc-event.rtc-availability {:cursor :default}
+    [:&.rtc-draggable {:cursor :grab}]]
    [:.rtc-delete {:position :absolute
                   :display :block
                   :right 0
@@ -18,7 +23,13 @@
                   :color :white
                   :font-weight 700
                   :font-size "1.5rem"
-                  :font-style :normal}]])
+                  :font-style :normal}]
+   [:.filter-group {:margin-bottom "3em"}]
+   [:.filter-field {:margin "1em 0"}]
+   [:.filter-label {:cursor :pointer}
+    [:&.filter-label--provider {:border-width "5px"
+                               :border-style "solid"
+                               :padding "0 0.3em"}]]])
 
 (def modal
   [[:.modal {:position :absolute

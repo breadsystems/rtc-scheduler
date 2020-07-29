@@ -114,7 +114,8 @@
                     12 {:id 12 :name "VRT"}}
             :contacts {13 {:id 13 :name "Language Link"}
                        14 {:id 14 :name "Weglot"}}
-            :user-id 3}
+            :user-id 3
+            :colors [:red :blue :green]}
         with-filters (fn [db filters]
                        (update db :filters merge filters))
         ;; Make tests more scannable!
@@ -297,3 +298,18 @@
            (-> db
                (cal/update-filter [:_ :access-needs 7])
                (get-in [:filters :access-needs]))))))
+
+(deftest test-users-by-id
+  (testing "it cycles through available colors"
+    (let [db {:users {1 {:id 1}
+                      2 {:id 2}
+                      3 {:id 3}
+                      4 {:id 4}
+                      5 {:id 5}}
+              :colors ["red" "blue" "green"]}] ;; RGB FTW
+      (is (= [{:id 1 :color "red"}
+              {:id 2 :color "blue"}
+              {:id 3 :color "green"}
+              {:id 4 :color "red"}
+              {:id 5 :color "blue"}]
+             (cal/providers db))))))

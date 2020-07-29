@@ -43,7 +43,7 @@
     :user-id 3
     :filters {:availabilities? true
               :appointments? true
-              :providers #{3} ;; TODO
+              :providers #{3 4} ;; TODO
               :access-needs #{}}
     :availabilities {1 {:id 1
                         :start #inst "2020-07-27T09:00:00-07:00"
@@ -66,47 +66,71 @@
                         :event/type :availability
                         :user/id 3}
                      5 {:id 5
-                        :start #inst "2020-08-02T10:00:00-07:00"
-                        :end #inst "2020-08-02T16:00:00-07:00"
+                        :start #inst "2020-07-31T10:00:00-07:00"
+                        :end #inst "2020-07-31T16:00:00-07:00"
                         :event/type :availability
-                        :user/id 2}
+                        :user/id 4}
                      6 {:id 6
                         :start #inst "2020-08-01T11:00:00-07:00"
                         :end #inst "2020-08-01T15:00:00-07:00"
-                        :title "AVAIL"
                         :event/type :availability
-                        :user/id 2}}
+                        :user/id 4}
+                     7 {:id 7
+                        :start #inst "2020-08-02T10:00:00-07:00"
+                        :end #inst "2020-08-02T16:00:00-07:00"
+                        :event/type :availability
+                        :user/id 4}}
     :appointments {10 {:id 10
                        :start #inst "2020-08-01T12:00:00-07:00"
                        :end #inst   "2020-08-01T12:30:00-07:00"
                        :name "Octavia"
                        :event/type :appointment
+                       :access-needs #{}
+                       :fulfillments #{}
                        :user/id 3}
                    11 {:id 11
                        :start #inst "2020-07-30T13:00:00-07:00"
                        :end #inst   "2020-07-30T13:30:00-07:00"
                        :name "Malcom"
                        :event/type :appointment
+                       :access-needs #{{:need/id 1}}
+                       :fulfillments #{}
                        :user/id 3}
                    12 {:id 12
                        :start #inst "2020-08-02T14:00:00-07:00"
                        :end #inst   "2020-08-02T14:30:00-07:00"
                        :name "Angela"
                        :event/type :appointment
+                       :access-needs #{{:need/id 2}}
+                       :fulfillments #{}
                        :user/id 2}
                    13 {:id 13
                        :start #inst "2020-07-28T11:00:00-07:00"
                        :end #inst   "2020-07-28T11:30:00-07:00"
                        :name "Ursula"
                        :event/type :appointment
+                       :access-needs #{}
+                       :fulfillments #{}
                        :user/id 1}}
     :users {3 {:id 3
-               :first_name "Coby"
-               :last_name "Tamayo"
+               :first_name "Lauren"
+               :last_name "Olamina"
+               :roles #{:doc :kin}}
+            4 {:id 4
+               :first_name "Shevek"
                :roles #{:doc :kin}}}
+    :needs {1 {:id 1 :name "Interpreter"}
+            2 {:id 2 :name "Closed Captioning"}}
     :current-invite {:email ""}
     :my-invitations []
-    :focused-appointment nil}))
+    :focused-appointment nil
+    :colors ["#0a5821c0"
+             "#6f026fc0"
+             "#1f026fc0"
+             "#114e73c0"
+             "#115325c0"
+             "#531b11c0"
+             "#4d0e5ac0"]}))
 
 ;;
 ;; Client-side routing, via Reitit.

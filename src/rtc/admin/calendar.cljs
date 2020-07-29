@@ -45,14 +45,28 @@
   (filter #(= id (:user/id %)) avails))
 
 (defn can-overlap? [a b]
-  (not (and (= "availability" (.. a -extendedProps -type))
-            (= "availability" (.. b -extendedProps -type)))))
+  (let [provider-id #(.. % -_def -extendedProps -provider_id)]
+    (or (not (availability? a))
+        (not (availability? b))
+        (not= (provider-id a) (provider-id b)))))
 
 (defn update-availability [db [_ id avail-data]]
   (update-in db [:availabilities id] merge avail-data))
 
 (defn delete-availability [db [_ id]]
   (update db :availabilities dissoc (js/parseInt id)))
+
+(defn users-by-id [{:keys [users colors]}]
+  (into {} (map (fn [[id user] color]
+                  [id (assoc user :color color)])
+                users
+                (take (count users) (cycle colors)))))
+
+(defn providers [db]
+  ;; TODO filter by role?
+  (vals (users-by-id db)))
+
+(providers {:users {1 {:id 1} 2 {:id 2}} :colors [1]})
 
 (defn current-user [{:keys [users user-id]}]
   (get users user-id))
@@ -62,6 +76,9 @@
 
 (defn- by-provider [events providers]
   (filter #(contains? providers (:user/id %)) events))
+
+(defn- access-needs [db]
+  (vals (:needs db)))
 
 (defn- fulfilled? [appt need]
   (contains? (set (map :need/id (:fulfillments appt))) need))
@@ -76,7 +93,24 @@
       (boolean ((apply some-fn predicates) appt)))
     false))
 
+(defn- any-unfulfilled? [appt]
+  (let [need-ids (map :need/id (:access-needs appt))]
+    (not (every? (partial fulfilled? appt) need-ids))))
+
 (comment
+  (any-unfulfilled? {:access-needs #{{:need/id 1} {:need/id 2}}
+                     :fulfillments #{{:need/id 1} {:need/id 2}}})
+  ;; => false
+  (any-unfulfilled? {:access-needs #{{:need/id 1} {:need/id 2}}
+                     :fulfillments #{{:need/id 1}}})
+  ;; => true
+  (any-unfulfilled? {:access-needs #{{:need/id 1} {:need/id 2}}
+                     :fulfillments #{{:need/id 42}}})
+  ;; => true
+  (any-unfulfilled? {:access-needs #{}
+                     :fulfillments #{{:need/id 42}}})
+  ;; => false
+
   (def with-needs {:access-needs #{{:need/id 1} {:need/id 2}}})
   (needs? with-needs 1)
   ;; => true
@@ -125,33 +159,41 @@
   (or (:name person)
       (join " " (filter some? ((juxt :first_name :last_name) person)))))
 
-(defn- deletable-for? [avail user-id]
+(defn- editable-for? [avail user-id]
   (= user-id (:user/id avail)))
 
 (defmulti ->fc-event :event/type)
 
 (defmethod ->fc-event :default [e] e)
 
-(defmethod ->fc-event :availability [event]
+(defmethod ->fc-event :availability [{:keys [event/provider] :as event}]
   (assoc event
-         :title (full-name (:event/provider event))
-         :editable true
-         :backgroundColor "#325685"
-         :classNames ["rtc-availability"]))
+         :title (full-name provider)
+         :provider_id (:id provider)
+         :backgroundColor (:color provider)
+         :borderColor (:color provider)
+         :classNames ["rtc-availability" (when (:editable event) "rtc-draggable")]))
 
-(defmethod ->fc-event :appointment [appt]
-  (assoc appt
-         :title (:name appt)
-         :editable false
-         :classNames ["rtc-appointment"]))
+(defmethod ->fc-event :appointment [{:keys [event/provider] :as appt}]
+  (let [unfulfilled? (any-unfulfilled? appt)
+        border-color (if unfulfilled? "#ff006c" "#76b7fd")
+        bg-color (if unfulfilled? "#6f026f" "#256fbe")]
+    (assoc appt
+           :title (full-name appt)
+           :provider_id (:id provider)
+           :editable false
+           :borderColor border-color
+           :backgroundColor bg-color
+           :classNames ["rtc-appointment"])))
 
-(defn visible-events [{:keys [availabilities appointments filters users needs user-id]}]
+(defn visible-events [{:keys [availabilities appointments filters needs user-id] :as db}]
   (let [{:keys [availabilities? appointments? providers access-needs]} filters
         ;; Only type and provider filters apply to Availabilities.
         visible-avails (-> (when availabilities?
                              (map #(assoc %
                                           :event/type :availability
-                                          :deletable (deletable-for? % user-id))
+                                          :deletable (editable-for? % user-id)
+                                          :editable (editable-for? % user-id))
                                   (vals availabilities)))
                            (by-provider providers))
         ;; All filters apply to Appointments.
@@ -164,7 +206,7 @@
         ;; Combine all events and enrich them with de-normalized display data
         enriched (map (fn [event]
                         (assoc event
-                               :event/provider (get users (:user/id event))
+                               :event/provider (get (users-by-id db) (:user/id event))
                                :event/needs (map #(get needs (:need/id %)) (:access-needs event))))
                       (concat visible-avails visible-appts))]
     (map ->fc-event enriched)))
@@ -177,16 +219,11 @@
  ;;                           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(rf/reg-sub ::my-availabilities (fn [{:keys [availabilities user-id]}]
-                                  (filter-by-id (vals availabilities) user-id)))
-
-(rf/reg-sub ::my-appointments (fn [{:keys [appointments user-id]}]
-                                (filter-by-id (vals appointments) user-id)))
-
 (rf/reg-sub ::focused-appointment :focused-appointment)
 (rf/reg-sub ::events visible-events)
-(rf/reg-sub ::filters identity)
+(rf/reg-sub ::filters :filters)
+(rf/reg-sub ::providers providers)
+(rf/reg-sub ::access-needs access-needs)
 
 
 
@@ -257,13 +294,15 @@
   @(rf/subscribe [::my-appointments])
   @(rf/subscribe [::focused-appointment])
   @(rf/subscribe [::filters])
+  @(rf/subscribe [::providers])
 
   (rf/dispatch [::create-availability {:db {:start "2020-07-31T10:00"
                                             :end "2020-07-31T17:00"
                                             :event/type :availability
                                             :user/id 3}}])
 
-  (rf/dispatch [::update-filter :providers 3]))
+  (rf/dispatch [::update-filter :providers 3])
+  (rf/dispatch [::update-filter :providers 4]))
 
 
 
@@ -281,6 +320,54 @@
      [:<> children]
      [:span.modal__close {:on-click #(rf/dispatch [::focus-appointment nil])} "×"]]]])
 
+(defn filter-controls []
+  (let [filters @(rf/subscribe [::filters])
+        access-needs @(rf/subscribe [::access-needs])
+        providers @(rf/subscribe [::providers])]
+    [:div.filter-controls
+     [:div.filter-group
+      [:h4 "Filter by provider"]
+      (doall (map (fn [{:keys [id] :as provider}]
+                    (let [html-id (str "provider-filter-" id)]
+                      [:div.filter-field
+                       [:input {:id html-id
+                                :type :checkbox
+                                :on-change #(rf/dispatch [::update-filter :providers id])
+                                :checked (contains? (:providers filters) id)
+                                :style {}}]
+                       [:label.filter-label.filter-label--provider
+                        {:for html-id
+                         :style {:border-color (:color provider)}}
+                        (full-name provider)]]))
+                  providers))]
+     [:div.filter-group
+      [:h4 "Filter by access need"]
+      (doall (map (fn [{:keys [id name]}]
+                    (let [html-id (str "access-filter-" id)]
+                      [:div.filter-field
+                       [:input {:id html-id
+                                :type :checkbox
+                                :on-change #(rf/dispatch [::update-filter :access-needs id])
+                                :checked (contains? (:access-needs filters) id)
+                                :style {}}]
+                       [:label.filter-label {:for html-id}
+                        (str "Needs " name)]]))
+                  access-needs))]
+     [:div.filter-group
+      [:h4 "Filter by type"]
+      [:div.filter-field
+       [:input {:id "show-availabilities"
+                :type :checkbox
+                :on-change #(rf/dispatch [::update-filter :availabilities? nil])
+                :checked (:availabilities? filters)}]
+       [:label.filter-label {:for "show-availabilities"} "Show availabilities"]]
+      [:div.filter-field
+       [:input {:id "show-appointments"
+                :type :checkbox
+                :on-change #(rf/dispatch [::update-filter :appointments? nil])
+                :checked (:appointments? filters)}]
+       [:label.filter-label {:for "show-appointments"} "Show appointments"]]]]))
+
 (defn calendar []
   (let [!ref (atom nil)]
     (r/create-class
@@ -295,7 +382,6 @@
               cal (js/FullCalendar.Calendar.
                    @!ref
                    #js {:selectable true
-                        :editable true
                         :headerToolbar #js {:start "today prev next"
                                             :center "title"
                                             :end "dayGridMonth timeGridWeek listWeek"}
@@ -305,6 +391,7 @@
                                           (rf/dispatch [::focus-appointment e]))))
                         :eventDidMount (fn [info]
                                          (when (.. info -event -_def -extendedProps -deletable)
+                                           (js/console.log (.-event info))
                                            (let [id (.. info -event -id)
                                                  elem (.-el info)
                                                  delete-btn (js/document.createElement "i")
@@ -343,7 +430,9 @@
                     ;; TODO enable drag & click interaction
                       :plugins [#_interactionPlugin listPlugin timeGridPlugin]}]
   (let [appt @(rf/subscribe [::focused-appointment])]
-    [:div.calendar-container
+    [:div.schedule-container
      (when appt
        [modal [:div "heyyy"]])
-     [calendar]]))
+     [:div.care-schedule
+      [filter-controls]
+      [calendar]]]))
