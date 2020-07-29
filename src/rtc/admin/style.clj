@@ -26,10 +26,10 @@
                   :font-style :normal}]
    [:.filter-group {:margin-bottom "3em"}]
    [:.filter-field {:margin "1em 0"}]
-   [:.filter-label {:cursor :pointer}
-    [:&.filter-label--provider {:border-width "5px"
-                               :border-style "solid"
-                               :padding "0 0.3em"}]]])
+   [:.filter-label {:margin-left "0.3em"
+                    :cursor :pointer}
+    [:&.filter-label--provider {:border-bottom-width "5px"
+                                :border-bottom-style "solid"}]]])
 
 (def modal
   [[:.modal {:position :absolute
