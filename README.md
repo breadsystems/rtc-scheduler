@@ -24,7 +24,10 @@ Our virtual clinics are real-world liberated zones. We don’t have “patients�
 This application ships a Docker image, which is the recommended method of running in production.
 
 ```sh
-docker run -it -p 8080:8080 radtelehealth/rtc-calendar
+docker run -it -p 8080:8080 \
+  -e DATABASE_URL=jdbc:postgresql://dbhost/dbname \
+  -e AUTHY_API_KEY=yourapikey \
+  radtelehealth/rtc-scheduler
 ```
 
 ## Building the means of production
