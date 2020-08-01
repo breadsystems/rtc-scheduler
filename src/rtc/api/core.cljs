@@ -30,6 +30,8 @@
 
 
 (comment
+  (debug-query! [:query
+                 [:appointment {:id }]])
   (debug-query! [:mutation
                  [:invite {:email "abc@example.email"}
                   :code :email]]))

@@ -20,6 +20,7 @@
                   :height "1em"
                   :z-index 2
 
+                  :cursor :pointer
                   :color :white
                   :font-weight 700
                   :font-size "1.5rem"

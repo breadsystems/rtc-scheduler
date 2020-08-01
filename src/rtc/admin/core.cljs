@@ -41,7 +41,7 @@
  (fn [_]
    {:view :schedule
     ;; TODO get this stuff from GraphQL
-    :user-id 3
+    :user-id 4
     :filters {:availabilities? true
               :appointments? true
               :providers #{3 4} ;; TODO
