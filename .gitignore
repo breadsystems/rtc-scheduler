@@ -1,5 +1,6 @@
 .cpcache/
 env/**/config.edn
+lock
 /target/
 /resources/public/js/
 /resources/public/test/
