@@ -13,6 +13,7 @@
 (def muted-pink (rgb 185 90 115))
 (def off-white (rgb 255 230 250))
 (def purple "#b9a1fb")
+(def indigo (rgb 127 90 240))
 (def dark-purple (rgb 110 25 160))
 (def muted-purple (rgb 55 5 80))
 (def grey (rgb 100 100 100))
@@ -34,6 +35,7 @@
    [:.help {:color grey
             :font-style :italic}]
    [:.center {:text-align :center}]
+   [:.right {:text-align :right}]
    [:.highlight {:color pink}]
    [:.spacious {:margin-top "3em"
                 :margin-bottom "3em"}]
@@ -71,7 +73,7 @@
                   :color :white
                   :background pink})
 
-(def button-secondary (merge button-base {:background purple}))
+(def button-secondary (merge button-base {:background indigo}))
 
 (def button-disabled {:background-color muted-pink
                       :color off-white
@@ -97,12 +99,19 @@
             {:min-width "25rem"
              :padding "0.7em"
              :border-radius border-radius
-             :border purple-border}]]
+             :border purple-border}]
+    [:&:disabled {:cursor :not-allowed}
+     [:&+label {:cursor :not-allowed}]]]
    [:button :.button button-base
     [:&.secondary button-secondary
      [:&:disabled :&.disabled button-disabled-secondary]]
     [:&.next {:text-align :right}]
     [:&:disabled :&.disabled button-disabled]]
+   [:.text-button {:font-weight 700
+                   :color indigo
+                   :cursor :pointer}
+    [:&:disabled :&.disabled {:cursor :not-allowed
+                              :color dark-grey}]]
    [:select {:width "25rem"
              :max-width "100%"
              :border purple-border
@@ -115,6 +124,8 @@
              :-moz-appearance :none
              :-webkit-appearance :none}
     [:&:ms-expand {:display :none}]]
+   [:legend {:color dark-purple
+             :font-weight 700}]
    [:.fc-button {:opacity 1
                  :background dark-purple
                  :border :none

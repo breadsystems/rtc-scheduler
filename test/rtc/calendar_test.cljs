@@ -234,7 +234,7 @@
       (is (= [false false false true true true false false nil nil nil nil nil]
              (map :deletable (cal/visible-events db)))))))
 
-(deftest test-filter-by
+(deftest test-update-filter
 
   (let [db {:filters {:appointments? true
                       :availabilities? true
@@ -299,6 +299,15 @@
                (cal/update-filter [:_ :access-needs 7])
                (get-in [:filters :access-needs]))))))
 
+(deftest test-clear-filter
+  
+  (testing "it resets all selected filters to the empty set"
+    (let [db {:filters {:access-needs #{1 2 3}}}]
+      (is (= #{}
+             (-> db
+                 (cal/clear-filter [:_ :access-needs])
+                 (get-in [:filters :access-needs])))))))
+
 (deftest test-users-by-id
   (testing "it cycles through available colors"
     (let [db {:users {1 {:id 1}
@@ -315,13 +324,16 @@
              (cal/providers db))))))
 
 (deftest test-access-needs-filter-summary
-  (let [db {:filters {:access-needs #{}}
+  (let [db {:filters {:appointments? true
+                      :access-needs #{}}
             :needs {1 {:id 1 :name "Love"}
                     2 {:id 2 :name "Fulfillment"}
                     3 {:id 3 :name "Food"}
                     4 {:id 4 :name "Shelter"}}}
         with-needs (fn [needs]
                      (assoc-in db [:filters :access-needs] needs))]
+    (is (= "Appointments are hidden"
+           (cal/access-needs-filter-summary (assoc-in db [:filters :appointments?] false))))
     (is (= "Showing all appointments"
            (cal/access-needs-filter-summary db)))
     (is (= "Showing appointments that need Love"

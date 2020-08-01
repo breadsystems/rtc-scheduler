@@ -7,7 +7,8 @@
   ;;  ["@fullcalendar/timegrid" :default timeGridPlugin]
    [reagent.core :as r]
    [re-frame.core :as rf]
-   [rtc.api.core :as api]))
+   [rtc.api.core :as api]
+   [rtc.style.colors :as colors]))
 
 
 
@@ -86,11 +87,18 @@
     (join " OR " phrases)))
 
 (defn access-needs-filter-summary [{:keys [filters needs]}]
-  (let [filtered (:access-needs filters)]
-    (if (seq filtered)
+  (let [hiding-appointments? (not (:appointments? filters))
+        filtered (:access-needs filters)]
+    (cond
+      hiding-appointments?
+      "Appointments are hidden"
+
+      (seq filtered)
       (let [labels (map :name (filter #(contains? filtered (:id %)) (vals needs)))
             oxford-comma (oxford-comma labels)]
         (str "Showing appointments that need " oxford-comma))
+
+      :else
       "Showing all appointments")))
 
 (defn- fulfilled? [appt need]
@@ -189,8 +197,12 @@
 
 (defmethod ->fc-event :appointment [{:keys [event/provider] :as appt}]
   (let [unfulfilled? (any-unfulfilled? appt)
-        border-color (if unfulfilled? "#ff006c" "#76b7fd")
-        bg-color (if unfulfilled? "#6f026f" "#256fbe")]
+        border-color (if unfulfilled?
+                       colors/appointment-unfulfilled-border
+                       colors/appointment-fulfilled-border)
+        bg-color (if unfulfilled?
+                   colors/appointment-unfulfilled-bg
+                   colors/appointment-fulfilled-bg)]
     (assoc appt
            :title (full-name appt)
            :provider_id (:id provider)
@@ -268,6 +280,9 @@
 (defn update-filter [db [_ k v]]
   (update-in db [:filters k] #(update-filter* k % v)))
 
+(defn clear-filter [db [_ k]]
+  (assoc-in db [:filters k] #{}))
+
 (rf/reg-event-fx ::create-availability (fn [{:keys [db]} [_ avail]]
                                          ;; TODO do id and overlap check server-side
                                          (let [{:keys [availabilities user-id]} db
@@ -303,6 +318,10 @@
                                    {:db (update-filter db dispatch)
                                     ::render-calendar nil}))
 
+(rf/reg-event-fx ::clear-filter (fn [{:keys [db]} filter-key]
+                                  {:db (clear-filter db filter-key)
+                                   ::render-calendar nil}))
+
 (comment
   @(rf/subscribe [::my-availabilities])
   @(rf/subscribe [::my-appointments])
@@ -337,6 +356,9 @@
 
 (defn filter-controls []
   (let [filters @(rf/subscribe [::filters])
+        showing-appointments? (:appointments? filters)
+        can-clear-access-needs? (and showing-appointments?
+                                     (seq (:access-needs filters)))
         access-needs @(rf/subscribe [::access-needs])
         summary @(rf/subscribe [::access-needs-filter-summary])
         providers @(rf/subscribe [::providers])]
@@ -365,11 +387,16 @@
                                 :type :checkbox
                                 :on-change #(rf/dispatch [::update-filter :access-needs id])
                                 :checked (contains? (:access-needs filters) id)
+                                :disabled (not showing-appointments?)
                                 :style {}}]
                        [:label.filter-label {:for html-id}
                         (str "Needs " name)]]))
                   access-needs))
-      [:p.instruct summary]]
+      [:p.instruct summary]
+      (when can-clear-access-needs?
+        [:div
+         [:a.text-button {:on-click #(rf/dispatch [::clear-filter :access-needs])}
+          "Show all"]])]
      [:div.filter-group
       [:h4 "Filter by type"]
       [:div.filter-field
@@ -383,7 +410,15 @@
                 :type :checkbox
                 :on-change #(rf/dispatch [::update-filter :appointments? nil])
                 :checked (:appointments? filters)}]
-       [:label.filter-label {:for "show-appointments"} "Show appointments"]]]]))
+       [:label.filter-label {:for "show-appointments"} "Show appointments"]]]
+     [:fieldset.access-needs-legend
+      [:legend "Appointment colors"]
+      [:div {:style {:background-color colors/appointment-unfulfilled-bg
+                     :border-color colors/appointment-unfulfilled-border}}
+       "Unmet access needs"]
+      [:div {:style {:background-color colors/appointment-fulfilled-bg
+                     :border-color colors/appointment-fulfilled-border}}
+       "Access needs met"]]]))
 
 (defn calendar []
   (let [!ref (atom nil)]
@@ -408,7 +443,6 @@
                                           (rf/dispatch [::focus-appointment e]))))
                         :eventDidMount (fn [info]
                                          (when (.. info -event -_def -extendedProps -deletable)
-                                           (js/console.log (.-event info))
                                            (let [id (.. info -event -id)
                                                  elem (.-el info)
                                                  delete-btn (js/document.createElement "i")

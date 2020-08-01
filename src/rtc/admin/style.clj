@@ -29,7 +29,15 @@
    [:.filter-label {:margin-left "0.3em"
                     :cursor :pointer}
     [:&.filter-label--provider {:border-bottom-width "5px"
-                                :border-bottom-style "solid"}]]])
+                                :border-bottom-style "solid"}]]
+   [:.access-needs-legend
+    [:div {:margin "0.3em"
+           :padding "0.3em"
+           :display :inline-block
+           :border-radius "3px"
+           :border-width "1px"
+           :border-style :solid
+           :color :white}]]])
 
 (def modal
   [[:.modal {:position :absolute

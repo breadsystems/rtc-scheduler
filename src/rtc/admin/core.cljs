@@ -16,6 +16,7 @@
    [rtc.admin.calendar :as calendar]
    [rtc.admin.schedule :as schedule]
    [rtc.api.core :as api]
+   [rtc.style.colors :as colors]
    [rtc.users.invites.ui :as invites]))
 
 
@@ -124,13 +125,7 @@
     :current-invite {:email ""}
     :my-invitations []
     :focused-appointment nil
-    :colors ["#0a5821c0"
-             "#6f026fc0"
-             "#1f026fc0"
-             "#114e73c0"
-             "#115325c0"
-             "#531b11c0"
-             "#4d0e5ac0"]}))
+    :colors colors/availability-colors}))
 
 ;;
 ;; Client-side routing, via Reitit.
