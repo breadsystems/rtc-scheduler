@@ -183,6 +183,16 @@
 (defn- editable-for? [avail user-id]
   (= user-id (:user/id avail)))
 
+(defn- appointment->border-color [appt]
+  (if (any-unfulfilled? appt)
+    colors/appointment-unfulfilled-border
+    colors/appointment-fulfilled-border))
+
+(defn- appointment->bg-color [appt]
+  (if (any-unfulfilled? appt)
+    colors/appointment-unfulfilled-bg
+    colors/appointment-fulfilled-bg))
+
 (defmulti ->fc-event :event/type)
 
 (defmethod ->fc-event :default [e] e)
@@ -203,13 +213,13 @@
         bg-color (if unfulfilled?
                    colors/appointment-unfulfilled-bg
                    colors/appointment-fulfilled-bg)]
-    (assoc appt
-           :title (full-name appt)
-           :provider_id (:id provider)
-           :editable false
-           :borderColor border-color
-           :backgroundColor bg-color
-           :classNames ["rtc-appointment"])))
+  (assoc appt
+         :title (full-name appt)
+         :provider_id (:id provider)
+         :editable false
+         :borderColor (appointment->border-color appt)
+         :backgroundColor (appointment->bg-color appt)
+         :classNames ["rtc-appointment"]))
 
 (defn visible-events [{:keys [availabilities appointments filters needs user-id] :as db}]
   (let [{:keys [availabilities? appointments? providers access-needs]} filters
