@@ -3,6 +3,7 @@ env/**/config.edn
 lock
 *.repl-file
 .clj-kondo/
+.calva/
 /target/
 /resources/public/js/
 /resources/public/test/
