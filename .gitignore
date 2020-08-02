@@ -1,6 +1,8 @@
 .cpcache/
 env/**/config.edn
 lock
+*.repl-file
+.clj-kondo/
 /target/
 /resources/public/js/
 /resources/public/test/
