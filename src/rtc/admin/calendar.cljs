@@ -5,6 +5,7 @@
   ;;  ["@fullcalendar/list" :default listPlugin]
   ;;  ["@fullcalendar/react" :default FullCalendar]
   ;;  ["@fullcalendar/timegrid" :default timeGridPlugin]
+   ["moment" :as moment]
    [reagent.core :as r]
    [re-frame.core :as rf]
    [rtc.api.core :as api]
@@ -206,13 +207,6 @@
          :classNames ["rtc-availability" (when (:editable event) "rtc-draggable")]))
 
 (defmethod ->fc-event :appointment [{:keys [event/provider] :as appt}]
-  (let [unfulfilled? (any-unfulfilled? appt)
-        border-color (if unfulfilled?
-                       colors/appointment-unfulfilled-border
-                       colors/appointment-fulfilled-border)
-        bg-color (if unfulfilled?
-                   colors/appointment-unfulfilled-bg
-                   colors/appointment-fulfilled-bg)]
   (assoc appt
          :title (full-name appt)
          :provider_id (:id provider)
@@ -254,12 +248,29 @@
  ;;                           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(rf/reg-sub ::focused-appointment :focused-appointment)
+;; (rf/reg-sub ::focused-appointment :focused-appointment)
+(rf/reg-sub ::focused-appointment (fn [{:keys [appointments focused-appointment]}]
+                                     (some->> focused-appointment
+                                              (get appointments))))
 (rf/reg-sub ::events visible-events)
 (rf/reg-sub ::filters :filters)
 (rf/reg-sub ::providers providers)
 (rf/reg-sub ::access-needs access-needs)
+(rf/reg-sub ::access-need (fn [{:keys [needs]} [_ id]]
+                            (get needs id)))
 (rf/reg-sub ::access-needs-filter-summary access-needs-filter-summary)
+(rf/reg-sub ::can-view-medical-needs? (fn [{:keys [user-id users]}]
+                                        (let [user (get users user-id)]
+                                          (contains? (:roles user) :doc))))
+
+(comment
+  @(rf/subscribe [::my-availabilities])
+  @(rf/subscribe [::my-appointments])
+  @(rf/subscribe [::focused-appointment])
+
+  @(rf/subscribe [::filters])
+  @(rf/subscribe [::providers])
+  @(rf/subscribe [::access-needs-filter-summary]))
 
 
 
@@ -315,8 +326,8 @@
                                          {:db (delete-availability db dispatch)
                                           ::render-calendar nil}))
 
-(rf/reg-event-db ::focus-appointment (fn [db [_ appt]]
-                                       (assoc db :focused-appointment appt)))
+(rf/reg-event-db ::focus-appointment (fn [db [_ id]]
+                                       (assoc db :focused-appointment id)))
 
 ;; Keep our FullCalendar instance around so we can re-render on demand.
 (def !calendar (r/atom nil))
@@ -335,7 +346,7 @@
 (comment
   @(rf/subscribe [::my-availabilities])
   @(rf/subscribe [::my-appointments])
-  @(rf/subscribe [::focused-appointment])
+  @(rf/subscribe [::focused-appointment*])
   @(rf/subscribe [::filters])
   @(rf/subscribe [::providers])
   @(rf/subscribe [::access-needs-filter-summary])
@@ -366,12 +377,12 @@
 
 (defn filter-controls []
   (let [filters @(rf/subscribe [::filters])
-        showing-appointments? (:appointments? filters)
-        can-clear-access-needs? (and showing-appointments?
-                                     (seq (:access-needs filters)))
         access-needs @(rf/subscribe [::access-needs])
         summary @(rf/subscribe [::access-needs-filter-summary])
-        providers @(rf/subscribe [::providers])]
+        providers @(rf/subscribe [::providers])
+        showing-appointments? (:appointments? filters)
+        can-clear-access-needs? (and showing-appointments?
+                                     (seq (:access-needs filters)))]
     [:div.filter-controls
      [:div.filter-group
       [:h4 "Filter by provider"]
@@ -423,12 +434,56 @@
        [:label.filter-label {:for "show-appointments"} "Show appointments"]]]
      [:fieldset.access-needs-legend
       [:legend "Appointment colors"]
-      [:div {:style {:background-color colors/appointment-unfulfilled-bg
-                     :border-color colors/appointment-unfulfilled-border}}
-       "Unmet access needs"]
-      [:div {:style {:background-color colors/appointment-fulfilled-bg
-                     :border-color colors/appointment-fulfilled-border}}
-       "Access needs met"]]]))
+      [:div.access-needs-indicator.--unmet "Unmet access needs"]
+      [:div.access-needs-indicator.--met "Access needs met"]]]))
+
+(defmulti access-need (fn [{:keys [need/type]}] type))
+
+(defmethod access-need :default [{:keys [name]}]
+  [:span.access-need-label name])
+
+(defmethod access-need :interpreter [{:keys [name interpreter/lang]}]
+  [:div.access-need [:b name] ": " lang])
+
+(defn appointment-details []
+  (let [appt @(rf/subscribe [::focused-appointment])
+        {:keys [pronouns email phone ok_to_text reason access-needs]} appt
+        start (moment. (:start appt))
+        can-view-medical-needs? @(rf/subscribe [::can-view-medical-needs?])]
+    [:article.appointment
+     [:header
+      [:h2.appointment-name (full-name appt) (when (seq pronouns)
+                                               (str " (" pronouns ")"))]
+      [:h3 (.format start "h:mma ddd, MMM D")]]
+     [:div.appointment-details
+      [:div.appointment-field-group
+       [:h3 "Contact"]
+       [:dl
+        (when (seq email)
+          [:<>
+           [:dt "Email"]
+           [:dd [:a {:href (str "mailto:")} email]]])
+        (when (seq phone)
+          [:<>
+           [:dt "Phone"]
+           [:dd [:a {:href (str "tel:" phone)} phone]]])
+        [:dt "OK to text?"]
+        [:dd (if ok_to_text "yes" "no")]]]
+      [:div.appointment-field-group
+       [:h3 "Access Needs"]
+       (if (seq access-needs)
+         [:<>
+          [:div.access-needs-indicator.--unmet "Unmet access needs"]
+          (doall (map (fn [{:need/keys [id] :as appt-need}]
+                        (let [need (merge @(rf/subscribe [::access-need id]) appt-need)]
+                          [:p (access-need need)]))
+                      access-needs))]
+         [:<>
+          [:div.access-needs-indicator.--met "Access needs met!"]])]]
+     (when can-view-medical-needs?
+       [:div.appointment-field-group
+        [:h3 "Medical Needs"]
+        [:p reason]])]))
 
 (defn calendar []
   (let [!ref (atom nil)]
@@ -448,9 +503,10 @@
                                             :center "title"
                                             :end "dayGridMonth timeGridWeek listWeek"}
                         :eventClick (fn [info]
-                                      (let [e (.-event info)]
+                                      (let [e (.-event info)
+                                            id (js/parseInt (.-id e))]
                                         (when (appointment? e)
-                                          (rf/dispatch [::focus-appointment e]))))
+                                          (rf/dispatch [::focus-appointment id]))))
                         :eventDidMount (fn [info]
                                          (when (.. info -event -_def -extendedProps -deletable)
                                            (let [id (.. info -event -id)
@@ -493,7 +549,8 @@
   (let [appt @(rf/subscribe [::focused-appointment])]
     [:div.schedule-container
      (when appt
-       [modal [:div "heyyy"]])
+       [modal
+        [appointment-details]])
      [:div.care-schedule
       [filter-controls]
       [calendar]]]))

@@ -24,7 +24,11 @@
 
 
 (def base
-  [[:section {:margin-bottom "2em"}]])
+  [[:section {:margin-bottom "2em"}]
+   [:dl {:display :grid
+         :grid-template-columns "1fr 5fr"}]
+   [:dt {:margin-bottom "0.3em"
+         :font-weight 700}]])
 
 (def typography
   [[:h1 {:color pink

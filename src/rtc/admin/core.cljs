@@ -85,22 +85,37 @@
                        :start #inst "2020-08-01T12:00:00-07:00"
                        :end #inst   "2020-08-01T12:30:00-07:00"
                        :name "Octavia"
+                       :pronouns "she/her"
+                       :email "octaviab@earthseed.net"
+                       :phone "555-555-5555"
+                       :ok_to_text true
+                       :reason "Life is pain"
                        :event/type :appointment
-                       :access-needs #{}
+                       :access-needs #{{:need/id 1 :interpreter/lang "Español"}}
                        :fulfillments #{}
                        :user/id 3}
                    11 {:id 11
                        :start #inst "2020-07-30T13:00:00-07:00"
                        :end #inst   "2020-07-30T13:30:00-07:00"
                        :name "Malcom"
+                       :pronouns "he/him"
+                       :email "x@riseup.net"
+                       :phone "555-555-5555"
+                       :ok_to_text true
+                       :reason "Life is pain"
                        :event/type :appointment
-                       :access-needs #{{:need/id 1}}
+                       :access-needs #{{:need/id 1 :interpreter/lang "Chinese Mandarin"}}
                        :fulfillments #{}
                        :user/id 3}
                    12 {:id 12
                        :start #inst "2020-08-02T14:00:00-07:00"
                        :end #inst   "2020-08-02T14:30:00-07:00"
                        :name "Angela"
+                       :pronouns "they/them"
+                       :email "angelab@riseup.net"
+                       :phone "555-555-5555"
+                       :ok_to_text false
+                       :reason "Life is pain"
                        :event/type :appointment
                        :access-needs #{{:need/id 2}}
                        :fulfillments #{}
@@ -109,10 +124,28 @@
                        :start #inst "2020-07-28T11:00:00-07:00"
                        :end #inst   "2020-07-28T11:30:00-07:00"
                        :name "Ursula"
+                       :pronouns "she/her"
+                       :email "ursula@ursulakleguin.com"
+                       :phone "555-555-5555"
+                       :ok_to_text true
+                       :reason "Life is pain"
                        :event/type :appointment
                        :access-needs #{}
                        :fulfillments #{}
-                       :user/id 1}}
+                       :user/id 1}
+                   14 {:id 14
+                       :start #inst "2020-07-30T13:30:00-07:00"
+                       :end #inst   "2020-07-30T14:00:00-07:00"
+                       :name "Anonymous Katie"
+                       :pronouns ""
+                       :email "anon@protonmail.com"
+                       :phone ""
+                       :ok_to_text nil
+                       :reason "Life is pain"
+                       :event/type :appointment
+                       :access-needs #{{:need/id 1 :interpreter/lang "Khmer"}}
+                       :fulfillments #{}
+                       :user/id 3}}
     :users {3 {:id 3
                :first_name "Lauren"
                :last_name "Olamina"
@@ -120,8 +153,8 @@
             4 {:id 4
                :first_name "Shevek"
                :roles #{:doc :kin}}}
-    :needs {1 {:id 1 :name "Interpreter"}
-            2 {:id 2 :name "Closed Captioning"}}
+    :needs {1 {:id 1 :need/type :interpreter :name "Interpreter"}
+            2 {:id 2 :need/type :closed-captioning :name "Closed Captioning"}}
     :current-invite {:email ""}
     :my-invitations []
     :focused-appointment nil

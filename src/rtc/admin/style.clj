@@ -1,6 +1,7 @@
 (ns rtc.admin.style
   (:require
    [rtc.style.core :as core]
+   [rtc.style.colors :as colors]
    [garden.def :refer [defstyles]]
    [garden.color :refer [rgba]]))
 
@@ -31,14 +32,17 @@
                     :cursor :pointer}
     [:&.filter-label--provider {:border-bottom-width "5px"
                                 :border-bottom-style "solid"}]]
-   [:.access-needs-legend
-    [:div {:margin "0.3em"
-           :padding "0.3em"
-           :display :inline-block
-           :border-radius "3px"
-           :border-width "1px"
-           :border-style :solid
-           :color :white}]]])
+   [:.access-needs-legend [:div {:margin "0.3em"}]]
+   [:.access-needs-indicator {:padding "0.3em"
+                              :display :inline-block
+                              :border-radius "3px"
+                              :border-width "1px"
+                              :border-style :solid
+                              :color :white}
+    [:&.--met {:background-color colors/appointment-fulfilled-bg
+                         :border-color colors/appointment-fulfilled-border}]
+    [:&.--unmet {:background-color colors/appointment-unfulfilled-bg
+                           :border-color colors/appointment-unfulfilled-border}]]])
 
 (def modal
   [[:.modal {:position :absolute
@@ -64,6 +68,11 @@
                     :font-weight 700
                     :cursor :pointer}]])
 
+(def appointment
+  [[:.appointment-details {:display :grid
+                           :grid-template-columns "1fr 1fr"}]
+   [:.appointment-name {:color core/pink}]])
+
 
 (defstyles screen
   core/base
@@ -72,4 +81,5 @@
   core/forms
   core/states
   calendar
+  appointment
   modal)
