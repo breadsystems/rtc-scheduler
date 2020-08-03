@@ -65,6 +65,35 @@
                                 [:= :provider_id 1]]}))
 
   (get-availabilities {:from "2020-08-12" :to "2020-08-31" :state "WA"})
+  ;; => [{:id 3,
+  ;;      :start_time #object[java.time.LocalDateTime 0x7ea74303 "2020-08-11T12:30"],
+  ;;      :end_time #object[java.time.LocalDateTime 0x67d795f "2020-08-11T18:00"],
+  ;;      :provider_id 1}
+  ;;     {:id 4,
+  ;;      :start_time #object[java.time.LocalDateTime 0x68bba23 "2020-08-12T15:30"],
+  ;;      :end_time #object[java.time.LocalDateTime 0x2ca7b24a "2020-08-12T19:00"],
+  ;;      :provider_id 1}
+  ;;     {:id 5,
+  ;;      :start_time #object[java.time.LocalDateTime 0x23278357 "2020-08-11T12:30"],
+  ;;      :end_time #object[java.time.LocalDateTime 0x6c4e9789 "2020-08-11T18:00"],
+  ;;      :provider_id 1}
+  ;;     {:id 6,
+  ;;      :start_time #object[java.time.LocalDateTime 0x6c565d75 "2020-08-12T15:30"],
+  ;;      :end_time #object[java.time.LocalDateTime 0x238653b8 "2020-08-12T19:00"],
+  ;;      :provider_id 1}
+  ;;     {:id 7,
+  ;;      :start_time #object[java.time.LocalDateTime 0x734b93c4 "2020-08-12T15:30"],
+  ;;      :end_time #object[java.time.LocalDateTime 0x79173505 "2020-08-12T19:00"],
+  ;;      :provider_id 1}
+  ;;     {:id 8,
+  ;;      :start_time #object[java.time.LocalDateTime 0x39a72d6f "2020-08-11T12:30"],
+  ;;      :end_time #object[java.time.LocalDateTime 0x2db8adbf "2020-08-11T18:00"],
+  ;;      :provider_id 1}
+  ;;     {:id 9,
+  ;;      :start_time #object[java.time.LocalDateTime 0x750f43d "2020-08-11T12:30"],
+  ;;      :end_time #object[java.time.LocalDateTime 0x33416086 "2020-08-11T18:00"],
+  ;;      :provider_id 1}]
+
   (get-availabilities {:from "2020-08-12" :to "2020-08-31" :state "OR"})
 
   (d/create-need! {:name "Interpretation"

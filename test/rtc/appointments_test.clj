@@ -5,8 +5,6 @@
    [rtc.appointments.avail :as avail]))
 
 
-(deftest test-str->timestamp
-  (is (= #inst "2020-01-01T")))
 
 (deftest test-params->query
   ;; No need to join when not querying by state

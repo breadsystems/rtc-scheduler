@@ -1,116 +1,103 @@
 (ns rtc.appointments.windows
   (:require
+   [clojure.set :refer [union]]
    [clojure.spec.alpha :as spec]
-   [java-time :as t])
-  (:import [java.time ZonedDateTime OffsetDateTime]
-           [java.text SimpleDateFormat]))
+   [rtc.appointments.internal.timeframes :as t]))
 
 
-(extend-protocol Inst
-  OffsetDateTime
-  (inst-ms* [inst] (t/to-millis-from-epoch inst)))
 
 (spec/def ::date (spec/inst-in #inst "2000" #inst "2100"))
+
+(spec/def ::drange (spec/and (spec/coll-of ::date :kind vector? :count 2 :distinct true)
+                             (fn [[start end]]
+                               ;; duration >= 30 minutes
+                               (>= (- (inst-ms end) (inst-ms start)) 1800000))))
 
 ;; A window should be between 10m and 2h
 (spec/def ::window-minutes (spec/and int? #(> % 10) #(> 120 %)))
 
-(spec/def ::provider-id #{1 2 3 4 5 6})
+(spec/def ::provider-id pos-int?)
+(spec/def ::start ::date)
+(spec/def ::end ::date)
+
+(spec/def ::window (spec/keys :req-un [::provider-id ::start ::end]))
+(spec/def ::windows (spec/coll-of ::window :kind vector?))
+
+(spec/def ::provider-pool (spec/coll-of ::provider-id :kind set? :min-count 1))
 
 
-(defn drange->window-count [from to window-in-minutes]
-  (/ (- (inst-ms to) (inst-ms from)) (* window-in-minutes 60 1000)))
 
-(defn drange->windows [from to window-in-minutes]
-  (let [window-count (drange->window-count from to window-in-minutes)]
-    (map (fn [factor]
-           [(t/plus from (t/duration (* factor window-in-minutes) :minutes))
-            (t/plus from (t/duration (* (inc factor) window-in-minutes) :minutes))])
-         (range 0 (inc window-count)))))
+(defn availabilities->windows
+  "The core algorithm of the appointment calendar. Takes a list of availabilities,
+   a list of appointments, a from/to date, and a window length (in minutes), and
+   returns a vector of availability windows of the form:
+   {:start #inst ...
+    :end #inst ...
+    :provider-id 123}"
+  [avails appts from to w]
+  {:pre [(spec/valid? ::windows avails)
+         (spec/valid? ::windows appts)
+         (t/before? from to)
+         (spec/valid? ::window-minutes w)]}
 
+  (let [;; For each availability, compute the Timeframe that overlaps
+        ;; with [from to] (if any).
+        timeframes (filter some? (map #(t/avail->timeframe % from to) avails))
 
-(defn availabilities->windows [avails appts from to w]
+        ;; For each Timeframe [A'n B'n], break into chunks of length w
+        ;; [[A'0 A'w] [A'w A'2w] ,,, [A'n-w A'n]]
+        ;; Record in a map where the keys are vectors [A'n A'n+w]
+        ;; and the values are maps with Provider data.
+        window->provider-id-mappings (map #(t/timeframe->window-map % w) timeframes)
 
-  ;; For each availability, compute the Timeframe that overlaps
-  ;; with [from to].
+        ;; Merge all Timeframe maps together, conjoining (unique) Provider
+        ;; values into sets. We now have a mapping of window start/end times
+        ;; to *potentially* available providers (we just need to take
+        ;; existing appointments into account).
+        window->provider-ids (reduce (fn [w->ps w->p]
+                                       ;; Cast provider ids into single-element sets,
+                                       ;; and merge all the sets together by window.
+                                       (merge-with union w->ps (into {} (map (fn [[w p]]
+                                                                               [w #{p}])
+                                                                             w->p))))
+                                     {}
+                                     window->provider-id-mappings)
 
-  ;; For each Timeframe [A'n B'n], bread into chunks of length w
-  ;; [[A'0 A'0+w] [A'0+w A'0+2w] ,,, [A'n-w A'n]]
-  ;; Record in a map where the keys are vectors [A'n A'n+w]
-  ;; and the values are maps with Provider data.
+        ;; For each Appoinment, round start (down) and end (up) to nearest
+        ;; window edge, i.e. (+ from (* n w)), where n is an int, to get
+        ;; [start'r end'r]. Remove the Provider from the set indexed by
+        ;; [start'r end'r].
+        windows-minus-appts (reduce (fn [w->p {:keys [provider-id] :as appt}]
+                                      ;; For each appointment, reduce over the
+                                      ;; discrete overlapping windows and remove
+                                      ;; the corresponding provider's availability
+                                      ;; during that window.
+                                      (reduce (fn [w->p window]
+                                                (println window)
+                                                (update w->p window disj provider-id))
+                                              w->p
+                                              (t/appt->windows appt from w)))
+                                    window->provider-ids
+                                    appts)
 
-  ;; Merge all Timeframe maps together, conjoining (unique) Provider
-  ;; values into sets. We now have a mapping of window start/end times
-  ;; to *potentially* available providers (we just need to take
-  ;; existing appointments into account).
-
-  ;; For each Appoinment, round start (down) and end (up) to nearest
-  ;; window edge, i.e. (+ from (* n w)), where n is an int, to get
-  ;; [start'r end'r]. Remove the Provider from the set indexed by
-  ;; [start'r end'r].
-
-  ;; The Windows remaining with at least one Provider are our
-  ;; Available Windows.
-
-  ;;  
-  )
+        ;; The Windows remaining with at least one Provider are our
+        ;; Available Windows. Collapse keys/vals into a single vector of maps.
+        ;; (println windows-minus-appts)
+        available-windows (reduce (fn [windows [[start end] provider-ids]]
+                                    (if (seq provider-ids)
+                                      (conj windows {:start start :end end :provider-ids provider-ids})
+                                      windows))
+                                  []
+                                  windows-minus-appts)]
+    ;; Sort windows by start date
+    (sort-by (comp inst-ms :start) available-windows)))
 
 
 (comment
-  ;; Just playing with Inst
-  (inst-ms #inst "2020-03-04T00:00:00-07:00") ;; => 1583305200000
-
-  ;; July 1st - July 15th
-  ;; => 14 * 48 = 672
-  (let [from (OffsetDateTime/parse "2020-07-01T00:00:00-07:00")
-        to   (OffsetDateTime/parse "2020-07-15T00:00:00-07:00")]
-    (drange->window-count from to 30))
-
-  ;; 9am - 6pm
-  ;; 9h * 2w/h = 18
-  (let [from (OffsetDateTime/parse "2020-07-01T09:00:00-07:00")
-        to   (OffsetDateTime/parse "2020-07-01T18:00:00-07:00")
-        windows (drange->windows from to 30)
-        window->providers (into {} (map (fn [window]
-                                          [window #{1 2 3}])
-                                        windows))]
-    (get window->providers [(OffsetDateTime/parse "2020-07-01T10:00:00-07:00")
-                            (OffsetDateTime/parse "2020-07-01T10:30:00-07:00")]))
-  ;; => #{1 3 2}
-
-  {0 #{2}
-   1 #{}
-   2 #{1}
-   3 #{3}
-   4 #{1 2 3}
-   5 #{1 3}
-   6 #{1 2}
-   7 #{}
-   8 #{1 2 3}
-   9 #{1 2 3}
-   10 #{1 3}
-   11 #{1 3}}
-
-
-  (as-> "2020-07-01T11:00:00-07:00" $
-    (OffsetDateTime/parse $)
-    (t/plus $ (t/duration 20 :minutes))
-    (str $))
-  ;; => "2020-07-01T11:20-07:00"
-
-  (t/max (OffsetDateTime/parse "2020-03-04T00:00:00-07:00")
-         (OffsetDateTime/parse "2020-03-04T00:00:00-08:00"))
-  ;; => #object[java.time.OffsetDateTime 0x4abb3ece "2020-03-04T00:00-08:00"]
-  (str (t/max (OffsetDateTime/parse "2020-03-04T00:00:00-07:00")
-              (OffsetDateTime/parse "2020-03-04T00:00:00-08:00")))
-  ;; => "2020-03-04T00:00-08:00"
-
-  ;; Midnight Eastern is before midnight Pacific.
-  (t/before? (OffsetDateTime/parse "2020-03-04T00:00:00-03:00")
-             (OffsetDateTime/parse "2020-03-04T00:00:00-07:00")) ;; => true
-  ;; 8pm Eastern is before midnight Pacific.
-  (t/before? (OffsetDateTime/parse "2020-03-04T00:00:00-07:00")
-             (OffsetDateTime/parse "2020-03-04T08:00:00-03:00")) ;; => true
-
-  ;;
-  )
+  (let [avails [{:start #inst "2020-01-03T11:00"
+                 :end   #inst "2020-01-03T14:00"
+                 :provider-id 1}
+                {:start #inst "2020-01-03T12:30"
+                 :end   #inst "2020-01-03T15:00"
+                 :provider-id 2}]
+        ]))
