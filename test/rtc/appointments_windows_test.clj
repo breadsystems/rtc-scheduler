@@ -8,17 +8,6 @@
    [rtc.appointments.windows :as w]))
 
 
-;; (defspec drange-is-always-positive
-;;   (prop/for-all
-;;    [drange (spec/gen ::w/drange)]
-;;    (let [[from to] drange]
-;;      (> (inst-ms to) (inst-ms from)))))
-
-;; (availabilities->windows avails appts from to w)
-;; should not return more than P * (avails' / w) windows
-
-;; Windows are maps whose keys are valid dranges
-
 ;; Given a window length w, the duration of each key's start/end 
 ;; insts should be EXACTLY w.
 
@@ -348,11 +337,3 @@
       ;; starting just as the first availability ends
       (is (= []
              (w/->windows avails [] 500 1000 50))))))
-
-
-(comment
-  
-
-  
-  ;;
-  )
