@@ -37,5 +37,4 @@
            :test {:main-opts ["-m" "kaocha.runner"]
                   :extra-paths ["env/test" "test"]
                   :extra-deps {lambdaisland/kaocha  {:mvn/version "0.0-529"}}}
-           :prod {:extra-paths ["env/prod"]
-                  :main-opts ["-m" "rtc.app"]}}}
+           :prod {:extra-paths ["env/prod"]}}}

@@ -1,1 +1,1 @@
-web: java -cp target/rtc.jar clojure.main -A:prod
+web: java -cp target/rtc.jar clojure.main -m rtc.app
