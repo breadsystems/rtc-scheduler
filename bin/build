@@ -3,4 +3,6 @@
 # Build production styles
 clojure -A:prod -m rtc.env
 
-clojure -A:uberjar
+# Bundle all assets in an uberjar
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+clojure -m uberdeps.uberjar --deps-file ../deps.edn --target ../target/rtc.jar --aliases prod

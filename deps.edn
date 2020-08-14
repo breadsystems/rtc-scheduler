@@ -37,7 +37,5 @@
            :test {:main-opts ["-m" "kaocha.runner"]
                   :extra-paths ["env/test" "test"]
                   :extra-deps {lambdaisland/kaocha  {:mvn/version "0.0-529"}}}
-           :prod {:extra-paths ["env/prod"]}
-           :uberjar {:extra-deps {seancorfield/depstar {:mvn/version "1.0.97"}}
-                     :extra-paths ["env/prod"]
-                     :main-opts ["-m" "hf.depstar.uberjar" "target/rtc.jar" "-C" "-m" "rtc.app"]}}}
+           :prod {:extra-paths ["env/prod"]
+                  :main-opts ["-m" "rtc.app"]}}}
