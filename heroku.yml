@@ -1,3 +1,11 @@
+# Tell Heroku to build and run the application as a Docker image
+# https://devcenter.heroku.com/articles/build-docker-images-heroku-yml
+#
+# NOTE: This assumes you have run:
+#
+#   heroku stack:set container
+#
+# See doc link above for more details.
 build:
   docker:
     web: Dockerfile
