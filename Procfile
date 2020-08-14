@@ -1,1 +1,1 @@
-web: java -cp target/rtc.jar clojure.main -m rtc.app -XX:MaxHeapSize 256M
+web: java -cp target/rtc.jar clojure.main -m rtc.app
