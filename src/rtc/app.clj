@@ -85,7 +85,7 @@
 (defonce stop-http (atom nil))
 
 (defn start! []
-  (let [port (Integer. (:http-port config/env 80))]
+  (let [port (Integer. (:port config/env 80))]
     (println (str "Running HTTP server at localhost:" port))
     (reset! stop-http
             (http/run-server (-> app
