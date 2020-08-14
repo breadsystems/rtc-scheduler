@@ -17,4 +17,4 @@ COPY yarn.lock /app/yarn.lock
 RUN /app/deploy/package.sh
 
 # Run the uberjar
-CMD "java" "-cp" "/app/target/rtc.jar" "clojure.main" "-m" "rtc.app"
+CMD "java" "-cp" "/app/target/rtc.jar" "clojure.main" "-m" "rtc.app" "-Xmx512M"
