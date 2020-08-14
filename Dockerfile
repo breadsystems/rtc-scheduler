@@ -6,7 +6,6 @@ EXPOSE 8080
 # Copy exactly what we need into the image
 COPY deploy /app/deploy
 COPY env /app/env
-COPY public /app/public
 COPY resources /app/resources
 COPY src /app/src
 COPY deps.edn /app/deps.edn
