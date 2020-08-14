@@ -21,27 +21,19 @@ Our virtual clinics are real-world liberated zones. We don’t have “patients�
 
 ## Running the means of production
 
-This application ships a Docker image, which is the recommended method of running in production.
+This application ships an "uberjar," which is the recommended method of running in production. The build script outputs the uberjar to `target/rtc.jar`, which can then be run just like any other .jar file:
 
 ```sh
-docker run -it -p 8080:8080 \
-  -e DATABASE_URL=jdbc:postgresql://dbhost/dbname \
-  -e AUTHY_API_KEY=yourapikey \
-  radtelehealth/rtc-scheduler
+DATABASE_URL=your-db-url AUTHY_API_KEY=your-api-key \
+  java -cp target/rtc.jar clojure.main -m rtc.app # run the jar
 ```
 
 ## Building the means of production
 
-First build the uberjar. This is basically an executable archive containing all the files you need to run in production (sans runtime dependencies, such as a database).
+The build script contains everything you need to build the production uberjar. Just run it:
 
 ```sh
-deploy/package.sh
-```
-
-Then, build the Docker image:
-
-```sh
-docker build . -t rtc:latest
+bin/build
 ```
 
 ## Building the movement
