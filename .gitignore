@@ -7,4 +7,5 @@ lock
 /target/
 /resources/public/js/
 /resources/public/test/
-/resources/public/css/
+/resources/public/css/*.css
+/resources/public/css/*/
