@@ -1,7 +1,6 @@
 FROM clojure:openjdk-11-tools-deps
 
-# http-kit listens on port 8080
-EXPOSE 8080
+EXPOSE 80
 
 # Copy exactly what we need into the image
 COPY deploy /app/deploy
