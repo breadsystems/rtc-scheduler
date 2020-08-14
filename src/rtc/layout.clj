@@ -37,7 +37,7 @@
       (doctype :html5)
       [:html
        (vec (concat [:head
-                     [:title (str title " | Radical Telehealth Collective")]
+                     [:title (if title (str title " | Radical Telehealth Collective") "Radical Telehealth Collective")]
                      [:meta {:charset "utf-8"}]
                      [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
                      [:meta {:name "csrf-token" :content (:anti-forgery-token req)}]

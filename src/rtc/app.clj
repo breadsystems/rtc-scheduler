@@ -41,6 +41,10 @@
     [""
      ;; TODO figure out the right order for middleware & fix anti-CSRF
      {:middleware [wrap-params auth/wrap-identity #_csrf-middleware]}
+     ["/" {:get (fn [_req]
+                  (layout/page {:content
+                                [:main [:h1 "Hello, Comrades!"]]}))}]
+
      ["/api/graphql" {:post (fn [req]
                               {:status 200
                                :headers {"Content-Type" "application/edn"}
