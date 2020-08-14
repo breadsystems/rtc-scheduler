@@ -42,7 +42,7 @@
                      [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
                      [:meta {:name "csrf-token" :content (:anti-forgery-token req)}]
                      [:link {:href "https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&display=swap" :rel "stylesheet"}]
-                     [:link {:href "/css/screen.css" :rel "stylesheet"}]]
+                     [:link {:href "/css/intake.css" :rel "stylesheet"}]]
                     head))
        (conj [:body
               content]

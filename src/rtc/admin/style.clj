@@ -73,6 +73,10 @@
                            :grid-template-columns "1fr 1fr"}]
    [:.appointment-name {:color core/pink}]])
 
+(def invites
+  [[:.invite {:margin "1em 0"}
+    [:.invite-url :.email {:margin "0 1em"}]]])
+
 
 (defstyles screen
   core/base
@@ -81,5 +85,6 @@
   core/forms
   core/states
   calendar
+  modal
   appointment
-  modal)
+  invites)

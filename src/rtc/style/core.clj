@@ -24,7 +24,13 @@
 
 
 (def base
-  [[:section {:margin-bottom "2em"}]
+  [[:body {:width "80em"
+           :max-width "95%"
+           :margin "1em auto"
+
+           :font-family "'Libre Franklin', sans-serif"
+           :font-weight 400}]
+   [:section {:margin-bottom "2em"}]
    [:dl {:display :grid
          :grid-template-columns "1fr 5fr"}]
    [:dt {:margin-bottom "0.3em"
