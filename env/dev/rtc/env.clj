@@ -1,6 +1,6 @@
 (ns rtc.env
   (:require
-   [clojure.set :refer [intersection]]
+   [config.core :as config]
    [mount.core :as mount :refer [defstate]]
    [nrepl.server :as nrepl]
    [ring.middleware.reload :refer [wrap-reload]]
@@ -10,9 +10,10 @@
 (defonce stop-repl (atom nil))
 
 (defn start! []
-  (println (str "Starting nREPL server at localhost:7000"))
-  (reset! stop-repl (nrepl/start-server :port 7000))
-  (spit ".nrepl-port" "7000")
+  (let [port (:nrepl-port config/env 7000)]
+   (println (str "Starting nREPL server at localhost:" port))
+   (reset! stop-repl (nrepl/start-server :port port))
+   (spit ".nrepl-port" (str port)))
   nil)
 
 (defn stop! []

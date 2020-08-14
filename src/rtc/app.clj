@@ -3,6 +3,7 @@
 (ns rtc.app
   (:require
    [clojure.string :as string]
+   [config.core :as config]
    [mount.core :as mount :refer [defstate]]
    [org.httpkit.server :as http]
    [reitit.ring :as ring]
@@ -84,7 +85,7 @@
 (defonce stop-http (atom nil))
 
 (defn start! []
-  (let [port (Integer. (or (System/getenv "HTTP_PORT") 8080))]
+  (let [port (Integer. (:http-port config/env 80))]
     (println (str "Running HTTP server at localhost:" port))
     (reset! stop-http
             (http/run-server (-> app

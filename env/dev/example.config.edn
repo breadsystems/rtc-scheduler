@@ -7,4 +7,6 @@
  ;; backend if you're actively making changes to it, which can be
  ;; annoying. You can short-circuit this behavior by setting this to true:
  :dev-disable-auth false
- :authy-api-key "API KEY HERE"}
+ :authy-api-key "API KEY HERE"
+ :http-port 8080
+ :nrepl-port 7000}
