@@ -43,8 +43,10 @@
      ;; TODO figure out the right order for middleware & fix anti-CSRF
      {:middleware [wrap-params auth/wrap-identity #_csrf-middleware]}
      ["/" {:get (fn [_req]
-                  (layout/page {:content
-                                [:main [:h1 "Hello, Comrades!"]]}))}]
+                  (layout/markdown-page
+                   {:file "home.md"
+                    :after [:section.center.spacious
+                            [:a.call-to-action {:href "/get-care"} "Get Care"]]}))}]
 
      ["/api/graphql" {:post (fn [req]
                               {:status 200

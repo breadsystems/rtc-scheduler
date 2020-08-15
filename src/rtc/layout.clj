@@ -1,9 +1,9 @@
 ;; Basic page layouts for rendering server-side.
 (ns rtc.layout
   (:require
-   [buddy.auth :refer [authenticated?]]
    [hiccup.core :refer [html]]
-   [hiccup.page :refer [doctype]]))
+   [hiccup.page :refer [doctype]]
+   [markdown.core :as md]))
 
 
 (defn error-page
@@ -47,6 +47,27 @@
        (conj [:body
               content]
              footer-content)])}))
+
+(defn- file->html [file]
+  (-> (str "resources/markdown/" file) slurp md/md-to-html-string))
+
+(comment
+  (file->html "home.md"))
+
+(defn markdown-page
+  "Render a markdown file as an HTML page. Calls (page) passing the rendered Markdown as :content."
+  [{:keys [title file after] :as opts}]
+  (page
+   (merge
+    opts
+    {:content [:div.page-container
+               [:header
+                [:h1 (or title "Radical Telehealth Collective")]]
+               [:main.prose
+                (file->html file)
+                (when after
+                  [:div.after
+                   after])]]})))
 
 
 (defn intake-page
