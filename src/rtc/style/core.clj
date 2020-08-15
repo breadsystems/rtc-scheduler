@@ -22,6 +22,25 @@
 (def purple-border (str "2px solid " purple))
 (def border-radius "0.3em")
 
+;; Button mixins
+(def button-base {:padding "0.7em 1.3em"
+                  :border :none
+                  :cursor :pointer
+                  :font-weight 700
+                  :text-transform :uppercase
+                  :color :white
+                  :background pink})
+
+(def button-secondary (merge button-base {:background indigo}))
+
+(def button-disabled {:background-color muted-pink
+                      :color off-white
+                      :cursor :not-allowed})
+
+(def button-disabled-secondary
+  (merge button-disabled {:background-color muted-purple
+                          :color off-white}))
+
 
 (def base
   [[:body {:width "80em"
@@ -37,21 +56,33 @@
          :font-weight 700}]])
 
 (def typography
-  [[:h1 {:color pink
+  [;; Main typographical elements
+   [:header {:text-align :center}]
+   [:h1 {:color pink
          :text-transform :uppercase}]
    [:h2 :h3 :h4 :h5 :h6
     {:color dark-purple}]
    [:a {:color dark-purple}]
+   [:.prose {:margin "3em auto"
+             :max-width "40em"}]
+
+   ;; Text styles
+   [:.call-to-action (merge button-base
+                            {:font-size "1.2em"
+                             :text-decoration :none
+                             :background dark-purple})]
    [:.help {:color grey
             :font-style :italic}]
-   [:.center {:text-align :center}]
-   [:.right {:text-align :right}]
    [:.highlight {:color pink}]
    [:.spacious {:margin-top "3em"
                 :margin-bottom "3em"}]
    [:.instruct {:font-size "0.9em"
                 :color dark-grey
-                :font-style :italic}]])
+                :font-style :italic}]
+
+   ;; Alignments
+   [:.center {:text-align :center}]
+   [:.right {:text-align :right}]])
 
 (def nav
   [[:nav
@@ -74,24 +105,6 @@
                                    "3px 3px white")
                  :background-size "1px 1em"
                  :box-shadow "inset 0 3px white, inset 0 -2px currentColor"}]]])
-
-(def button-base {:padding "0.7em 1.3em"
-                  :border :none
-                  :cursor :pointer
-                  :font-weight 700
-                  :text-transform :uppercase
-                  :color :white
-                  :background pink})
-
-(def button-secondary (merge button-base {:background indigo}))
-
-(def button-disabled {:background-color muted-pink
-                      :color off-white
-                      :cursor :not-allowed})
-
-(def button-disabled-secondary
-  (merge button-disabled {:background-color muted-purple
-                          :color off-white}))
 
 (def forms
   [[:.field {:margin "0.7em 0"}]
