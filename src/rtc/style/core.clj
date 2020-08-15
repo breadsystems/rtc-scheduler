@@ -94,9 +94,6 @@
           :width "100%"
           :justify-content :space-around
           :list-style :none}
-     [:& {;; Progressive enhancement with CSS grid
-          :display :grid
-          :grid-template-columns "1fr 1fr 1fr"}]
      [:li {:flex "1 1 10ch"
            :margin "1em"}]]]
    [:.nav-link {:color dark-purple
