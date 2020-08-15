@@ -21,7 +21,13 @@
 
 (comment
   compiled-i18n-data
-  lang-options)
+  lang-options
+  (i18n/best-supported-lang :es compiled-i18n-data)
+  (i18n/best-supported-lang :es-MX compiled-i18n-data)
+  (i18n/best-supported-lang :en compiled-i18n-data)
+  (i18n/best-supported-lang :en-US compiled-i18n-data)
+  ;; Careful! If you omit the i18n arg, it'll always default to :en-US!
+  (i18n/best-supported-lang :es))
 
 
 
@@ -636,5 +642,10 @@
 
 (defn init! []
   (rf/dispatch-sync [::init-db])
-  (rf/dispatch [::update-lang :en-US])
+  (let [browser-lang (or (.-language js/navigator)
+                         (.-userLanguage js/navigator))
+        supported-lang (i18n/best-supported-lang browser-lang
+                                                 compiled-i18n-data)]
+    (js/console.log "Detected language:" browser-lang "Selected language:" (name supported-lang))
+    (rf/dispatch [::update-lang supported-lang]))
   (mount!))

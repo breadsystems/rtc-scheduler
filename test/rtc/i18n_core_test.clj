@@ -32,6 +32,12 @@
     ;; We have no plans to support Esperanto, unfortunately.
     (is (not (core/supported? :eo i18n)))))
 
-#_(deftest test-best-supported-lang
+(deftest test-best-supported-lang
   (let [i18n {:en-US {} :es {}}]
-    (is (= ))))
+    (is (= :en-US (core/best-supported-lang :en-US i18n)))
+    (is (= :en-US (core/best-supported-lang "en-US" i18n)))
+    (is (= :es (core/best-supported-lang :es i18n)))
+    (is (= :es (core/best-supported-lang :es-MX i18n)))
+    ;; Fallback on en-US
+    (is (= :en-US (core/best-supported-lang :eo i18n)))
+    (is (= :en-US (core/best-supported-lang :fr-BE i18n)))))

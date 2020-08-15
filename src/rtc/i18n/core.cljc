@@ -21,3 +21,12 @@
 
 (defn supported? [lang i18n]
   (contains? (supported-langs i18n) (name lang)))
+
+(defn best-supported-lang [lang i18n]
+  ;; I guess globalization is a necessary evil sometimes.
+  (letfn [(globalize [lang]
+            (apply str (take 2 (seq (name lang)))))]
+    (cond
+     (supported? lang i18n) (keyword lang)
+     (supported? (globalize lang) i18n) (keyword (globalize lang))
+     :else :en-US)))
