@@ -46,6 +46,7 @@
   [[:body {:width "80em"
            :max-width "95%"
            :margin "1em auto"
+           :padding-bottom "5em"
 
            :font-family "'Libre Franklin', sans-serif"
            :font-weight 400}]
@@ -87,11 +88,17 @@
 (def nav
   [[:nav
     [:ul {:display :flex
+          :flex-wrap :wrap
           :margin "3em 0 3em"
           :padding 0
           :width "100%"
           :justify-content :space-around
-          :list-style :none}]]
+          :list-style :none}
+     [:& {;; Progressive enhancement with CSS grid
+          :display :grid
+          :grid-template-columns "1fr 1fr 1fr"}]
+     [:li {:flex "1 1 10ch"
+           :margin "1em"}]]]
    [:.nav-link {:color dark-purple
                 :cursor :pointer
                 :font-size "1.2em"
