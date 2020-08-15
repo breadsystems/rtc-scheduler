@@ -564,7 +564,7 @@
         [:div [:label.field-label (t :appointment-details)]]
         [:div [:b (appointment->str appt)]]]
        [:div.confirm-container
-        [:button.confirm-btn {:on-click #(rf/dispatch [::confirm!])}
+        [:button.call-to-action {:on-click #(rf/dispatch [::confirm!])}
          (t :book-appointment)]]]})))
 
 (defn- confirmed []

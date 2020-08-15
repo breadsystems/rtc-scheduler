@@ -30,9 +30,7 @@
                [:div {:flex "0 0 35%"
                       :padding-right "2em"}]])]
    [:.confirm-container {:margin "3em auto"
-                         :text-align :center}]
-   [:.confirm-btn {:font-size "1.2em"
-                   :background core/dark-purple}]])
+                         :text-align :center}]])
 
 (def i18n
   [[:.lang-selector {:position :fixed
