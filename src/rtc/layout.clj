@@ -1,6 +1,7 @@
 ;; Basic page layouts for rendering server-side.
 (ns rtc.layout
   (:require
+   [clojure.java.io :as io]
    [hiccup.core :refer [html]]
    [hiccup.page :refer [doctype]]
    [markdown.core :as md]))
@@ -49,9 +50,10 @@
              footer-content)])}))
 
 (defn- file->html [file]
-  (-> (str "resources/markdown/" file) slurp md/md-to-html-string))
+  (-> (str "markdown/" file) io/resource slurp md/md-to-html-string))
 
 (comment
+  (io/resource "markdown/home.md")
   (file->html "home.md"))
 
 (defn markdown-page
