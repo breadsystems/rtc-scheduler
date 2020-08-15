@@ -16,6 +16,7 @@
         hiccup                    {:mvn/version "1.0.5"}
         honeysql                  {:mvn/version "1.0.444"}
         http-kit                  {:mvn/version "2.3.0"}
+        markdown-clj              {:mvn/version "1.10.5"}
         metosin/reitit-frontend   {:mvn/version "0.5.2"}
         metosin/reitit-ring       {:mvn/version "0.5.2"}
         migratus                  {:mvn/version "1.2.8"}
