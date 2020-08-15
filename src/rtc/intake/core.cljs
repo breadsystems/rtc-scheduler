@@ -14,6 +14,16 @@
    [rtc.util :refer [->opt]]))
 
 
+;; First gather i18n data from flat files.
+(def compiled-i18n-data (i18n-data/i18n-data))
+;; Compile language options. These won't change over the lifecycle of the app.
+(def lang-options (i18n/i18n->lang-options compiled-i18n-data))
+
+(comment
+  compiled-i18n-data
+  lang-options)
+
+
 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;                           ;;
@@ -36,11 +46,13 @@
    ;; Just make first view the default?
    {:step 0
     :viewed-up-to-step 0
-    :lang :en
-    ;; TODO load these from i18n
-    :lang-options [{:value :en :label "English"}
-                   {:value :es :label "Español"}]
+
+    :i18n compiled-i18n-data
+    :lang-options lang-options
+    :lang :en-US
+
     :loading? false
+
     ;; Where we collect info about the Person Seeking Care.
     :careseeker-info {}
     :appointment-windows []
@@ -102,8 +114,7 @@
        {:key :anything-else
         :type :text}]}
      {:name :schedule}
-     {:name :confirmation}]
-    :i18n (i18n-data/i18n-data)}))
+     {:name :confirmation}]}))
 
 
 
@@ -399,9 +410,11 @@
   (rf/dispatch [::update-step {:name :contact-info :step 1}])
   (rf/dispatch [::update-step {:name :schedule :step 4}])
   (rf/dispatch [::update-step {:name :confirmation :step 5}])
-  
+
   (rf/dispatch [::update-lang :en])
-  (rf/dispatch [::update-lang :es]))
+  (rf/dispatch [::update-lang :es])
+  ;; Esperanto
+  (rf/dispatch [::update-lang :eo]))
 
 
 
@@ -623,4 +636,5 @@
 
 (defn init! []
   (rf/dispatch-sync [::init-db])
+  (rf/dispatch [::update-lang :en-US])
   (mount!))

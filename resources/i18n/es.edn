@@ -1,4 +1,5 @@
 {:lang :es
+ :lang-name "Español"
  :get-care "Recibe Atencion Médica"
  :choose-a-language "Seleccione un idioma"
  :yes-no [{:value 1 :label "Sí"}

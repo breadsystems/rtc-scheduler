@@ -4,7 +4,7 @@
    [rtc.i18n.data :as data]))
 
 
-(deftest reduce-lang-maps
+(deftest test-reduce-lang-maps
   (let [english {:lang :en :yes "Yes" :no "No"}
         español {:lang :es :yes "Sí"  :no "No"}]
     (is (= {:en english :es español}

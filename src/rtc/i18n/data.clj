@@ -4,7 +4,9 @@
    [clojure.java.io :as io]))
 
 
-(defn reduce-langs [ms]
+(defn reduce-langs
+  "Takes a vector of lang maps and returns a map keyed by :lang"
+  [ms]
   (reduce (fn [data m]
             (assoc data (:lang m) m)) {} ms))
 
