@@ -36,6 +36,14 @@ The build script contains everything you need to build the production uberjar. J
 bin/build
 ```
 
+This application is hosted on Heroku. To deploy, build the uberjar as describe above and run:
+
+```sh
+heroku deploy:jar target/rtc.jar --app radical-telehealth-collective
+```
+
+You will need to be logged in to the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) to do this.
+
 ## Building the movement
 
 ### Manual installation (recommended)
