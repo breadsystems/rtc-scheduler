@@ -354,6 +354,15 @@
 (rf/reg-fx :moment-locale (fn [lang]
                             (.locale moment (name lang))))
 
+(defn- focus-relevant-elem
+  "For good keyboard UX, focus on the input for the first question. Should run whenever the question changes.
+   Can override by setting the data-keep-focus attribute, which keeps the focus on the currently focused element
+   if this attribute is true."
+  []
+  (when-not (.. js/document.activeElement -dataset -keepFocus)
+    (when-let [elem (.querySelector js/document ".field input, .field select")]
+      (.focus elem))))
+
 ;; Dispatched on initial page load
 (defn- *generate-calendar-events [cnt]
   (doall (distinct (map (fn [_]
@@ -441,6 +450,14 @@
   (let [s (moment start "en_US")
         e (moment end "en_US")]
     (str (.format s "h:mma - ") (.format e "h:mma ") (.format s "dddd, MMM Do"))))
+
+(defn- on-enter
+  "Given a callback f, returns a function that takes a KeyboardEvent and calls f
+   IFF the event is an Enter keypress, or otherwise does nothing."
+  [f]
+  (fn [e]
+    (when (= 13 (or (.-code e) (.-which e)))
+      (f))))
 
 (comment
   (t :name)
@@ -534,6 +551,12 @@
       (when (seq errors) [:div.error-message messages])]
      (when help [:div.help (t help)])]))
 
+;; The focus MAY change when the question changes, so use the React lifecycle
+;; to trigger that potential change.
+(def ^:private stateful-question
+  (with-meta question
+    {:component-did-mount focus-relevant-elem}))
+
 (defn- questions []
   (let [step (:name @(rf/subscribe [::current-step]))
         qs @(rf/subscribe [::questions step])]
@@ -541,7 +564,7 @@
      {:heading (t step)
       :content (map (fn [q]
                       ^{:key (:key q)}
-                      [question q])
+                      [stateful-question q])
                     qs)}]))
 
 (defn- schedule []
@@ -600,10 +623,14 @@
                     (let [nav-title @(rf/subscribe [::i18n name])
                           linkable? (and accessible? (not current?))]
                       ^{:key name}
-                      [:li {:class (join " " [(when current? "current") (when viewed? "viewed")])
-                            :tabindex (if accessible? 0 -1)}
-                       [:span.nav-link {:class (when-not accessible? "disabled")
-                                        :on-click #(when linkable? (rf/dispatch [::update-step step]))}
+                      [:li {:class (join " " [(when current? "current") (when viewed? "viewed")])}
+                       [:a.nav-link {:class (when-not accessible? "disabled")
+                                     :tab-index (if accessible? 0 -1)
+                                     :on-click #(when linkable? (rf/dispatch [::update-step step]))
+                                     :on-key-press (on-enter #(when linkable? (rf/dispatch [::update-step step])))
+                                     ;; Keep the focus on this element when the question changes,
+                                     ;; rather than focus on the first question/field as usual.
+                                     :data-keep-focus true}
                         nav-title]]))
                   nav-steps))]]))
 
