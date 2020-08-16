@@ -11,12 +11,13 @@
 (def pink (rgb 255 26 79))
 (def light-pink (rgb 255 220 225))
 (def muted-pink (rgb 185 90 115))
-(def off-white (rgb 255 230 250))
+(def off-white (rgb 255 240 250))
 (def purple "#b9a1fb")
 (def indigo (rgb 127 90 240))
 (def dark-purple (rgb 110 25 160))
 (def muted-purple (rgb 55 5 80))
 (def grey (rgb 100 100 100))
+(def light-grey (rgb 235 235 235))
 (def dark-grey (rgb 115 105 135))
 
 (def purple-border (str "2px solid " purple))
@@ -46,7 +47,7 @@
   [[:body {:width "80em"
            :max-width "95%"
            :margin "1em auto"
-           :padding-bottom "5em"
+           :padding-top "2em"
 
            :font-family "'Libre Franklin', sans-serif"
            :font-weight 400}]

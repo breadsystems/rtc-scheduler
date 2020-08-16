@@ -33,16 +33,17 @@
                          :text-align :center}]])
 
 (def i18n
-  [[:.lang-selector {:position :fixed
-                     :right "1em"
-                     :bottom "1em"
-                     :width "10rem"
-                     :padding "1em"
+  [[:.lang-selector {:position :absolute
+                     :top 0
+                     :left 0
+                     :width "100%"
                      :z-index 2
-                     :background :white
-                     :border core/purple-border
-                     :border-radius core/border-radius}
-    [:div {:margin-bottom "1em"}]]])
+                     :text-align :right
+                     :background core/off-white}
+    [:* {:font-size "0.8em"}]
+    [:label {:margin "1em"}]
+    [:select {:margin "0.3em"
+              :width "10rem"}]]])
 
 
 (defstyles screen

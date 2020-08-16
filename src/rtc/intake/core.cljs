@@ -612,13 +612,9 @@
         lang-options @(rf/subscribe [::lang-options])
         confirmed-info @(rf/subscribe [::confirmed-info])]
     [:div.container.container--get-care {:class (when @(rf/subscribe [::loading?]) "loading")}
-     [:header
-      [:h1 "Radical Telehealth Collective"]
-      [:h2 (t :get-care)]
-      (when (not confirmed-info) [progress-nav])]
-     [:div.lang-selector
-      [:div [:label.field-label {:for "select-language"}
-             (t :choose-a-language)]]
+     [:aside.lang-selector
+      [:label.field-label {:for "select-language"}
+       (t :choose-a-language)]
       [:select {:value lang
                 :id "select-language"
                 :on-change #(rf/dispatch [::update-lang (keyword (.. % -target -value))])}
@@ -626,6 +622,10 @@
               ^{:key value}
               [:option {:value value} label])
             lang-options)]]
+     [:header
+      [:h1 "Radical Telehealth Collective"]
+      [:h2 (t :get-care)]
+      (when (not confirmed-info) [progress-nav])]
      [:main
       (if confirmed-info
         [confirmed]
