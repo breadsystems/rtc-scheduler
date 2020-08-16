@@ -79,9 +79,8 @@
    (merge
     opts
     {:title          "Get Care"
-     :head           [[:link {:rel "stylesheet" :href "/css/fullcalendar/main.min.css"}]
-                      [:link {:rel "stylesheet" :href "/css/fullcalendar/list.min.css"}]
-                      [:link {:rel "stylesheet" :href "/css/fullcalendar/timegrid.min.css"}]
+     :head           [[:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/fullcalendar@5.1.0/main.min.css"}]
+                      [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/@fullcalendar/list@5.1.0/main.min.css"}]
                       [:link {:rel "stylesheet" :href "/css/intake.css"}]]
      :content        [:div#rtc-intake-app]
      :footer-content [:div
