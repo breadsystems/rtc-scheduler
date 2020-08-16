@@ -44,7 +44,8 @@
 
 
 (def base
-  [[:body {:width "80em"
+  [[:* {:box-sizing :border-box}]
+   [:body {:width "80em"
            :max-width "95%"
            :margin "1em auto"
            :padding-top "2em"
@@ -124,7 +125,8 @@
    [:input [(& (attr :type=text))
             (& (attr :type=email))
             (& (attr :type=password))
-            {:min-width "25rem"
+            {:width "25rem"
+             :max-width "100%"
              :padding "0.7em"
              :border-radius border-radius
              :border purple-border}]
