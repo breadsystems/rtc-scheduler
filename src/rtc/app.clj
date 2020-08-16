@@ -12,6 +12,7 @@
    [ring.middleware.session :refer [wrap-session]]
    [ring.middleware.session.memory :as memory]
    [rtc.api.core :as api]
+   [rtc.assets.core :as assets]
    [rtc.auth.core :as auth]
    [rtc.db]
    [rtc.env :as env]
@@ -76,7 +77,7 @@
                        (layout/admin-page {:title "Comrades"})))}]])])
 
    (ring/routes
-    (ring/create-resource-handler {:path "/"})
+    (assets/wrap-asset-headers (ring/create-resource-handler {:path "/"}))
     (ring/redirect-trailing-slash-handler {:method :strip})
     (ring/create-default-handler
      {:not-found (constantly {:status 404
