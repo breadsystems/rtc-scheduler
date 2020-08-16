@@ -112,8 +112,33 @@
                  :background-size "1px 1em"
                  :box-shadow "inset 0 3px white, inset 0 -2px currentColor"}]]])
 
+(def purple-box {:padding "0.7em"
+                 :border-radius border-radius
+                 :border purple-border})
+
+(def box-field {:width "25rem"
+                :max-width "100%"
+                :border purple-border})
+
 (def forms
-  [[:.field {:margin "0.7em 0"}]
+  [[:input [(& (attr :type=text))
+            (& (attr :type=email))
+            (& (attr :type=password))
+            (merge
+             box-field
+             purple-box)]
+    [:&:disabled {:cursor :not-allowed}
+     [:&+label {:cursor :not-allowed}]]]
+   [:select (merge
+             box-field
+             purple-box
+             {:background-image (url "/img/caret-down.svg")
+              :background-position "right 10px bottom 12px"
+              :background-repeat :no-repeat
+              :-moz-appearance :none
+              :-webkit-appearance :none})
+    [:&:ms-expand {:display :none}]]
+   [:.field {:margin "0.7em 0"}]
    [:.radio-option {:margin "0 2em 0 0"}]
    [:.required {:color pink}]
    [:.has-errors {:color dark-purple
@@ -122,16 +147,6 @@
    [:.error-message {:color muted-pink
                      :font-weight 700
                      :margin "0.3em 0"}]
-   [:input [(& (attr :type=text))
-            (& (attr :type=email))
-            (& (attr :type=password))
-            {:width "25rem"
-             :max-width "100%"
-             :padding "0.7em"
-             :border-radius border-radius
-             :border purple-border}]
-    [:&:disabled {:cursor :not-allowed}
-     [:&+label {:cursor :not-allowed}]]]
    [:button :.button button-base
     [:&.secondary button-secondary
      [:&:disabled :&.disabled button-disabled-secondary]]
@@ -142,18 +157,6 @@
                    :cursor :pointer}
     [:&:disabled :&.disabled {:cursor :not-allowed
                               :color dark-grey}]]
-   [:select {:width "25rem"
-             :max-width "100%"
-             :border purple-border
-             :border-radius border-radius
-             :background-color :lavender
-             :background-image (url "/img/caret-down.svg")
-             :background-position "right 10px bottom 12px"
-             :background-repeat :no-repeat
-             :padding "0.7em"
-             :-moz-appearance :none
-             :-webkit-appearance :none}
-    [:&:ms-expand {:display :none}]]
    [:legend {:color dark-purple
              :font-weight 700}]
    [:.fc-button {:opacity 1
