@@ -1,6 +1,6 @@
 (ns rtc.style.core
   (:require
-   [garden.color :refer [rgb]]
+   [garden.color :refer [rgb as-hex]]
    [garden.def :refer [defcssfn]]
    [garden.selectors :refer [attr &]]))
 
@@ -25,28 +25,33 @@
 
 ;; Button mixins
 (def button-base {:padding "0.7em 1.3em"
-                  :border :none
+                  :border-width "3px"
+                  :border-style :solid
+                  :border-color pink
                   :cursor :pointer
                   :font-weight 700
                   :text-transform :uppercase
                   :color :white
                   :background pink})
 
-(def button-secondary (merge button-base {:background indigo}))
+(def button-secondary (merge button-base {:background indigo
+                                          :border-color indigo}))
 
 (def button-disabled {:background-color muted-pink
+                      :border-color muted-pink
                       :color off-white
                       :cursor :not-allowed})
 
 (def button-disabled-secondary
   (merge button-disabled {:background-color muted-purple
+                          :border-color muted-purple
                           :color off-white}))
 
 
 (def base
   [[:* {:box-sizing :border-box}]
    [:body {:width "80em"
-           :max-width "95%"
+           :max-width "90%"
            :margin "1em auto"
            :padding-top "2em"
 
@@ -70,10 +75,14 @@
              :max-width "40em"}]
 
    ;; Text styles
-   [:.call-to-action (merge button-base
-                            {:font-size "1.2em"
-                             :text-decoration :none
-                             :background dark-purple})]
+   [:.call-to-action
+    button-base
+    {:font-size "1.2em"
+     :text-decoration :none
+     :background dark-purple
+     :border-color dark-purple}
+    [:&:focus {:background :white
+               :color dark-purple}]]
    [:.help {:color grey
             :font-style :italic}]
    [:.highlight {:color pink}]
@@ -115,6 +124,8 @@
 (def purple-box {:padding "0.7em"
                  :border-radius border-radius
                  :border purple-border})
+(def &purple-box-focus [:&:focus {:outline :none
+                                  :border-color dark-purple}])
 
 (def box-field {:width "25rem"
                 :max-width "100%"
@@ -124,20 +135,21 @@
   [[:input [(& (attr :type=text))
             (& (attr :type=email))
             (& (attr :type=password))
-            (merge
-             box-field
-             purple-box)]
+            box-field
+            purple-box
+            &purple-box-focus]
     [:&:disabled {:cursor :not-allowed}
      [:&+label {:cursor :not-allowed}]]]
-   [:select (merge
-             box-field
-             purple-box
-             {:background-color :lavender
-              :background-image (url "/img/caret-down.svg")
-              :background-position "right 10px bottom 12px"
-              :background-repeat :no-repeat
-              :-moz-appearance :none
-              :-webkit-appearance :none})
+   [:select
+    box-field
+    purple-box
+    {:background-color :lavender
+     :background-image (url "/img/caret-down.svg")
+     :background-position "right 10px bottom 12px"
+     :background-repeat :no-repeat
+     :-moz-appearance :none
+     :-webkit-appearance :none}
+    &purple-box-focus
     [:&:ms-expand {:display :none}]]
    [:.field {:margin "0.7em 0"}]
    [:.radio-option {:margin "0 2em 0 0"}]
@@ -150,8 +162,12 @@
                      :margin "0.3em 0"}]
    [:button :.button button-base
     [:&.secondary button-secondary
+     [:&:focus {:background-color :white
+                :color (as-hex pink)}]
      [:&:disabled :&.disabled button-disabled-secondary]]
     [:&.next {:text-align :right}]
+    [:&:focus {:background-color :white
+               :color (as-hex pink)}]
     [:&:disabled :&.disabled button-disabled]]
    [:.text-button {:font-weight 700
                    :color indigo

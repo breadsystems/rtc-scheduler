@@ -600,7 +600,8 @@
                     (let [nav-title @(rf/subscribe [::i18n name])
                           linkable? (and accessible? (not current?))]
                       ^{:key name}
-                      [:li {:class (join " " [(when current? "current") (when viewed? "viewed")])}
+                      [:li {:class (join " " [(when current? "current") (when viewed? "viewed")])
+                            :tabindex (if accessible? 0 -1)}
                        [:span.nav-link {:class (when-not accessible? "disabled")
                                         :on-click #(when linkable? (rf/dispatch [::update-step step]))}
                         nav-title]]))
