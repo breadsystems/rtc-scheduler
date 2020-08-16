@@ -84,8 +84,8 @@
                       [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/@fullcalendar/list@5.1.0/main.min.css"}]]
      :content        [:div#rtc-intake-app]
      :footer-content [:div
-                      [:script {:src "/js/shared.js" :type "text/javascript"}]
-                      [:script {:src "/js/intake.js" :type "text/javascript"}]]})))
+                      [:script {:src (assets/js-src :shared) :type "text/javascript"}]
+                      [:script {:src (assets/js-src :intake) :type "text/javascript"}]]})))
 
 
 (defn admin-page
@@ -99,8 +99,8 @@
      :content        [:div#rtc-admin-app]
      :footer-content [:div
                       [:script {:src "https://cdn.jsdelivr.net/npm/fullcalendar@5.1.0/main.min.js" :type "text/javascript"}]
-                      [:script {:src "/js/shared.js" :type "text/javascript"}]
-                      [:script {:src "/js/admin.js" :type "text/javascript"}]]})))
+                      [:script {:src (assets/js-src :shared) :type "text/javascript"}]
+                      [:script {:src (assets/js-src :admin) :type "text/javascript"}]]})))
 
 
 (defn login-page
