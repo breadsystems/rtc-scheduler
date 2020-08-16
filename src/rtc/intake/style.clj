@@ -39,7 +39,7 @@
                      :width "100%"
                      :z-index 2
                      :text-align :right
-                     :background core/off-white}
+                     :background core/light-grey}
     [:* {:font-size "0.8em"}]
     [:label {:margin "1em"}]
     [:select {:margin "0.3em"

@@ -17,7 +17,7 @@
 (def dark-purple (rgb 110 25 160))
 (def muted-purple (rgb 55 5 80))
 (def grey (rgb 100 100 100))
-(def light-grey (rgb 235 235 235))
+(def light-grey (rgb 245 245 245))
 (def dark-grey (rgb 115 105 135))
 
 (def purple-border (str "2px solid " purple))
