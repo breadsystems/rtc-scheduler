@@ -339,12 +339,16 @@
   (assoc db :appointment appt))
 
 
+;; When the user interacts with the progress nav
 (rf/reg-event-db ::update-step update-step)
-
-(rf/reg-event-db ::answer! update-answer)
+;; When the user hits the back/next buttons
 (rf/reg-event-db ::prev-step prev-step)
 (rf/reg-event-db ::next-step next-step)
+;; When the user focuses a field for the first time. For validation purposes.
 (rf/reg-event-db ::touch! touch)
+;; When the user answers a question
+(rf/reg-event-db ::answer! update-answer)
+;; When the user selects an appointment time
 (rf/reg-event-db ::update-appointment update-appointment)
 
 (rf/reg-event-fx ::update-lang (fn [{:keys [db]} [_ lang]]
@@ -463,7 +467,7 @@
   (t :name)
   (t* [:please-enter :name])
   (map (comp t* :message) @(rf/subscribe [::errors-for :state]))
-  
+
   (appointment->str {:start "2020-07-06 16:00:00"
                      :end "2020-07-06 16:30:00"}))
 
