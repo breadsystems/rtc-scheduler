@@ -4,7 +4,8 @@
    [clojure.java.io :as io]
    [hiccup.core :refer [html]]
    [hiccup.page :refer [doctype]]
-   [markdown.core :as md]))
+   [markdown.core :as md]
+   [rtc.assets.core :as assets]))
 
 
 (defn error-page
@@ -43,7 +44,7 @@
                      [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
                      [:meta {:name "csrf-token" :content (:anti-forgery-token req)}]
                      [:link {:href "https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&display=swap" :rel "stylesheet"}]
-                     [:link {:href "/css/intake.css" :rel "stylesheet"}]]
+                     [:link {:href (assets/style-href :intake) :rel "stylesheet"}]]
                     head))
        (conj [:body
               content]
@@ -80,8 +81,7 @@
     opts
     {:title          "Get Care"
      :head           [[:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/fullcalendar@5.1.0/main.min.css"}]
-                      [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/@fullcalendar/list@5.1.0/main.min.css"}]
-                      [:link {:rel "stylesheet" :href "/css/intake.css"}]]
+                      [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/@fullcalendar/list@5.1.0/main.min.css"}]]
      :content        [:div#rtc-intake-app]
      :footer-content [:div
                       [:script {:src "/js/shared.js" :type "text/javascript"}]
@@ -95,7 +95,7 @@
    (merge
     opts
     {:head           [[:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/fullcalendar@5.1.0/main.min.css"}]
-                      [:link {:rel "stylesheet" :href "/css/admin.css"}]]
+                      [:link {:rel "stylesheet" :href (assets/style-href :admin)}]]
      :content        [:div#rtc-admin-app]
      :footer-content [:div
                       [:script {:src "https://cdn.jsdelivr.net/npm/fullcalendar@5.1.0/main.min.js" :type "text/javascript"}]
