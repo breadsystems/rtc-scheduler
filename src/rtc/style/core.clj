@@ -132,7 +132,8 @@
    [:select (merge
              box-field
              purple-box
-             {:background-image (url "/img/caret-down.svg")
+             {:background-color :lavender
+              :background-image (url "/img/caret-down.svg")
               :background-position "right 10px bottom 12px"
               :background-repeat :no-repeat
               :-moz-appearance :none
