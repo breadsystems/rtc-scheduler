@@ -14,12 +14,11 @@
     (loop [namespaces (tracker)]
       (try
         (when (seq namespaces)
-          (require ns-sym :reload)
+          (require ns-sym :reload-all)
           (let [styles-list (deref (resolve (:styles build)))
                 [conf rules] (if (map? (first styles-list))
                                [(first styles-list) (next styles-list)]
                                [{} styles-list])]
-            ;; TODO why doesn't this work the first time?
             (apply garden/css (merge conf compiler) rules)))
         (catch Exception e
           (println "Error compiling CSS:" (.getMessage e) e)))
