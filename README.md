@@ -132,3 +132,7 @@ This will initialize the database and start the dev environment. This may take a
 
 * Link to Clojure guides
 * Document basic app architecture
+
+### License
+
+Released under the [Anti-Capitalist Software License](https://anticapitalist.software/), v1.4
