@@ -114,12 +114,9 @@
                 :font-weight 700}]
    [:.current
     [:.nav-link {:display :inline
-                 :text-shadow (str "-3px -3px white,"
-                                   "-3px 3px white,"
-                                   "3px -3px white,"
-                                   "3px 3px white")
-                 :background-size "1px 1em"
-                 :box-shadow "inset 0 3px white, inset 0 -2px currentColor"}]]])
+                 :text-decoration :underline
+                 :text-decoration-skip-ink :auto
+                 :text-decoration-thickness "2px"}]]])
 
 (def purple-box {:padding "0.7em"
                  :border-radius border-radius
