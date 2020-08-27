@@ -1,6 +1,8 @@
 (ns rtc.api.queries
   (:require
-   [clojure.string :as string]))
+   [clojure.string :as string]
+   #?(:cljs
+      ["moment" :as moment])))
 
 
 (defprotocol QueryNode
@@ -56,6 +58,11 @@
   
   #?(:clj java.lang.Boolean :cljs boolean)
   (->query-arg-value [b] (str b)))
+
+#?(:cljs
+   (extend-protocol QueryArgValue
+     js/Date
+     (->query-arg-value [dt] (.format (moment dt)))))
 
 
 (comment

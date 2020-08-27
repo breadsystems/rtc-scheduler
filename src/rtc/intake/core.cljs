@@ -395,16 +395,14 @@
 (rf/reg-event-fx
  ::confirm!
  (fn [{:keys [db]}]
-   (let [{:keys [answers loading? confirmed-info]} db
+   (let [{:keys [answers appointment loading? confirmed-info]} db
          should-mutate? (and (not loading?) (not confirmed-info))]
      ;; Dispatching this event when the UI is already loading or an appointment
      ;; has already been confirmed is a noop.
      (when should-mutate?
        {:db (assoc db :loading? true)
         ;; TODO refine this mutation query
-        ::query [[:mutation [:schedule (merge answers {:provider_id 123
-                                                       :start_time "TODO"
-                                                       :end_time "TODO"})
+        ::query [[:mutation [:book (merge answers (select-keys appointment [:provider_id :start :end]))
                              :email]]
                  ::confirmed]}))))
 
@@ -420,6 +418,7 @@
   ;; Moment.js experiments
   (moment)
   (.format (moment) "YYYY-MM-DD")
+  (.format (moment))
   (.format (doto (moment)
              (.add (rand-int 10) "days")
              (.add (rand-int 4) "hours"))

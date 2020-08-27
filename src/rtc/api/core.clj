@@ -11,6 +11,7 @@
    [rtc.api.queries :refer [->query-string]]
    [rtc.db :as db]
    [rtc.appointments.avail :as avail]
+   [rtc.appointments.core :as appt]
    [rtc.users.core :as u]
    [rtc.users.handlers :refer [register-resolver]])
   (:import (clojure.lang IPersistentMap)))
@@ -49,6 +50,7 @@
                             (db/get-invitations (merge (select-keys args [:redeemed])
                                                        {:invited_by (req->uid request)}))))
 
+   :mutation/book        appt/book-appointment-resolver
    :mutation/invite      (auth/admin-only-resolver
                           (fn [{:keys [request]} {:keys [email]} _value]
                             (let [user-id (req->uid request)]

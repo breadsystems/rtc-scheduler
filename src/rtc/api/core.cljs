@@ -30,6 +30,10 @@
 
 
 (comment
+  (->query-string [:mutation
+                   [:book {:start (js/Date. 2020 0 1 13 30)
+                           :end (js/Date. 2020 0 1 14 0)}]])
+
   (debug-query! [:query
                  [:appointment {}]])
   (debug-query! [:mutation

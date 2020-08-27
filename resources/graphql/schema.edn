@@ -13,7 +13,7 @@
     ;; TODO should these be datetimes?
     :date_created {:type String}
     :date_modified {:type String}}}
-  
+
   :User
   {:description "A user account"
    :fields
@@ -72,7 +72,7 @@
     :code {:type String}
     :redeemed {:type Boolean}
     :date_invited {:type String}}}}
- 
+
  :queries
  {:careseeker
   {:type :Careseeker
@@ -135,11 +135,18 @@
    :resolve :query/invitations}}
 
  :mutations
- {:invite
+ {:book
+  {:type :Appointment
+   :args {:provider_id {:type Int}
+          :start {:type String}
+          :end {:type String}}
+   :resolve :mutation/book}
+
+  :invite
   {:type :Invitation
    :args {:email {:type String}}
    :resolve :mutation/invite}
-  
+
   :register
   {:type :User
    :args {:first_name {:type String}
