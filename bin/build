@@ -10,3 +10,7 @@ clojure -A:cljs-build release app
 # Bundle all assets in an uberjar
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 clojure -m uberdeps.uberjar --deps-file ../deps.edn --target ../target/rtc.jar --aliases prod
+
+# Cleanup after ourselves to avoid interfering with the dev env
+# TODO make it so dev just ignores manifest.edn
+rm -rf resources/public/css/manifest.edn
