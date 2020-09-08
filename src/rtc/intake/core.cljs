@@ -299,7 +299,17 @@
     (rf/dispatch [::answer! :description-of-needs "Life is pain"])
     (rf/dispatch [::update-step {:name :confirmation :step 5}]))
 
-  (rf/dispatch [::confirm!]))
+  (rf/dispatch [::confirm!])
+
+  (rf/dispatch [::debug-query! [[:mutation [:book {:email "coby@tamayo.email"
+                                                   :name "Coby"
+                                                   :description-of-needs "Life is pain"
+                                                   :provider_id 1
+                                                   :state "WA"
+                                                   :start (js/Date 2020 7 9 8 0)
+                                                   :end (js/Date 2020 7 9 8 30)}
+                                            :provider_id]]
+                                ::confirmed]]))
 
 
 
@@ -350,6 +360,11 @@
 (rf/reg-event-db ::answer! update-answer)
 ;; When the user selects an appointment time
 (rf/reg-event-db ::update-appointment update-appointment)
+
+;; Query helper. Not used in production code.
+(rf/reg-event-db ::debug-query! (fn [_ [_ query]]
+                                  ;; (js/console.log (name (ffirst query)) (name (second query)))
+                                  {::query query}))
 
 (rf/reg-event-fx ::update-lang (fn [{:keys [db]} [_ lang]]
                                  {:db (assoc db :lang lang)
@@ -403,7 +418,7 @@
        {:db (assoc db :loading? true)
         ;; TODO refine this mutation query
         ::query [[:mutation [:book (merge answers (select-keys appointment [:provider_id :start :end]))
-                             :email]]
+                             :provider_id]]
                  ::confirmed]}))))
 
 (rf/reg-event-db
