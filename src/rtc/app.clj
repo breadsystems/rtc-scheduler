@@ -11,7 +11,8 @@
    [ring.middleware.params :refer [wrap-params]]
    [ring.middleware.session :refer [wrap-session]]
    [ring.middleware.session.memory :as memory]
-   [rtc.api.core :as api]
+   [rtc.api.core :as api] ;; TODO
+   [rtc.rest.core :as rest]
    [rtc.assets.core :as assets]
    [rtc.auth.core :as auth]
    [rtc.db]
@@ -49,15 +50,17 @@
                     :after [:section.center.spacious
                             [:a.call-to-action {:href "/get-care"} "Get Care"]]}))}]
 
+     ;; TODO remove
      ["/api/graphql" {:post (fn [req]
                               {:status 200
                                :headers {"Content-Type" "application/edn"}
                                :body (-> req :body slurp (api/q {:request req}))})}]
 
-     (let [conf {:get intake/get-care-handler}]
-       ["/get-care"
-        ["" conf]
-        ["/*" conf]])
+     (rest/endpoints {:mount "/api/v1"})
+
+     ["/get-care"
+      ["" {:get intake/get-care-handler}]
+      ["/*" {:get intake/get-care-handler}]]
 
      ["/register" user/register-handler]
      ["/login" auth/login-handler]

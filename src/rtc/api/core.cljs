@@ -8,6 +8,7 @@
    [cljs.core.async.macros :refer [go]]))
 
 
+;; TODO convert this to REST
 (defn query->then [query f]
   (go (let [req {:body (->query-string query)
                  :headers {"Content-Type" "application/graphql"}}

@@ -1,5 +1,7 @@
 (ns rtc.intake.core
   (:require
+   [cljs-http.client :as http]
+   [cljs.core.async :refer [<!]]
    [clojure.string :refer [join]]
    ["moment" :as moment]
    ["moment/locale/es"]
@@ -11,7 +13,10 @@
    [rtc.api.core :as api]
    [rtc.i18n.core :as i18n]
    [rtc.i18n.data :as i18n-data]
-   [rtc.util :refer [->opt]]))
+   [rtc.util :refer [->opt]]
+   [cognitect.transit :as transit])
+  (:require-macros
+   [cljs.core.async.macros :refer [go]]))
 
 
 ;; First gather i18n data from flat files.
@@ -695,3 +700,15 @@
     (js/console.log "Detected language:" browser-lang "Selected language:" (name supported-lang))
     (rf/dispatch [::update-lang supported-lang]))
   (mount!))
+
+(comment
+
+  (go (let [response (<! (http/post
+                          "/api/v1/appointment"
+                          {:form-params {:name "Me" :date #inst "2020-01-01T00:00:00-00:00"}}))
+            reader (transit/reader :json)]
+        (js/console.clear)
+        (prn (transit/read reader (:body response)))))
+
+  ;;
+  )

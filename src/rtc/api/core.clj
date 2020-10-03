@@ -1,3 +1,4 @@
+;; TODO retire this ns
 (ns rtc.api.core
   (:require
    [clojure.edn :as edn]

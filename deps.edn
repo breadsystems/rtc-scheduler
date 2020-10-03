@@ -30,6 +30,8 @@
         re-frame                  {:mvn/version "0.12.0"}
         ring                      {:mvn/version "1.7.0"}
         ring/ring-defaults        {:mvn/version "0.3.2"}
+        com.cognitect/transit-clj {:mvn/version "1.0.324"}
+        com.cognitect/transit-cljs {:mvn/version "0.8.264"}
         yogthos/config            {:mvn/version "1.1.7"}}
 
  :aliases {:dev {:extra-paths ["env/dev" "test"]

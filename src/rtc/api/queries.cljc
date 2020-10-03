@@ -1,3 +1,4 @@
+;; TODO retire this ns
 (ns rtc.api.queries
   (:require
    [clojure.string :as string]

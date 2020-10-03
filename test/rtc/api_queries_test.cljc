@@ -1,3 +1,4 @@
+;; TODO retire this ns
 (ns rtc.api-queries-test
   (:require
    [clojure.test :refer [deftest is]]
