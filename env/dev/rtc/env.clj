@@ -2,35 +2,13 @@
   (:require
    [config.core :as config]
    [mount.core :as mount :refer [defstate]]
-   [nrepl.server :as nrepl]
    [ring.middleware.reload :refer [wrap-reload]]
    [rtc.style.build :as style]))
-
-
-(defonce stop-repl (atom nil))
-
-(defn start! []
-  (let [port (:nrepl-port config/env 7000)]
-   (println (str "Starting nREPL server at localhost:" port))
-   (reset! stop-repl (nrepl/start-server :port port))
-   (spit ".nrepl-port" (str port)))
-  nil)
-
-(defn stop! []
-  (when @stop-repl
-    (@stop-repl)
-    (reset! stop-repl nil))
-  nil)
 
 
 (defn middleware [app]
   (-> app
       (wrap-reload)))
-
-
-(defstate repl-server
-  :start (start!)
-  :stop  (stop!))
 
 
 (def ^:private style-namespaces #{'rtc.intake.style

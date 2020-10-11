@@ -115,3 +115,17 @@
 
 (defn -main [& _args]
   (mount/start))
+
+(defn- restart! []
+  (mount/stop)
+  (mount/start))
+
+(comment
+
+  ;; Evaluate this to start the app in the REPL.
+  (mount/start)
+
+  ;; Restart the dev environment.
+  (restart!)
+
+  )
