@@ -1,8 +1,4 @@
-(ns rtc.appointments.windows
-  (:require
-   [clojure.set :refer [union]]
-   [clojure.spec.alpha :as spec]
-   [rtc.appointments.internal.time :as t]))
+(ns rtc.appointments.windows)
 
 
 (defn- ->earlier-window-edge

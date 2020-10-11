@@ -1,11 +1,11 @@
 (ns rtc.rest.core
   (:require
    [clojure.data.json :as json]
+   [cognitect.transit :as transit]
    [rtc.auth.core :as auth]
-   [rtc.db :as db]
-   [cognitect.transit :as transit])
+   [rtc.appointments.core :as appt])
   (:import
-   [java.io ByteArrayInputStream ByteArrayOutputStream]))
+   [java.io ByteArrayOutputStream]))
 
 
 (def ^:private default-uid
