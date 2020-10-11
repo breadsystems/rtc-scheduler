@@ -31,7 +31,5 @@
 
 (comment
 
-  (transit/write writer {:hi :there})
-
   ;;  
   )

@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS careseekers (
 
 CREATE TABLE IF NOT EXISTS providers (
   id int PRIMARY KEY,
-  state varchar(2),
+  state varchar(2) NOT NULL,
   date_created timestamp,
   date_modified timestamp,
   FOREIGN KEY (id) REFERENCES users (id) ON DELETE RESTRICT
