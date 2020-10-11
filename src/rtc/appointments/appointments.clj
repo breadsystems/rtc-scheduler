@@ -9,15 +9,15 @@
 
 (defn params->query
   "Takes a map of params and returns a HoneySQL query map"
-  [{:keys [from to state]}]
+  [{:keys [from to states]}]
   {:select [:*]
    :from [[:appointments :a]]
    :join
-           (when state [[:providers :p] [:= :p.id :a.provider_id]])
+           (when states [[:providers :p] [:= :p.id :a.provider_id]])
    :where
            (filter some? [:and
                           ;; TODO state mappings
-                          (when state [:= :p.state state])
+                          (when states [:in :p.state states])
                           ;; TODO migrate away from clj-time
                           (when (and from to) [:between :start_time (c/to-sql-time from) (c/to-sql-time to)])])})
 
@@ -27,4 +27,4 @@
 
 (comment
   (c/to-sql-time (inst-ms (Date. 2021 01 01)))
-  (get-appointments {:from (Date.) :to (Date.) :state "WA"}))
+  (get-appointments {:from (Date.) :to (Date.) :states #{"WA"}}))

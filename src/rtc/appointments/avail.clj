@@ -20,14 +20,14 @@
 
 (defn params->query
   "Takes a map of params and returns a HoneySQL query map"
-  [{:keys [from to state]}]
+  [{:keys [from to states]}]
   {:select [:*]
    :from [[:availabilities :a]]
    :join
-   (when state [[:providers :p] [:= :p.id :a.provider_id]])
+   (when states [[:providers :p] [:= :p.id :a.provider_id]])
    :where
    (filter some? [:and
-                  (when state [:= :state state])
+                  (when states [:= :state states])
                   (when (and from to) [:between :start_time (c/to-sql-time from) (c/to-sql-time to)])])})
 
 (defn get-availabilities [params]
