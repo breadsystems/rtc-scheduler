@@ -2,6 +2,7 @@
   (:require
    [clojure.data.json :as json]
    [cognitect.transit :as transit]
+   [rtc.admin.schedule :as schedule]
    [rtc.auth.core :as auth]
    [rtc.appointments.core :as appt])
   (:import
@@ -73,7 +74,11 @@
              {:status 200
               :headers {"Content-Type" "application/transit+edn"}
               :body (->transit {:success true
-                                :appointment (:params req)})})}]])
+                                :appointment (:params req)})})}]
+   ["/schedule"
+    ;; TODO AUTHORIZE REQUEST!!
+    {:get (rest-handler (fn [req]
+                          (schedule/schedule {})))}]])
 
 (comment
 
