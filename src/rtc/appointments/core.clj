@@ -16,6 +16,7 @@
 (defn appt-req->windows [{:keys [from to state] :as params}]
   (let [avails (avail/get-availabilities {:from from :to to :state state})
         appts  (appt/get-appointments    {:from from :to to :state state})]
+    ;; TODO just the windows plz
     {:params         params
      :availabilities avails
      :appointments   appts
