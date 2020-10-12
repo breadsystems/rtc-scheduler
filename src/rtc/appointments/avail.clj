@@ -22,13 +22,13 @@
   "Takes a map of params and returns a HoneySQL query map"
   [{:keys [from to states]}]
   {:select [:*]
-   :from [[:availabilities :a]]
+   :from   [[:availabilities :a]]
    :join
-   (when states [[:providers :p] [:= :p.id :a.provider_id]])
+           (when states [[:providers :p] [:= :p.id :a.provider_id]])
    :where
-   (filter some? [:and
-                  (when states [:= :state states])
-                  (when (and from to) [:between :start_time (c/to-sql-time from) (c/to-sql-time to)])])})
+           (filter some? [:and
+                          (when states [:in :state states])
+                          (when (and from to) [:between :start_time (c/to-sql-time from) (c/to-sql-time to)])])})
 
 (defn get-availabilities [params]
   (-> params params->query sql/format d/query))
@@ -39,21 +39,9 @@
 
   (t/sql-timestamp (t/local-date "yyyy-MM-dd" "2020-01-01"))
 
-  (sql/format {:select [:*]
-               :from [:appointments]
-               :where [:and [:between :start_time "2020-01-01" "2020-01-07"] [:= :provider_id 123]]})
-  ;; => ["SELECT * FROM appointments WHERE (start_time BETWEEN ? AND ? AND provider_id = ?)"
-  ;;     "2020-01-01"
-  ;;     "2020-01-07"
-  ;;     123]
-
-  ;; NOTE:
-  ;; `AND` collapses with only a single clause:
-  (sql/format {:select [:*]
-               :from [:appointments]
-               :where [:and [:= 1 1]]})
-  ;; => ["SELECT * FROM appointments WHERE (? = ?)" 1 1]
-
+  (d/query (sql/format {:select [:*] :from [:careseekers]}))
+  (d/query (sql/format {:select [:*] :from [:availabilities]}))
+  (d/query (sql/format {:select [:*] :from [:appointments]}))
 
   (d/query (sql/format {:select [:*]
                         :from [:availabilities]
@@ -64,7 +52,7 @@
                                  (c/to-sql-time #inst "2020-12-31T23:59:59.000-08:00")]
                                 [:= :provider_id 1]]}))
 
-  (get-availabilities {:from "2020-08-12" :to "2020-08-31" :state "WA"})
+  (get-availabilities {:from "2020-08-12" :to "2020-08-31" :states "CA"})
   ;; => [{:id 3,
   ;;      :start_time #object[java.time.LocalDateTime 0x7ea74303 "2020-08-11T12:30"],
   ;;      :end_time #object[java.time.LocalDateTime 0x67d795f "2020-08-11T18:00"],
@@ -110,7 +98,7 @@
   (d/create-appointment! {:start (c/to-sql-time #inst "2020-08-10T09:00:00.000-08:00")
                           :end (c/to-sql-time #inst "2020-08-10T09:20:00.000-08:00")
                           :reason "I have questions about my medication"
-                          :careseeker-id 2
+                          :careseeker-id 1
                           :provider-id 1})
 
   (d/get-appointment {:id 1})
