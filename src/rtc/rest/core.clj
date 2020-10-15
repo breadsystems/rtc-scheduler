@@ -25,11 +25,10 @@
 
 
 (defn- ->json-value [_ v]
-  (cond
-    (= Date (type v)) (let [format (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")]
-                        (.format format v))
-    (= java.sql.Timestamp (type v)) (inst-ms v)
-    :else v))
+  (let [fmt (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")]
+    (cond
+      (= Date (type v)) (.format fmt v)
+      :else v)))
 
 (defn- ->json [x]
   (json/write-str x :value-fn ->json-value))

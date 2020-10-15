@@ -1,4 +1,6 @@
-(ns rtc.appointments.windows)
+(ns rtc.appointments.windows
+  (:import
+    [java.util Date]))
 
 
 (defn- ->earlier-window-edge
@@ -40,6 +42,9 @@
   {:id    (:provider_id m)
    :start (inst-ms (:start_time m))
    :end   (inst-ms (:end_time m))})
+
+(defn format [m]
+  (-> m (update :start #(Date. %)) (update :end #(Date. %))))
 
 
 (defn ->windows [avails appts from to w]

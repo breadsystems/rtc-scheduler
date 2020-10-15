@@ -30,6 +30,14 @@
                     :end_time    #inst "2020-10-22T01:00:00"
                     :provider_id 123}))))
 
+(deftest test-format
+  (is (= {:start #inst "2020-10-22T00:00:00"
+          :end #inst "2020-10-22T01:00:00"
+          :id 123}
+         (w/format {:id 123
+                    :start 1603324800000
+                    :end 1603328400000}))))
+
 (deftest test-avail->ops
 
   ;; Whereas we want to be more liberal with appointments -
