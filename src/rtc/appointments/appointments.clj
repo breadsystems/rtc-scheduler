@@ -27,4 +27,27 @@
 
 (comment
   (c/to-sql-time (inst-ms (Date. 2021 01 01)))
+  (d/create-need! {:name "Interpretation"
+                   :description "Translation service for a non-English speaker"})
+  (d/get-needs)
+  (d/get-need {:id 1})
+
+  (d/create-appointment! {:start (c/to-sql-time #inst "2020-08-09T10:30:00.000-08:00")
+                          :end (c/to-sql-time #inst "2020-08-09T10:50:00.000-08:00")
+                          :reason "I have questions about my HRT"
+                          :careseeker-id 1
+                          :provider-id 1})
+
+  (d/create-appointment! {:start (c/to-sql-time #inst "2020-08-10T09:00:00.000-08:00")
+                          :end (c/to-sql-time #inst "2020-08-10T09:20:00.000-08:00")
+                          :reason "I have questions about my medication"
+                          :careseeker-id 1
+                          :provider-id 1})
+
+  (d/get-appointment {:id 1})
+  (d/get-appointment {:id 5})
+
+  (d/create-appointment-need! {:need-id 1 :appointment-id 1 :info "Mandarin"})
+  (d/get-appointment-need {:appointment-id 1})
+  (d/delete-appointment-need! {:need-id 1 :appointment-id 1})
   (get-appointments {:from (Date.) :to (Date.) :states #{"WA"}}))
