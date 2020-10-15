@@ -1,5 +1,6 @@
 (ns rtc.appointments.core
   (:require
+    [clojure.set :refer [rename-keys]]
     [rtc.appointments.appointments :as appt]
     [rtc.appointments.avail :as avail]
     [rtc.appointments.states :as st]
@@ -18,13 +19,8 @@
 (defn appt-req->windows [{:keys [from to state] :as params}]
   (let [states (get st/state-mappings state)
         avails (avail/get-availabilities {:from from :to to :states states})
-        appts  (appt/get-appointments    {:from from :to to :states states})]
-    ;; TODO just the windows plz
-    {:params         params
-     :availabilities avails
-     :appointments   appts
-     :windows        (w/->windows avails appts from to WINDOW-MS)}))
-
+        appts (appt/get-appointments {:from from :to to :states states})]
+    (w/->windows (map w/coerce avails) (map w/coerce appts) from to WINDOW-MS)))
 
 (comment
 

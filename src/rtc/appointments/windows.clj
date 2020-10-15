@@ -28,9 +28,6 @@
     (update (apply-ops id->toggle ops) id #(+ (or % 0) opcode))
     id->toggle))
 
-;; (defn- id->appt-count [id appts]
-;;   (count (filter #(= id (:id %)) appts)))
-
 (defn fold-ops [t->ops [start id op]]
   (update t->ops start conj [start id op]))
 
@@ -38,6 +35,11 @@
   (let [one? #(= 1 %)
         positives (filter (comp one? val) toggles)]
     (into [] (map key positives))))
+
+(defn coerce [m]
+  {:id    (:provider_id m)
+   :start (inst-ms (:start_time m))
+   :end   (inst-ms (:end_time m))})
 
 
 (defn ->windows [avails appts from to w]

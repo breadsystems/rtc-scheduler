@@ -17,6 +17,8 @@
 
 (defn create-first-admin-user! []
   (try
+    ;; TODO get env vars from config
+    ;; TODO email an invite to redeem instead of printing the pw
     (let [pw (or (System/getenv "ADMIN_PASSWORD") (tmp-password))
           pw-hash (hash/derive pw)
           email (or (System/getenv "ADMIN_EMAIL") "rtc@example.com")

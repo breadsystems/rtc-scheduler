@@ -28,6 +28,7 @@
   (cond
     (= Date (type v)) (let [format (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")]
                         (.format format v))
+    (= java.sql.Timestamp (type v)) (inst-ms v)
     :else v))
 
 (defn- ->json [x]

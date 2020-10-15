@@ -21,6 +21,15 @@
   (is (= [1 2 4]
          (w/->ids {1 1, 2 1, 3 0, 4 1, 5 -1}))))
 
+(deftest test-coerce
+  (is (= {:id 123
+          :start 1603324800000
+          :end 1603328400000}
+         (w/coerce {:id          5
+                    :start_time  #inst "2020-10-22T00:00:00"
+                    :end_time    #inst "2020-10-22T01:00:00"
+                    :provider_id 123}))))
+
 (deftest test-avail->ops
 
   ;; Whereas we want to be more liberal with appointments -
