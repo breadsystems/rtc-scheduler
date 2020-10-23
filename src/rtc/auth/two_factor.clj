@@ -47,10 +47,9 @@
 (defn verified? [req]
   (boolean (:verified-2fa-token? (:session req))))
 
-(defn require-verification? [{:keys [session] :as req}]
-  (let [user (:identity session)]
-    (and (u/two-factor-enabled? user)
-         (not (verified? req)))))
+(defn require-verification? [{:keys [identity] :as req}]
+  (and (u/two-factor-enabled? identity)
+       (not (verified? req))))
 
 (comment
 

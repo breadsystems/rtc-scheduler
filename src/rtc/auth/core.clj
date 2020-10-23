@@ -36,7 +36,9 @@
   (cond
     (and
      (authenticated? req)
-     (two-factor/verified? req))
+     (or
+      (two-factor/verified? req)
+      (not (two-factor/require-verification? req))))
     :logged-in
 
     (and
@@ -44,7 +46,9 @@
      (get form-params "token"))
     :verifying
 
-    (authenticated? req)
+    (and
+     (authenticated? req)
+     (two-factor/require-verification? req))
     :two-factor
 
     (and (get form-params "email")
@@ -78,7 +82,7 @@
     (layout/two-factor-page req)
 
     :verifying
-    (if (two-factor/verify-token (get form-params "token") 25490095)
+    (if (two-factor/verify-token (get form-params "token") 25490095) ;; TODO get token from user
       (-> (redirect (destination-uri req))
           (assoc :session (assoc session :verified-2fa-token? true)))
       (layout/two-factor-page {:req req
@@ -107,7 +111,9 @@
     (if (or
          (and
           (authenticated? req)
-          (two-factor/verified? req))
+          (or
+           (two-factor/verified? req)
+           (not (two-factor/require-verification? req))))
          ;; Support disabling auth for nicer frontend dev workflow
          (auth-disabled?))
       (handler req)

@@ -9,9 +9,13 @@
   (is (= :authenticating  (auth/login-step {:session nil
                                             :form-params {"email"    "any truthy value"
                                                           "password" "any truthy value"}})))
-  (is (= :two-factor      (auth/login-step {:identity {:id 123}})))
-  (is (= :verifying       (auth/login-step {:identity {:id 123}
+  (is (= :two-factor      (auth/login-step {:identity {:id 123 :preferences {:two-factor-enabled? true}}})))
+  (is (= :verifying       (auth/login-step {:identity {:id 123 :preferences {:two-factor-enabled? true}}
                                             :form-params {"token" "12345678"}})))
+  (is (= :logged-in       (auth/login-step {:identity {:id 123 :preferences {:two-factor-enabled? false}}})))
+  ;; 2FA should default to false
+  (is (= :logged-in       (auth/login-step {:identity {:id 123 :preferences {}}})))
+  (is (= :logged-in       (auth/login-step {:identity {:id 123 :preferences nil}})))
   (is (= :logged-in       (auth/login-step {:identity {:id 123}
                                             :session {:verified-2fa-token? true}}))))
 
