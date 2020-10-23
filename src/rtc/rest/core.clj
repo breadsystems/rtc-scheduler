@@ -7,6 +7,7 @@
    [rtc.appointments.core :as appt])
   (:import
     [java.io ByteArrayOutputStream]
+    [java.lang Throwable]
     [java.util Date]
     [java.text SimpleDateFormat]))
 
@@ -49,7 +50,7 @@
         {:status 400
          :headers {"Content-Type" content-type}
          :body    (transform {:success false
-                              :errors  (:errors req)})}))))
+                              :errors  (:errors res)})}))))
 
 (defonce ONE-DAY-MS (* 24 60 60 1000))
 
@@ -78,7 +79,13 @@
    ["/schedule"
     ;; TODO AUTHORIZE REQUEST!!
     {:get (rest-handler (fn [req]
-                          (schedule/schedule {})))}]])
+                          (try
+                            {:success true
+                             :data    (merge {:user {:id 1}}
+                                             (schedule/schedule req))}
+                            (catch Throwable e
+                              {:success false
+                               :errors [{:message "Unexpected error"}]}))))}]])
 
 (comment
 

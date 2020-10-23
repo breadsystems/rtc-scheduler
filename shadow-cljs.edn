@@ -19,4 +19,6 @@
                  :ns-regexp "-test$"
                  :devtools {:http-root "resources/public/test"
                             :http-port 3002}}}
+ :nrepl {:port 7001
+         :middleware []}
  :cache-blockers #{rtc.i18n.data}}

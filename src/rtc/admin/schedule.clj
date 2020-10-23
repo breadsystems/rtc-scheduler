@@ -1,8 +1,21 @@
-(ns rtc.admin.schedule)
+(ns rtc.admin.schedule
+  (:require
+    [rtc.appointments.appointments :as appt]
+    [rtc.appointments.avail :as avail]))
 
 
 (defn schedule [_]
-  {:success true
-   :data {:appointments   []
-          :availabilities []
-          :users          []}})
+  ;; TODO parameterize from/to
+  {:appointments   (appt/get-appointments {})
+   :availabilities (avail/get-availabilities {})
+   :users          []})
+
+
+(comment
+
+  ;; TODO exceptions, y tho
+  (appt/get-appointments {})
+  (avail/get-availabilities {})
+
+  ;;
+  )
