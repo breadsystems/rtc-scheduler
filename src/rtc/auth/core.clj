@@ -74,7 +74,9 @@
     :authenticating
     (if-let [user (authenticate-user (get form-params "email")
                                      (get form-params "password"))]
-      (assoc (layout/two-factor-page req) :session {:identity user})
+      (if (two-factor/require-verification? req)
+        (assoc (layout/two-factor-page req) :session {:identity user})
+        (redirect (destination-uri req)))
       (layout/login-page {:req req
                           :error "Invalid email or password"}))
 
