@@ -13,13 +13,13 @@
 (deftest test-require-verification
   ;; 2FA disabled (empty preference value)
   (is (false? (two-factor/require-verification?
-               {:identity {:preferences {}}})))
+               {:session {:identity {:preferences {}}}})))
   ;; 2FA disabled
   (is (false? (two-factor/require-verification?
-               {:identity {:preferences {:two-factor-enabled? false}}})))
+               {:session {:identity {:preferences {:two-factor-enabled? false}}}})))
   ;; 2FA enabled and has already verified
   (is (false? (two-factor/require-verification?
-               {:identity {:preferences {:two-factor-enabled? true}}
-                :session {:verified-2fa-token? true}})))
+               {:session {:identity {:preferences {:two-factor-enabled? true}}
+                          :verified-2fa-token? true}})))
   (is (true? (two-factor/require-verification?
-              {:identity {:preferences {:two-factor-enabled? true}}}))))
+              {:session {:identity {:preferences {:two-factor-enabled? true}}}}))))
