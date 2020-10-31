@@ -12,8 +12,8 @@ SELECT * FROM users WHERE id = :id
 
 -- :name get-user-by-email :? :1
 -- :doc retrieves a user record given an email
-SELECT u.*, p.*, p.id != NULL AS is_provider FROM users u
-LEFT JOIN providers p ON u.ID = p.ID
+SELECT u.*, p.state, p.id != NULL AS is_provider FROM users u
+LEFT JOIN providers p ON u.id = p.id
 WHERE email = :email
 
 -- :name delete-user! :! :n

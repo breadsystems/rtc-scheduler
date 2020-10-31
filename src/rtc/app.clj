@@ -15,7 +15,7 @@
    [rtc.rest.core :as rest]
    [rtc.assets.core :as assets]
    [rtc.auth.core :as auth]
-   [rtc.db]
+   [rtc.db :as db]
    [rtc.env :as env]
    [rtc.intake.core :as intake]
    [rtc.layout :as layout]
@@ -127,5 +127,10 @@
 
   ;; Restart the dev environment.
   (restart!)
+
+  ;; Recreate the test admin user.
+  (when-let [admin-uid (:id (db/get-user-by-email {:email "rtc@example.com"}))]
+    (db/delete-user! {:id admin-uid})
+    (restart!))
 
   )
