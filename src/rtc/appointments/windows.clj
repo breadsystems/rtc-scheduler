@@ -43,7 +43,7 @@
    :start (inst-ms (:start_time m))
    :end   (inst-ms (:end_time m))})
 
-(defn format [m]
+(defn format-window [m]
   (-> m (update :start #(Date. %)) (update :end #(Date. %))))
 
 

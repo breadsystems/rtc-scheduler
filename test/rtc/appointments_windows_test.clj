@@ -34,9 +34,9 @@
   (is (= {:start #inst "2020-10-22T00:00:00"
           :end #inst "2020-10-22T01:00:00"
           :id 123}
-         (w/format {:id 123
-                    :start 1603324800000
-                    :end 1603328400000}))))
+         (w/format-window {:id 123
+                           :start 1603324800000
+                           :end 1603328400000}))))
 
 (deftest test-avail->ops
 

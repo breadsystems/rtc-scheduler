@@ -20,7 +20,7 @@
   (let [states (get st/state-mappings state)
         avails (avail/get-availabilities {:from from :to to :states states})
         appts (appt/get-appointments {:from from :to to :states states})]
-    (map w/format
+    (map w/format-window
          (w/->windows (map w/coerce avails) (map w/coerce appts) from to WINDOW-MS))))
 
 (comment
