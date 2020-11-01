@@ -1,6 +1,5 @@
 (ns rtc.env
   (:require
-   [config.core :as config]
    [mount.core :as mount :refer [defstate]]
    [ring.middleware.reload :refer [wrap-reload]]
    [rtc.style.build :as style]))
