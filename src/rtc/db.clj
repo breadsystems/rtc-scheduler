@@ -7,14 +7,26 @@
    [clojure.string :as string]
    [migratus.core :as migratus]
    [mount.core :as mount :refer [defstate]])
-  (:import (org.postgresql.util PGobject)))
+  (:import
+   [org.postgresql.util PGobject]
+   [java.net URI]))
 
 
+(defn- ->jdbc-url [database-url]
+  (if (string/starts-with? database-url "postgres://")
+    (let [uri (URI. database-url)
+          user-info (.getUserInfo uri)
+          [username password] (when user-info (.split user-info ":"))
+          creds (when user-info
+                  (str "?user=" username "&password=" password))]
+      [(str "jdbc:postgresql://" (.getHost uri) ":" (.getPort uri) (.getPath uri) creds)])
+    database-url))
+
+;; Parse the DATABASE_URL environment variable into something JDBC can use
+;; https://devcenter.heroku.com/articles/connecting-to-relational-databases-on-heroku-with-java#using-the-database_url-in-plain-jdbc
 (defstate url
-  :start (if-let [url (:database-url env)]
-           ;; Apparently JDBC does not support the `postgres://...` shorthand 😕
-           ;; https://help.heroku.com/51QYCRMZ/why-is-there-no-suitable-driver-found-for-jdbc-postgres
-           (string/replace url #"postgres://" "jdbc:postgresql://")
+  :start (if-let [database-url (:database-url env)]
+           (->jdbc-url database-url)
            (throw (ex-info "No database-url detected!" {:causes #{:no-database-url}}))))
 
 (defstate ^:dynamic *db*
