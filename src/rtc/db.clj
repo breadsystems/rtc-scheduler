@@ -4,6 +4,7 @@
    [config.core :as config :refer [env]]
    [conman.core :as conman]
    [clojure.java.jdbc :as jdbc]
+   [clojure.string :as string]
    [migratus.core :as migratus]
    [mount.core :as mount :refer [defstate]])
   (:import (org.postgresql.util PGobject)))
@@ -11,7 +12,9 @@
 
 (defstate url
   :start (if-let [url (:database-url env)]
-           url
+           ;; Apparently JDBC does not support the `postgres://...` shorthand 😕
+           ;; https://help.heroku.com/51QYCRMZ/why-is-there-no-suitable-driver-found-for-jdbc-postgres
+           (string/replace url #"postgres://" "jdbc:postgresql://")
            (throw (ex-info "No database-url detected!" {:causes #{:no-database-url}}))))
 
 (defstate ^:dynamic *db*
