@@ -687,7 +687,7 @@
               [:option {:value value} label])
             lang-options)]]
      [:header
-      [:h1 "Radical Telehealth Collective"]
+      [:h1 [:a {:href "/"} "Radical Telehealth Collective"]]
       [:h2 (t :get-care)]
       (when (not confirmed-info) [progress-nav])]
      [:main

@@ -82,6 +82,8 @@
      :background dark-purple
      :border-color dark-purple}
     [:&:focus {:background :white
+               :color dark-purple}]
+    [:&:hover {:background :white
                :color dark-purple}]]
    [:.help {:color grey
             :font-style :italic}]

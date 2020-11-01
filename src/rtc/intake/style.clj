@@ -6,7 +6,11 @@
 
 
 (def nav
-  [[:.nav-link
+  [[:h1
+    [:a {:color core/pink
+         :text-decoration :none}
+     [:&:hover {:text-decoration :underline}]]]
+   [:.nav-link
     [:&.disabled {:color core/dark-grey
                   :cursor :not-allowed}]]])
 
