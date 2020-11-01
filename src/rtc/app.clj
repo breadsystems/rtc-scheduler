@@ -93,6 +93,8 @@
 (defn start! []
   (let [port (Integer. (:port config/env 80))]
     (println (str "Running HTTP server at localhost:" port))
+    (when (:dev-disable-auth config/env)
+      (println "NOTICE: Authentication is disabled!"))
     (reset! stop-http
             (http/run-server (-> app
                                  (wrap-session)
