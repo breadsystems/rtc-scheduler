@@ -14,8 +14,8 @@
    [reitit.frontend :as reitit]
    [reitit.frontend.easy :as easy]
    [rtc.admin.calendar :as calendar]
-   [rtc.admin.schedule :as schedule]
    [rtc.api.core :as api]
+   [rtc.rest.core :as rest]
    [rtc.style.colors :as colors]
    [rtc.users.invites.ui :as invites]))
 
@@ -46,106 +46,8 @@
               :appointments? true
               :providers #{3 4} ;; TODO
               :access-needs #{}}
-    :availabilities {1 {:id 1
-                        :start #inst "2020-07-27T09:00:00-07:00"
-                        :end #inst "2020-07-27T16:00:00-07:00"
-                        :event/type :availability
-                        :user/id 3}
-                     2 {:id 2
-                        :start #inst "2020-07-29T09:00:00-07:00"
-                        :end #inst "2020-07-29T16:00:00-07:00"
-                        :event/type :availability
-                        :user/id 3}
-                     3 {:id 3
-                        :start #inst "2020-07-30T10:00:00-07:00"
-                        :end #inst "2020-07-30T15:00:00-07:00"
-                        :event/type :availability
-                        :user/id 3}
-                     4 {:id 4
-                        :start #inst "2020-08-01T11:00:00-07:00"
-                        :end #inst "2020-08-01T15:00:00-07:00"
-                        :event/type :availability
-                        :user/id 3}
-                     5 {:id 5
-                        :start #inst "2020-07-31T10:00:00-07:00"
-                        :end #inst "2020-07-31T16:00:00-07:00"
-                        :event/type :availability
-                        :user/id 4}
-                     6 {:id 6
-                        :start #inst "2020-08-01T11:00:00-07:00"
-                        :end #inst "2020-08-01T15:00:00-07:00"
-                        :event/type :availability
-                        :user/id 4}
-                     7 {:id 7
-                        :start #inst "2020-08-02T10:00:00-07:00"
-                        :end #inst "2020-08-02T16:00:00-07:00"
-                        :event/type :availability
-                        :user/id 4}}
-    :appointments {10 {:id 10
-                       :start #inst "2020-08-01T12:00:00-07:00"
-                       :end #inst   "2020-08-01T12:30:00-07:00"
-                       :name "Octavia"
-                       :pronouns "she/her"
-                       :email "octaviab@earthseed.net"
-                       :phone "555-555-5555"
-                       :ok_to_text true
-                       :reason "Life is pain"
-                       :event/type :appointment
-                       :access-needs #{{:need/id 1 :interpreter/lang "Español"}}
-                       :fulfillments #{}
-                       :user/id 3}
-                   11 {:id 11
-                       :start #inst "2020-07-30T13:00:00-07:00"
-                       :end #inst   "2020-07-30T13:30:00-07:00"
-                       :name "Malcom"
-                       :pronouns "he/him"
-                       :email "x@riseup.net"
-                       :phone "555-555-5555"
-                       :ok_to_text true
-                       :reason "Life is pain"
-                       :event/type :appointment
-                       :access-needs #{{:need/id 1 :interpreter/lang "Chinese Mandarin"}}
-                       :fulfillments #{}
-                       :user/id 3}
-                   12 {:id 12
-                       :start #inst "2020-08-02T14:00:00-07:00"
-                       :end #inst   "2020-08-02T14:30:00-07:00"
-                       :name "Angela"
-                       :pronouns "they/them"
-                       :email "angelab@riseup.net"
-                       :phone "555-555-5555"
-                       :ok_to_text false
-                       :reason "Life is pain"
-                       :event/type :appointment
-                       :access-needs #{{:need/id 2}}
-                       :fulfillments #{}
-                       :user/id 2}
-                   13 {:id 13
-                       :start #inst "2020-07-28T11:00:00-07:00"
-                       :end #inst   "2020-07-28T11:30:00-07:00"
-                       :name "Ursula"
-                       :pronouns "she/her"
-                       :email "ursula@ursulakleguin.com"
-                       :phone "555-555-5555"
-                       :ok_to_text true
-                       :reason "Life is pain"
-                       :event/type :appointment
-                       :access-needs #{}
-                       :fulfillments #{}
-                       :user/id 1}
-                   14 {:id 14
-                       :start #inst "2020-07-30T13:30:00-07:00"
-                       :end #inst   "2020-07-30T14:00:00-07:00"
-                       :name "Anonymous Katie"
-                       :pronouns ""
-                       :email "anon@protonmail.com"
-                       :phone ""
-                       :ok_to_text nil
-                       :reason "Life is pain"
-                       :event/type :appointment
-                       :access-needs #{{:need/id 1 :interpreter/lang "Khmer"}}
-                       :fulfillments #{}
-                       :user/id 3}}
+    :availabilities {}
+    :appointments {}
     :users {3 {:id 3
                :first_name "Lauren"
                :last_name "Olamina"
@@ -240,32 +142,37 @@
 
 ;; Dispatched when the user visits a client-side route (including on
 ;; initial page load, once the router figures out what page we're on).
-(rf/reg-event-db
+(rf/reg-event-fx
  ::update-route
- (fn [db [_ view]]
-   (assoc db :current-view view)))
+ (fn [{:keys [db]} [_ view]]
+   (prn view)
+   (let [event (:name @(rf/subscribe [::current-view]))]
+     {:db (assoc db :current-view view)
+      event []})))
 
 ;; Dispatched on initial page load
 (rf/reg-event-fx
  ::init-admin
- (fn []
-   (api/query! [:query [:invitations
-                        {:redeemed false}
-                        :email
-                        :date_invited]]
-               ::admin-data)))
+ (fn [_]
+   (let [event (:name @(rf/subscribe [::current-view]))]
+     {event []})))
 
-;; Dispatched once the admin data is ready
+(rf/reg-fx
+ ::schedule
+ (fn []
+   (rest/get! "/api/v1/schedule" {} ::load-schedule)))
+
+;; Dispatched once the schedule data is ready
 (rf/reg-event-db
- ::admin-data
+ ::load-schedule
  (fn [db [_ {:keys [data errors]}]]
    (if (seq errors)
      ;; TODO some kind of real error handling
-     (js/console.error errors)
+     (do (prn errors) db)
      (assoc db
             :my-invitations (:invitations data)
-            ;; :availabilities (:availabilities data)
-            ;; :appointments   (:appointments data)
+            :availabilities (:availabilities data)
+            :appointments   (:appointments data)
             ))))
 
 (comment

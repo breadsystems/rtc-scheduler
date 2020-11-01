@@ -10,7 +10,7 @@
    ["@fullcalendar/list" :default listPlugin]
    [reagent.dom :as dom]
    [re-frame.core :as rf]
-   [rtc.api.core :as api]
+   [rtc.rest.core :as rest]
    [rtc.i18n.core :as i18n]
    [rtc.i18n.data :as i18n-data]
    [rtc.util :refer [->opt]]
@@ -304,17 +304,7 @@
     (rf/dispatch [::answer! :description-of-needs "Life is pain"])
     (rf/dispatch [::update-step {:name :confirmation :step 5}]))
 
-  (rf/dispatch [::confirm!])
-
-  (rf/dispatch [::debug-query! [[:mutation [:book {:email "coby@tamayo.email"
-                                                   :name "Coby"
-                                                   :description-of-needs "Life is pain"
-                                                   :provider_id 1
-                                                   :state "WA"
-                                                   :start (js/Date 2020 7 9 8 0)
-                                                   :end (js/Date 2020 7 9 8 30)}
-                                            :provider_id]]
-                                ::confirmed]]))
+  (rf/dispatch [::confirm!]))
 
 
 
@@ -325,23 +315,33 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defn update-step [db [_ {:keys [step]}]]
-  (assoc db :step step))
-
-(defn update-answer [db [_ k v]]
+(defn update-answer
+  "Update the user's answer to field k"
+  [db [_ k v]]
   (assoc-in db [:answers k] v))
 
-(defn next-step [{:keys [step steps viewed-up-to-step] :as db}]
+(defn update-step
+  "Update to an arbirary intake step"
+  [db [_ {:keys [step]}]]
+  (assoc db :step step))
+
+(defn next-step
+"Go to the next intake step"
+  [{:keys [step steps viewed-up-to-step] :as db}]
   (let [new-step (min (inc step) (dec (count steps)))]
     (assoc db
            :step new-step
            :viewed-up-to-step (max viewed-up-to-step new-step))))
 
-(defn prev-step [{:keys [step] :as db}]
+(defn prev-step
+  "Go to the previous intake step"
+  [{:keys [step] :as db}]
   (let [new-step (max (dec step) 0)]
     (assoc db :step new-step)))
 
-(defn touch [db [_ k]]
+(defn touch
+  "Mark field k as touched (subject to validation)"
+  [db [_ k]]
   (update db :touched conj k))
 
 
@@ -355,21 +355,32 @@
 
 
 ;; When the user interacts with the progress nav
-(rf/reg-event-db ::update-step update-step)
+(rf/reg-event-fx
+ ::update-step
+ (fn [{:keys [db]} params]
+   (let [updated (update-step db params)]
+     {:db updated
+      :dispatch [::on-step (:name (current-step updated))]})))
+
 ;; When the user hits the back/next buttons
-(rf/reg-event-db ::prev-step prev-step)
-(rf/reg-event-db ::next-step next-step)
+(rf/reg-event-fx
+ ::prev-step
+ (fn [{:keys [db]}]
+   {:db (prev-step db)}))
+
+(rf/reg-event-fx
+ ::next-step
+ (fn [{:keys [db]}]
+   (let [updated (next-step db)]
+     {:db updated
+      :dispatch [::on-step (:name (current-step updated))]})))
+
 ;; When the user focuses a field for the first time. For validation purposes.
 (rf/reg-event-db ::touch! touch)
 ;; When the user answers a question
 (rf/reg-event-db ::answer! update-answer)
 ;; When the user selects an appointment time
 (rf/reg-event-db ::update-appointment update-appointment)
-
-;; Query helper. Not used in production code.
-(rf/reg-event-db ::debug-query! (fn [_ [_ query]]
-                                  ;; (js/console.log (name (ffirst query)) (name (second query)))
-                                  {::query query}))
 
 (rf/reg-event-fx ::update-lang (fn [{:keys [db]} [_ lang]]
                                  {:db (assoc db :lang lang)
@@ -387,30 +398,34 @@
     (when-let [elem (.querySelector js/document ".field input, .field select")]
       (.focus elem))))
 
-;; Dispatched on initial page load
-(defn- *generate-calendar-events [cnt]
-  (doall (distinct (map (fn [_]
-                          (let [m (doto (moment)
-                                    (.add (rand-int 3) "hours")
-                                    (.subtract (rand-int 6) "hours")
-                                    (.add (inc (rand-int 20)) "days"))
-                                start (.format m "YYYY-MM-DDTHH:00")
-                                end   (.format m "YYYY-MM-DDTHH:30")]
-                            {:start start
-                             :end end
-                             :allDay false
-                             :provider_id 123}))
-                        (range 0 cnt)))))
+(rf/reg-event-fx
+ ::on-step
+ (fn [{:keys [db]} [_ step-name]]
+   (when (= :schedule step-name)
+     {:db (assoc db :loading? true)
+      ;; Make a network request for the available appointment windows.
+      ::fetch-appointment-windows [(:answers db)]})))
 
+;; Called when we get the appointment windows back from the server.
 (rf/reg-event-db
  ::load-appointment-windows
  (fn [db [_ windows]]
-   (assoc db :appointment-windows windows)))
+   (prn ::load-appointment-windows (:data windows))
+   (assoc db :loading? false :appointment-windows (:data windows))))
 
 (rf/reg-fx
- ::query
- (fn [[query event]]
-   (api/query! query event)))
+ ::fetch-appointment-windows
+ (fn [[answers]]
+   (rest/get! "/api/v1/windows"
+              {:form-params {:state (:state answers)}}
+              ::load-appointment-windows)))
+
+(rf/reg-fx
+ ::book-appointment!
+ (fn [params]
+   (rest/post! "/api/v1/appointment"
+               {:form-params params}
+               ::confirmed)))
 
 (rf/reg-event-fx
  ::confirm!
@@ -421,15 +436,13 @@
      ;; has already been confirmed is a noop.
      (when should-mutate?
        {:db (assoc db :loading? true)
-        ;; TODO refine this mutation query
-        ::query [[:mutation [:book (merge answers (select-keys appointment [:provider_id :start :end]))
-                             :provider_id]]
-                 ::confirmed]}))))
+        ;; TODO book appt
+        ::book-appointment! {:answers answers :appointment appointment}}))))
 
 (rf/reg-event-db
  ::confirmed
  (fn [db [_ response]]
-   (js/console.log (clj->js response))
+   (prn response)
    (assoc db
           :loading? false
           :confirmed-info response)))
@@ -687,8 +700,6 @@
 
 
 (defn ^:dev/after-load mount! []
-  ;; TODO load from GraphQL
-  (rf/dispatch [::load-appointment-windows (*generate-calendar-events 100)])
   (dom/render [intake-ui] (.getElementById js/document "rtc-intake-app")))
 
 (defn init! []

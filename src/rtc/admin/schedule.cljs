@@ -70,8 +70,8 @@
           (let [events-fn (fn [_info on-success _on-error]
                             (on-success
                              (clj->js
-                               (let [doc @(rf/subscribe [::user])]
-                                 (map #(->fc-event % doc)
+                               (let [user @(rf/subscribe [::user])]
+                                 (map #(->fc-event % user)
                                       @(rf/subscribe [::all-appointments]))))))
                 cal (js/FullCalendar.Calendar.
                      @!ref
