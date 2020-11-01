@@ -29,7 +29,8 @@
            (when states [[:providers :p] [:= :p.id :a.provider_id]])
    :where
            (filter some? [:and
-                          (when states [:in :state states])
+                          [:= 1 1]
+                          (when states [:in :p.state states])
                           (when (and from to) [:between :start_time (c/to-sql-time from) (c/to-sql-time to)])])})
 
 (defn get-availabilities [params]
@@ -73,6 +74,7 @@
                            :end         (c/to-sql-time (+ one-week (inst-ms now) (* 2 one-day) six-hours))
                            :provider-id 1})
 
+  (get-availabilities {})
   (get-availabilities {:states #{"WA"}})
   (get-availabilities {:from (+ (inst-ms now) one-day) :to (+ (inst-ms now) (* 2 one-day)) :states #{"WA"}})
   (get-availabilities {:from "2020-08-12" :to "2020-08-31" :states #{"CA"}})

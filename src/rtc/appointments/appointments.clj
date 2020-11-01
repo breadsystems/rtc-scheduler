@@ -16,6 +16,7 @@
            (when states [[:providers :p] [:= :p.id :a.provider_id]])
    :where
            (filter some? [:and
+                          [:= 1 1]
                           ;; TODO state mappings
                           (when states [:in :p.state states])
                           ;; TODO migrate away from clj-time
@@ -50,4 +51,6 @@
   (d/create-appointment-need! {:need-id 1 :appointment-id 1 :info "Mandarin"})
   (d/get-appointment-need {:appointment-id 1})
   (d/delete-appointment-need! {:need-id 1 :appointment-id 1})
-  (get-appointments {:from (Date.) :to (Date.) :states #{"WA"}}))
+  (get-appointments {:from (Date.) :to (Date.) :states #{"WA"}})
+
+  (get-appointments {}))

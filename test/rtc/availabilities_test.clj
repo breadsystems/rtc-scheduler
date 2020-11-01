@@ -1,19 +1,19 @@
-(ns rtc.appointments-test
+(ns rtc.availabilities-test
   (:require
    [clj-time.coerce :as c]
    [clojure.test :refer [deftest is]]
-   [rtc.appointments.appointments :as appt]))
+   [rtc.appointments.avail :as avail]))
 
 
 
 (deftest test-params->query
   ;; No need to join when not querying by state
-  (is (nil? (:join (appt/params->query {}))))
+  (is (nil? (:join (avail/params->query {}))))
   ;; Join on provider_id
   (is (= [[:providers :p] [:= :p.id :a.provider_id]]
-         (:join (appt/params->query {:states #{"CA"}}))))
+         (:join (avail/params->query {:states #{"CA"}}))))
   (is (= [:and [:= 1 1] [:in :p.state #{"NY"}]]
-         (:where (appt/params->query {:states #{"NY"}}))))
+         (:where (avail/params->query {:states #{"NY"}}))))
   (is (= [:and
           [:= 1 1]
           [:in :p.state #{"CA"}]
@@ -21,6 +21,6 @@
            :start_time
            (c/to-sql-time "2020-01-01T10:00:00.000-08:00")
            (c/to-sql-time "2020-01-07T10:00:00.000-08:00")]]
-         (:where (appt/params->query {:states #{"CA"}
+         (:where (avail/params->query {:states #{"CA"}
                                        :from   "2020-01-01T10:00:00.000-08:00"
                                        :to     "2020-01-07T10:00:00.000-08:00"})))))
