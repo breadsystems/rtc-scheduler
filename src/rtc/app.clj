@@ -22,17 +22,6 @@
    [rtc.users.handlers :as user]))
 
 
-;; TODO CSRF isn't working right now; figure out why
-(defn- debugging-csrf-error-handler
-  ([req]
-   (layout/error-page {:err "Invalid CSRF Token!" :req (:session req "(nil)")}))
-  ([_ req _]
-   (debugging-csrf-error-handler req)))
-
-(defn- csrf-middleware [handler]
-  (wrap-anti-forgery handler {:error-handler debugging-csrf-error-handler}))
-
-
 ;; shared session store for all reitit routes
 ;; https://github.com/metosin/reitit/issues/205
 (def store (memory/memory-store))
@@ -43,7 +32,7 @@
    (ring/router
     [""
      ;; TODO figure out the right order for middleware & fix anti-CSRF
-     {:middleware [wrap-params auth/wrap-identity #_csrf-middleware]}
+     {:middleware [wrap-params auth/wrap-identity wrap-anti-forgery]}
      ["/" {:get (fn [_req]
                   (layout/markdown-page
                    {:file "home.md"
