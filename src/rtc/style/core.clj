@@ -120,6 +120,19 @@
                  :text-decoration-skip-ink :auto
                  :text-decoration-thickness "2px"}]]])
 
+(def i18n
+  [[:.lang-selector {:position :absolute
+                     :top 0
+                     :left 0
+                     :width "100%"
+                     :z-index 2
+                     :text-align :right
+                     :background light-grey}
+    [:* {:font-size "0.8em"}]
+    [:label {:margin "1em"}]
+    [:select {:margin "0.3em"
+              :width "10rem"}]]])
+
 (def purple-box {:padding "0.7em"
                  :border-radius border-radius
                  :border purple-border})

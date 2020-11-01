@@ -36,19 +36,6 @@
    [:.confirm-container {:margin "3em auto"
                          :text-align :center}]])
 
-(def i18n
-  [[:.lang-selector {:position :absolute
-                     :top 0
-                     :left 0
-                     :width "100%"
-                     :z-index 2
-                     :text-align :right
-                     :background core/light-grey}
-    [:* {:font-size "0.8em"}]
-    [:label {:margin "1em"}]
-    [:select {:margin "0.3em"
-              :width "10rem"}]]])
-
 
 (defstyles screen
   core/base
@@ -56,8 +43,8 @@
   core/typography
   core/forms
   core/states
+  core/i18n
   nav
   questions
   calendar
-  confirmation
-  i18n)
+  confirmation)

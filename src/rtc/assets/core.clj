@@ -39,6 +39,11 @@
   (let [entry (js-manifest-entry asset-name)]
     (str "/js/" (or (:output-name entry) (str (name asset-name) ".js")))))
 
+
+(defmacro inline-js [file]
+  `[:script
+    ~(-> (str "inline-js/" file) io/resource slurp)])
+
 (comment
   (style-href :intake)
   (style-href :admin)

@@ -57,20 +57,35 @@
   (io/resource "markdown/home.md")
   (file->html "home.md"))
 
+(defn static-lang-selector []
+  [:aside.lang-selector
+   [:label.field-label {:for "select-language"}
+    [:span {:data-lang "en"} "Select a language"]
+    [:span {:data-lang "es" :style {:display :none}} "Seleccione un idioma"]]
+   [:select {:id "select-language"}
+    [:option {:selected true :value "en"} "English"]
+    [:option {:value "es"} "Español"]]])
+
 (defn markdown-page
   "Render a markdown file as an HTML page. Calls (page) passing the rendered Markdown as :content."
   [{:keys [title file after] :as opts}]
   (page
    (merge
     opts
-    {:content [:div.page-container
+    {:content [:div.container.page-container
+               (static-lang-selector)
                [:header
                 [:h1 (or title "Radical Telehealth Collective")]]
                [:main.prose
-                (file->html file)
+                [:section {:data-lang "en"}
+                 (file->html (str "en/" file))]
+                [:section {:data-lang "es"
+                           :style {:display :none}}
+                 (file->html (str "es/" file))]
                 (when after
                   [:div.after
-                   after])]]})))
+                   after])]]
+     :footer-content (assets/inline-js "lang.js")})))
 
 
 (defn intake-page

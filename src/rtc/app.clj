@@ -31,13 +31,15 @@
   (ring/ring-handler
    (ring/router
     [""
-     ;; TODO figure out the right order for middleware & fix anti-CSRF
      {:middleware [wrap-params auth/wrap-identity wrap-anti-forgery]}
      ["/" {:get (fn [_req]
                   (layout/markdown-page
                    {:file "home.md"
                     :after [:section.center.spacious
-                            [:a.call-to-action {:href "/get-care"} "Get Care"]]}))}]
+                            ;; TODO get this from EDN
+                            [:a.call-to-action {:href "/get-care"}
+                             [:span {:data-lang "en"} "Get Care"]
+                             [:span {:data-lang "es" :style {:display :none}} "Recibe Atencion Médica"]]]}))}]
 
      ;; TODO remove
      ["/api/graphql" {:post (fn [req]
