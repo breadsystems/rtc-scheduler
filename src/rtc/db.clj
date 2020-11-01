@@ -19,7 +19,7 @@
           [username password] (when user-info (.split user-info ":"))
           creds (when user-info
                   (str "?user=" username "&password=" password))]
-      [(str "jdbc:postgresql://" (.getHost uri) ":" (.getPort uri) (.getPath uri) creds)])
+      (str "jdbc:postgresql://" (.getHost uri) ":" (.getPort uri) (.getPath uri) creds))
     database-url))
 
 ;; Parse the DATABASE_URL environment variable into something JDBC can use
