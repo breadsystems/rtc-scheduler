@@ -4,16 +4,59 @@
 (ns rtc.appointments.avail
   (:require
    [clj-time.coerce :as c]
+   [clojure.spec.alpha :as spec]
    [honeysql.core :as sql]
+   [honeysql.helpers :as sqlh]
    [java-time :as t]
    [rtc.db :as d])
   (:import
     [java.util Date]))
 
 
+(spec/def ::start_time inst?)
+(spec/def ::end_time inst?)
+(spec/def ::provider_id int?)
+
+(spec/def ::availability (spec/and
+                          (spec/keys :req-un [::start_time ::end_time ::provider_id])
+                          #(< (inst-ms (:start_time %)) (inst-ms (:end_time %)))))
+
+
 (defn create!
-  "TODO"
-  [])
+  "Given a provider_id and a time range, ({:start_time x :end_time y}), create an availility."
+  [{:keys [start_time end_time provider_id] :as avail}]
+  {:pre [(spec/valid? ::availability avail)]}
+  (d/query
+   (-> (sqlh/insert-into :availabilities)
+       (sqlh/values [{:start_time (c/to-sql-time start_time)
+                      :end_time (c/to-sql-time end_time)
+                      :provider_id provider_id}])
+       (sql/format))))
+
+(comment
+
+  (spec/valid? ::availability {:start_time #inst "2020"
+                               :end_time #inst "2021"
+                               :provider_id 123})
+  ;; => true
+
+  ;; Hopefully by 2050 this code will be obsolete because we'll
+  ;; have public  healthcare in this shithole country.
+  (spec/explain-data ::availability {:start_time #inst "2050"
+                                     :end_time (Date.)
+                                     :provider_id 123})
+
+  (spec/explain-data ::availability {:start_time #inst "2020"
+                                     :end_time #inst "2021"
+                                     :provider_id 'invalid!!lol})
+
+  (spec/explain-data ::availability {})
+
+  (create! {}) ;; fail
+
+  (create! {:start_time #inst "2020-11-07T10:00:00-08:00"
+            :end_time #inst "2020-11-07T17:00:00-08:00"
+            :provider_id 456}))
 
 (defn window-resolver [{:keys [from to state]}]
   [{:start_time ""
