@@ -2,7 +2,7 @@
 
 When the pandemic began, crip, disabled, and chronically ill communities, especially those of us who are queer, trans, non-binary, BIPOC, immigrants, and/or low-income knew we’d be among those most impacted and that our essential healthcare needs — which the Medical Industrial Complex was already epically failing to meet pre-pandemic — would be even harder to access.
 
-Health Justice Commons took immediate action to ensure our communities’ survival and united to create the Radical Telehealth Collective. The RTC is a collective of rad frontline healthcare providers, rad crips/disability justice organizers, and Health Justice Commons members uniting to create free, accessible, and multilingual urgent and essential care and access during the ongoing COVID-19 pandemic. 
+[Health Justice Commons](https://www.healthjusticecommons.org/) took immediate action to ensure our communities’ survival and united to create the Radical Telehealth Collective. The RTC is a collective of rad frontline healthcare providers, rad crips/disability justice organizers, and Health Justice Commons members uniting to create free, accessible, and multilingual urgent and essential care and access during the ongoing COVID-19 pandemic. 
 
 ## What We Do 
 

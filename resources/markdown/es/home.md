@@ -2,7 +2,7 @@
 
 Cuando comenzó la pandemia nosotrxs, las comunidades criptas, discapacitadas, y con enfermedades crónicas, especialmente los que somos queer, trans, no binarios, indígenas, negras, inmigrantes, y/o de bajos ingresos, sabíamos que estaríamos entre los más afectados y que nuestros necesidades esenciales de atención médica -- las cuales que el Complejo Industrial Médico ya no cumplía antes de la pandemia -- sería aún más difícil acceder.
 
-Health Justice Commons tomó medidas inmediatas para garantizar la supervivencia de nuestras comunidades y se unió para crear el Colectivo Radical de Telesalud (RTC). El RTC es un colectivo radical de proveedores de atención médica, organizadores discapacitados, y miembros del Health Justice Commons que se unieron para crear acceso esencial y atención médica gratuita, accesible, multilingüe, y urgente durante la pandemia actual de COVID-19.
+[Health Justice Commons](https://www.healthjusticecommons.org/) tomó medidas inmediatas para garantizar la supervivencia de nuestras comunidades y se unió para crear el Colectivo Radical de Telesalud (RTC). El RTC es un colectivo radical de proveedores de atención médica, organizadores discapacitados, y miembros del Health Justice Commons que se unieron para crear acceso esencial y atención médica gratuita, accesible, multilingüe, y urgente durante la pandemia actual de COVID-19.
 
 ## Lo Que Hacemos:
 
