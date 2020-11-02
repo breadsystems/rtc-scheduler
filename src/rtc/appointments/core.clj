@@ -2,7 +2,7 @@
   (:require
     [clojure.set :refer [rename-keys]]
     [rtc.appointments.appointments :as appt]
-    [rtc.appointments.avail :as avail]
+    [rtc.appointments.availabilities :as avail]
     [rtc.appointments.states :as st]
     [rtc.appointments.windows :as w]))
 

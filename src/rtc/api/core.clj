@@ -11,7 +11,7 @@
    [rtc.auth.core :as auth]
    [rtc.api.queries :refer [->query-string]]
    [rtc.db :as db]
-   [rtc.appointments.avail :as avail]
+   [rtc.appointments.availabilities :as avail]
    [rtc.appointments.core :as appt]
    [rtc.users.core :as u]
    [rtc.users.handlers :refer [register-resolver]])

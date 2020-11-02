@@ -2,7 +2,7 @@
   (:require
    [clj-time.coerce :as c]
    [clojure.test :refer [deftest is]]
-   [rtc.appointments.avail :as avail]))
+   [rtc.appointments.availabilities :as avail]))
 
 
 

@@ -1,7 +1,7 @@
 ;; Availabilities.
 ;; This is where existing appointments and calendar availabilities
 ;; get turned into open appointment windows to present to careseekers.
-(ns rtc.appointments.avail
+(ns rtc.appointments.availabilities
   (:require
    [clj-time.coerce :as c]
    [clojure.spec.alpha :as spec]

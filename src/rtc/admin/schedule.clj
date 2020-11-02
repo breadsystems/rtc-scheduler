@@ -1,7 +1,7 @@
 (ns rtc.admin.schedule
   (:require
    [rtc.appointments.appointments :as appt]
-   [rtc.appointments.avail :as avail]
+   [rtc.appointments.availabilities :as avail]
    [rtc.util :refer [index-by]])
   (:import
    [java.util Date]))
