@@ -26,12 +26,12 @@
   "Given a provider_id and a time range, ({:start_time x :end_time y}), create an availility."
   [{:keys [start_time end_time provider_id] :as avail}]
   {:pre [(spec/valid? ::availability avail)]}
-  (d/query
-   (-> (sqlh/insert-into :availabilities)
-       (sqlh/values [{:start_time (c/to-sql-time start_time)
-                      :end_time (c/to-sql-time end_time)
-                      :provider_id provider_id}])
-       (sql/format))))
+  (-> (sqlh/insert-into :availabilities)
+      (sqlh/values [{:start_time (c/to-sql-time start_time)
+                     :end_time (c/to-sql-time end_time)
+                     :provider_id provider_id}])
+      (sql/format)
+      (d/query)))
 
 (comment
 
