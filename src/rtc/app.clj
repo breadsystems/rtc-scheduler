@@ -11,7 +11,6 @@
    [ring.middleware.params :refer [wrap-params]]
    [ring.middleware.session :refer [wrap-session]]
    [ring.middleware.session.memory :as memory]
-   [rtc.api.core :as api] ;; TODO
    [rtc.rest.core :as rest]
    [rtc.assets.core :as assets]
    [rtc.auth.core :as auth]
@@ -40,12 +39,6 @@
                             [:a.call-to-action {:href "/get-care"}
                              [:span {:data-lang "en"} "Get Care"]
                              [:span {:data-lang "es" :style {:display :none}} "Recibe Atencion Médica"]]]}))}]
-
-     ;; TODO remove
-     ["/api/graphql" {:post (fn [req]
-                              {:status 200
-                               :headers {"Content-Type" "application/edn"}
-                               :body (-> req :body slurp (api/q {:request req}))})}]
 
      (rest/endpoints {:mount "/api/v1"})
 
@@ -122,8 +115,9 @@
   (restart!)
 
   ;; Recreate the test admin user.
-  (when-let [admin-uid (:id (db/get-user-by-email {:email "rtc@example.com"}))]
-    (db/delete-user! {:id admin-uid})
+  (do
+    (when-let [admin-uid (:id (db/get-user-by-email {:email "rtc@example.com"}))]
+      (db/delete-user! {:id admin-uid}))
     (restart!))
 
   )
