@@ -31,7 +31,7 @@
                      :end_time (c/to-sql-time end_time)
                      :provider_id provider_id}])
       (sql/format)
-      (d/query)))
+      (d/execute!)))
 
 (comment
 
@@ -69,7 +69,7 @@
   {:select [:*]
    :from   [[:availabilities :a]]
    :join
-           (when states [[:providers :p] [:= :p.id :a.provider_id]])
+           (when states [[:users :p] [:= :p.id :a.provider_id]])
    :where
            (filter some? [:and
                           [:= 1 1]

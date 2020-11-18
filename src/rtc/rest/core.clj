@@ -8,6 +8,7 @@
   (:import
     [java.io ByteArrayOutputStream]
     [java.lang Throwable]
+    [java.sql Timestamp]
     [java.util Date]
     [java.text SimpleDateFormat]))
 
@@ -29,6 +30,7 @@
   (let [fmt (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")]
     (cond
       (= Date (type v)) (.format fmt v)
+      (= Timestamp (type v)) (.format fmt v)
       :else v)))
 
 (defn- ->json [x]

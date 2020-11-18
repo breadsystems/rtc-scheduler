@@ -1,21 +1,37 @@
 (ns rtc.appointments.appointments
   (:require
-    [clj-time.coerce :as c]
-    [honeysql.helpers :as sqlh]
-    [honeysql.core :as sql]
-    [rtc.db :as d])
+   [clojure.spec.alpha :as spec]
+   [clj-time.coerce :as c]
+   [honeysql.helpers :as sqlh]
+   [honeysql.core :as sql]
+   [rtc.db :as d]
+   [rtc.providers.core :as p])
   (:import
     [java.util Date]))
 
 
+(spec/def ::id int?)
+(spec/def ::start_time inst?)
+(spec/def ::end_time inst?)
+(spec/def ::provider_id int?)
+(spec/def ::reason string?)
+
+(spec/def ::appointment
+  (spec/and
+   (spec/keys :req-un [::start_time ::end_time ::provider_id ::reason]
+              :opt-un [::id])
+   #(> (inst-ms (:end_time %)) (inst-ms (:start_time %)))))
+
+
 (defn create! [appt]
+  {:pre [(spec/valid? ::appointment appt)]}
   (-> (sqlh/insert-into :appointments)
       (sqlh/values [appt])
       (sql/format)
       (d/execute!)))
 
 (comment
-  (def provider (d/query ["SELECT * FROM providers LIMIT 1"]))
+  (def provider (p/email->provider "lauren@tamayo.email"))
 
   (def now (Date.))
   (create! {:start_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000)))
@@ -35,7 +51,7 @@
   {:select [:*]
    :from [[:appointments :a]]
    :join
-           (when states [[:providers :p] [:= :p.id :a.provider_id]])
+           (when states [[:users :p] [:= :p.id :a.provider_id]])
    :where
            (filter some? [:and
                           [:= 1 1]
