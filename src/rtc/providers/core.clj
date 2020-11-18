@@ -1,27 +1,35 @@
 (ns rtc.providers.core
   (:require
-   [clojure.java.jdbc :as jdbc]
+   [buddy.hashers :as hash]
    [honeysql.core :as sql]
-   [rtc.db :as db]
-   [rtc.users.core :as u]))
+   [honeysql.helpers :as sqlh]
+   [rtc.db :as db]))
 
 
 (defn create! [provider]
-  #_(jdbc/with-db-transaction
-      [conn {:isolation :read-uncommitted}])
-  (try
-    (db/create-user! provider)
-    (let [user (u/email->user (:email provider))]
-      user
-      #_(db/create-provider! (merge provider user))
-      #_(db/get-provider {:id (:id user)}))
-    (catch org.postgresql.util.PSQLException e
-      {:error (.getMessage e)})))
+  (-> (sqlh/insert-into :users)
+      (sqlh/values [(assoc provider :is_provider true)])
+      (sql/format)
+      (db/execute!)))
+
+(defn id->provider [id]
+  {:pre [(int? id)]}
+  (when-let [provider (first (db/query ["SELECT * FROM users WHERE is_provider = true AND id = ?" id]))]
+    (dissoc provider :pass)))
+
+(defn email->provider [email]
+  {:pre [(string? email)]}
+  (when-let [provider (first (db/query ["SELECT * FROM users WHERE is_provider = true AND email = ?" email]))]
+    (dissoc provider :pass)))
 
 
 (comment
 
-  (create! {:email "rtc10@example.com" :pass "eyyy" :is_admin true :state "OR"})
+  (create! {:email "rtc10@example.com" :pass (hash/derive "eyyy") :is_admin true :state "OR"})
+
+  (id->provider 1) ;; user may exist, but not as a provider => nil
+  (id->provider 2)
+  (email->provider "coby02@cobytamayo.com")
 
   (try
     (db/create-user! {:email "me@example.com" :pass "password123" :is_admin true :state "WA"})

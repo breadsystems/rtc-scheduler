@@ -1,11 +1,33 @@
 (ns rtc.appointments.appointments
   (:require
     [clj-time.coerce :as c]
+    [honeysql.helpers :as sqlh]
     [honeysql.core :as sql]
     [rtc.db :as d])
   (:import
     [java.util Date]))
 
+
+(defn create! [appt]
+  (-> (sqlh/insert-into :appointments)
+      (sqlh/values [appt])
+      (sql/format)
+      (d/execute!)))
+
+(comment
+  (def provider (d/query ["SELECT * FROM providers LIMIT 1"]))
+
+  (def now (Date.))
+  (create! {:start_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000)))
+            :end_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000) (* 30 60 1000)))
+            :name "Zoey"
+            :email "zoey@dyke4prez.blue"
+            :alias ""
+            :pronouns "she/her"
+            :ok_to_text true
+            :date_created (c/to-sql-time now)
+            :other_needs "I shall require forty-five green M&Ms"
+            :provider_id (:id provider)}))
 
 (defn params->query
   "Takes a map of params and returns a HoneySQL query map"
@@ -32,18 +54,6 @@
                    :description "Translation service for a non-English speaker"})
   (d/get-needs)
   (d/get-need {:id 1})
-
-  (d/create-appointment! {:start (c/to-sql-time #inst "2020-08-09T10:30:00.000-08:00")
-                          :end (c/to-sql-time #inst "2020-08-09T10:50:00.000-08:00")
-                          :reason "I have questions about my HRT"
-                          :careseeker-id 1
-                          :provider-id 1})
-
-  (d/create-appointment! {:start (c/to-sql-time #inst "2020-08-10T09:00:00.000-08:00")
-                          :end (c/to-sql-time #inst "2020-08-10T09:20:00.000-08:00")
-                          :reason "I have questions about my medication"
-                          :careseeker-id 1
-                          :provider-id 1})
 
   (d/get-appointment {:id 1})
   (d/get-appointment {:id 5})

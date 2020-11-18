@@ -68,30 +68,7 @@
 
   (query "SELECT * FROM appointments")
 
-  (get-invitations {:redeemed false :invited_by 1})
-
-  (try
-    (create-careseeker! {:email "octaviabutler@earthseed.com" :alias "George Simcoff" :state "WA"})
-    (create-careseeker! {:email "shevek@annarres.net" :alias "Selma Blaise" :state "OR"})
-    (create-careseeker! {:email "beloved@morrison.email" :alias "Alan McLoughlin" :state "CA"})
-    (catch Exception e
-      (.getMessage e)))
-
-  (get-careseeker {:id 1})
-  (get-careseeker {:id 2})
-  (get-careseeker {:id 3})
-
-  (delete-careseeker! {:id 3})
-  (get-careseeker {:id 3})
-
-  (update-careseeker! {:id 1
-                       :first-name "Octavia"
-                       :last-name "Butler"
-                       :email "newaddr@earthseed.com"
-                       :pronouns "she/her"
-                       :phone "2535551234"
-                       :ok-to-text? false
-                       :state "WA"}))
+  (get-invitations {:redeemed false :invited_by 1}))
 
 
 (defn migration-config []
@@ -106,16 +83,18 @@
            (migratus/migrate (migration-config))
            (println "Done.")))
 
-
-(comment
-  ;; manage migrations
+(defn reset-everything!! []
   (try
     (migratus/rollback (migration-config))
     (mount/stop #'migrations)
     (mount/start #'migrations)
     true
     (catch Exception e
-      (.getMessage e)))
+      (.getMessage e))))
+
+
+(comment
+  (reset-everything!!)
 
   ;; create a migration
   (migratus/create (migration-config) "migration-name-here")

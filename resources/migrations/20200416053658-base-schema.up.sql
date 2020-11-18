@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
   date_created timestamp,
   date_modified timestamp,
   is_admin boolean,
+  is_provider boolean,
   authy_id varchar(15),
   preferences json default '{}',
   UNIQUE (email)
@@ -29,37 +30,6 @@ CREATE TABLE IF NOT EXISTS invitations (
 );
 
 --;;
--- We are trying to humanize medical care again.
--- To that end, we don't talk about "patients" - we talk about People Seeking Care,
--- People Requiring Care (PRCs) or Careseekers for short.
-
-CREATE TABLE IF NOT EXISTS careseekers (
-  id bigserial PRIMARY KEY,
-  first_name varchar(100),
-  last_name varchar(100),
-  email varchar(100),
-  alias varchar(50),
-  pronouns varchar(15),
-  phone varchar(12),
-  ok_to_text boolean,
-  state varchar(2),
-  date_created timestamp,
-  date_modified timestamp,
-  UNIQUE (alias)
-);
-
---;;
--- Next up, doctors (and potentially other medical professionals)
-
-CREATE TABLE IF NOT EXISTS providers (
-  id int PRIMARY KEY,
-  state varchar(2) NOT NULL,
-  date_created timestamp,
-  date_modified timestamp,
-  FOREIGN KEY (id) REFERENCES users (id) ON DELETE RESTRICT
-);
-
---;;
 -- Appointments are discrete windows in time with a set start and end date/time.
 -- They require some data collected at the end, for basic analytic purposes:
 -- these are state, reason, and status.
@@ -69,7 +39,14 @@ CREATE TABLE IF NOT EXISTS appointments (
   id bigserial PRIMARY KEY,
   start_time timestamp NOT NULL,
   end_time timestamp NOT NULL,
-  careseeker_id integer NOT NULL,
+  name varchar(100),
+  email varchar(100),
+  alias varchar(50),
+  pronouns varchar(50),
+  phone varchar(12),
+  ok_to_text boolean,
+  date_created timestamp,
+  other_needs varchar(200),
   provider_id integer NOT NULL,
   reason varchar(100) NOT NULL,
   provider_notes text,
@@ -77,8 +54,7 @@ CREATE TABLE IF NOT EXISTS appointments (
   state varchar(2),
   category varchar(100),
   resolution varchar(50),
-  FOREIGN KEY (careseeker_id) REFERENCES careseekers (id) ON DELETE RESTRICT,
-  FOREIGN KEY (provider_id) REFERENCES providers (id) ON DELETE RESTRICT
+  FOREIGN KEY (provider_id) REFERENCES users (id) ON DELETE RESTRICT
 );
 
 --;;
@@ -90,7 +66,7 @@ CREATE TABLE IF NOT EXISTS availabilities (
   start_time timestamp,
   end_time timestamp,
   provider_id integer NOT NULL,
-  FOREIGN KEY (provider_id) REFERENCES providers (id) ON DELETE CASCADE
+  FOREIGN KEY (provider_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 --;;

@@ -41,33 +41,6 @@ UPDATE invitations SET redeemed = true
 WHERE email = :email AND code = :code AND now() < (date_invited + interval '72 hours')
 
 
--- :name create-careseeker! :! :n
--- :doc create a new careseeker record
-INSERT INTO careseekers (email, alias, state, date_created, date_modified)
-VALUES (:email, :alias, :state, now(), now())
-
--- :name update-careseeker! :! :n
--- :doc update an existing careseeker record
-UPDATE careseekers
-SET first_name = :first-name,
-  last_name = :last-name,
-  email = :email,
-  pronouns = :pronouns,
-  phone = :phone,
-  ok_to_text = :ok-to-text?,
-  state = :state,
-  date_modified = now()
-WHERE id = :id
-
--- :name get-careseeker :? :1
--- :doc retrieve a careseeker by their id
-SELECT id, alias, email FROM careseekers WHERE id = :id
-
--- :name delete-careseeker! :! :n
--- :doc delete a careseeker record given the id
-DELETE FROM careseekers WHERE id = :id
-
-
 -- :name create-provider! :! :n
 -- :doc create a new provider record
 INSERT INTO providers (state, id, date_created, date_modified)
@@ -85,12 +58,6 @@ FROM providers JOIN users ON (providers.id = users.id) WHERE providers.id = :id
 -- :name delete-provider! :! :n
 -- :doc delete a provider record given the id
 DELETE FROM providers WHERE id = :id
-
-
--- :name create-appointment! :! :n
--- :doc create an appointment record
-INSERT INTO appointments (start_time, end_time, careseeker_id, provider_id, reason)
-VALUES (:start, :end, :careseeker-id, :provider-id, :reason)
 
 -- :name create-appointment-need! :! :n
 -- :doc create an appointment_need record
