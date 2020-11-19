@@ -297,6 +297,13 @@
 
   @(rf/subscribe [::steps])
 
+  ;; Fill out required stuff and jump to schedule step
+  (do
+    (rf/dispatch [::answer! :state "WA"])
+    (rf/dispatch [::answer! :email "coby@tamayo.email"])
+    (rf/dispatch [::answer! :description-of-needs "Life is pain"])
+    (rf/dispatch [::update-step {:name :confirmation :step 4}]))
+
   ;; Fill out required stuff and jump to last step
   (do
     (rf/dispatch [::answer! :state "WA"])
@@ -614,10 +621,10 @@
       "Select a time by clicking on one of the available appointment windows"
       :sub-heading :select-appointment-time
       :content
-      [:> FullCalendar {:default-view "listWeek"
+      [:> FullCalendar {:default-view "timeGridWeek"
                         :events windows
                         :eventClick on-event-click
-                        :plugins [listPlugin timeGridPlugin]
+                        :plugins [timeGridPlugin]
                         ;; TODO why is "TODAY" text not switching on locale?
                         :locale lang}]})))
 

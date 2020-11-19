@@ -24,7 +24,8 @@
                      :justify-content :space-between}]])
 
 (def calendar
-  [[:.fc-list-item {:cursor :pointer}]])
+  [[:.fc-timegrid-event {:cursor :pointer}]
+   [:.fc-list-item {:cursor :pointer}]])
 
 (def confirmation
   [[:.detail {:display :block
