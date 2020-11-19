@@ -4,7 +4,8 @@
    [cognitect.transit :as transit]
    [rtc.admin.schedule :as schedule]
    [rtc.auth.core :as auth]
-   [rtc.appointments.core :as appt])
+   [rtc.appointments.core :as appt]
+   [rtc.util :as util])
   (:import
     [java.io ByteArrayOutputStream]
     [java.lang Throwable]
@@ -60,12 +61,9 @@
   [mount
    ["/windows"
     {:get (rest-handler (fn [{:keys [params]}]
-                          (let [;; TODO snap to midnight this morning
-                                now (inst-ms (Date.))
-                                midnight-this-morning now
-                                ;; TODO tighten up this logic for more accurate availability
+                          (let [;; TODO tighten up this logic for more accurate availability
                                 ;; Look for availabilities starting this time five days from now
-                                from (+ midnight-this-morning (* 5 ONE-DAY-MS))
+                                from (+ (inst-ms (util/midnight-this-morning)) (* 5 ONE-DAY-MS))
                                 to (+ from (* 28 ONE-DAY-MS))
                                 state (get params "state")]
                             {:success true
