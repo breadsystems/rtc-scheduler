@@ -1,5 +1,5 @@
 -- Basic user table, for common data between all user types (doctors, admins, volunteers)
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
   id bigserial PRIMARY KEY,
   email varchar(30),
   pass varchar(300),
@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   last_name varchar(100),
   pronouns varchar(15),
   phone varchar(12),
+  state varchar(2),
   last_login timestamp,
   date_created timestamp,
   date_modified timestamp,
