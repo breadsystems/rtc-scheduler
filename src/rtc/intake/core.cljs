@@ -291,6 +291,12 @@
   @(rf/subscribe [::i18n :states])
   @(rf/subscribe [::i18n :description-of-needs])
 
+  @(rf/subscribe [::appointment-windows])
+  (def earliest (moment (:start (first @(rf/subscribe [::appointment-windows])))))
+  (.week earliest)
+  (.minutes earliest)
+  (.format earliest "hh:mm:ss")
+
   @(rf/subscribe [::lang])
   @(rf/subscribe [::confirmed-info])
   @(rf/subscribe [::appointment])
@@ -625,6 +631,7 @@
 
 (defn- schedule []
   (let [windows @(rf/subscribe [::appointment-windows])
+        earliest (moment (:start (first windows)))
         on-event-click (fn [info]
                          (rf/dispatch [::update-appointment (fc-event->appointment
                                                              (.-event info))])
@@ -635,10 +642,11 @@
       "Select a time by clicking on one of the available appointment windows"
       :sub-heading :select-appointment-time
       :content
-      [:> FullCalendar {:default-view "timeGridWeek"
+      [:> FullCalendar {:initial-view "listWeek"
                         :events windows
                         :eventClick on-event-click
-                        :plugins [timeGridPlugin]
+                        :plugins [listPlugin timeGridPlugin]
+                        :scrollTime (.format earliest "hh:mm:00")
                         ;; TODO why is "TODAY" text not switching on locale?
                         :locale lang}]})))
 
