@@ -8,14 +8,20 @@
    [cljs.core.async.macros :refer [go]]))
 
 
-(defn request! [http-method endpoint req then]
+(defn request! [http-method endpoint req then on-err]
   (go (let [response (<! (http-method endpoint req))
-            reader (transit/reader :json)
-            data (transit/read reader (:body response))]
-        (cond
-          (nil? then) (prn data)
-          (fn? then) (then data)
-          (keyword? then) (rf/dispatch [then data])))))
+            reader (transit/reader :json)]
+        (try
+          (let [data (transit/read reader (:body response))]
+           (cond
+             (nil? then) (prn data)
+             (fn? then) (then data)
+             (keyword? then) (rf/dispatch [then data])))
+          (catch :default e
+            (cond
+              (nil? on-err) (prn e)
+              (fn? on-err) (on-err e)
+              (keyword? then) (rf/dispatch [on-err e])))))))
 
 (defn get! [& args]
   (apply request! http/get args))
