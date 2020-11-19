@@ -410,7 +410,6 @@
 (rf/reg-event-db
  ::load-appointment-windows
  (fn [db [_ windows]]
-   (prn ::load-appointment-windows (:data windows))
    (assoc db :loading? false :appointment-windows (:data windows))))
 
 (rf/reg-fx

@@ -18,6 +18,7 @@
    [rtc.env :as env]
    [rtc.intake.core :as intake]
    [rtc.layout :as layout]
+   [rtc.users.core :as u]
    [rtc.users.handlers :as user]))
 
 
@@ -116,7 +117,7 @@
 
   ;; Recreate the test admin user.
   (do
-    (when-let [admin-uid (:id (db/get-user-by-email {:email "rtc@example.com"}))]
+    (when-let [admin-uid (:id (u/email->user "rtc@example.com"))]
       (db/delete-user! {:id admin-uid}))
     (restart!))
 

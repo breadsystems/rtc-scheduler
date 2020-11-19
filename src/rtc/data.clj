@@ -8,7 +8,8 @@
    [rtc.appointments.appointments :as appt]
    [rtc.db :as d]
    [rtc.providers.core :as p]
-   [rtc.users.core :as u])
+   [rtc.users.core :as u]
+   [rtc.util :refer [thirty-minutes one-hour six-hours one-day one-week]])
   (:import
    [java.util Date]))
 
@@ -21,6 +22,7 @@
                      :last_name "Butler"
                      :pronouns "she/her"
                      :phone "1234567890"
+                     :state ""
                      :is_admin true
                      :is_provider false}
                     {:email "ursula@tamayo.email"
@@ -29,6 +31,7 @@
                      :last_name "Le Guin"
                      :pronouns "she/her"
                      :phone "1234567890"
+                     :state "WA"
                      :is_admin true
                      :is_provider true}
                     {:email "shevek@tamayo.email"
@@ -37,6 +40,7 @@
                      :last_name ""
                      :pronouns "he/him"
                      :phone "1234567890"
+                     :state "WA"
                      :is_admin true
                      :is_provider true}
                     {:email "lauren@tamayo.email"
@@ -45,6 +49,7 @@
                      :last_name "Olamina"
                      :pronouns "she/her"
                      :phone "1234567890"
+                     :state "CA"
                      :is_admin false
                      :is_provider true}])
       (sql/format)
@@ -67,8 +72,8 @@
     (appt/create!
      {:provider_id (:id lauren)
       ;; in one hour
-      :start_time (c/to-sql-time (+ (inst-ms now) (* 60 60 1000)))
-      :end_time (c/to-sql-time (+ (inst-ms now) (* 90 60 1000)))
+      :start_time (c/to-sql-time (+ (inst-ms now) one-hour))
+      :end_time (c/to-sql-time (+ (inst-ms now) one-hour thirty-minutes))
       :name "Somebody"
       :email "prc@example.com"
       :pronouns "they/them"
@@ -81,8 +86,8 @@
     (appt/create!
      {:provider_id (:id shevek)
       ;; in one day
-      :start_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000)))
-      :end_time (c/to-sql-time (+ (inst-ms now) (* 25 60 60 1000)))
+      :start_time (c/to-sql-time (+ (inst-ms now) one-day))
+      :end_time (c/to-sql-time (+ (inst-ms now) one-day one-hour))
       :alias "Anon"
       :email "prc.1983@example.com"
       :pronouns "she/her"
@@ -98,22 +103,28 @@
 (defn create-test-availabilities! []
   (let [now (Date.)
         lauren (p/email->provider "lauren@tamayo.email")
+        ursula (p/email->provider "ursula@tamayo.email")
         shevek (p/email->provider "shevek@tamayo.email")]
     (avail/create!
      {:provider_id (:id lauren)
       ;; in one day, for 6 hours
-      :start_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000)))
-      :end_time (c/to-sql-time (+ (inst-ms now) (* 30 60 60 1000)))})
+      :start_time (c/to-sql-time (+ (inst-ms now) one-day))
+      :end_time (c/to-sql-time (+ (inst-ms now) one-day six-hours))})
     (avail/create!
      {:provider_id (:id lauren)
       ;; in two days, for 8 hours
-      :start_time (c/to-sql-time (+ (inst-ms now) (* 48 60 60 1000)))
-      :end_time (c/to-sql-time (+ (inst-ms now) (* 56 60 60 1000)))})
+      :start_time (c/to-sql-time (+ (inst-ms now) (* 2 one-day)))
+      :end_time (c/to-sql-time (+ (inst-ms now) (* 2 one-day) (* 8 one-hour)))})
     (avail/create!
      {:provider_id (:id shevek)
-      ;; in one week
-      :start_time (c/to-sql-time (+ (inst-ms now) (* 7 24 60 60 1000)))
-      :end_time (c/to-sql-time (+ (inst-ms now) (* 7 24 60 60 1000) (* 8 60 60 1000)))})
+      ;; in one week, for 8 hours
+      :start_time (c/to-sql-time (+ (inst-ms now) one-week))
+      :end_time (c/to-sql-time (+ (inst-ms now) one-week (* 8 one-hour)))})
+    (avail/create!
+     {:provider_id (:id ursula)
+      ;; in one week, for 8 hours
+      :start_time (c/to-sql-time (+ (inst-ms now) one-week one-day))
+      :end_time (c/to-sql-time (+ (inst-ms now) one-week one-day (* 8 one-hour)))})
     ;; TODO MOAR AVAILZ
     ))
 
