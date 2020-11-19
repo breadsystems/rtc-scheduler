@@ -10,7 +10,7 @@
   ;; No need to join when not querying by state
   (is (nil? (:join (appt/params->query {}))))
   ;; Join on provider_id
-  (is (= [[:users :p] [:= :p.id :a.provider_id]]
+  (is (= [[:users :p] [:and [:= :p.id :a.provider_id] [:= :p.is_provider true]]]
          (:join (appt/params->query {:states #{"CA"}}))))
   (is (= [:and [:= 1 1] [:in :p.state #{"NY"}]]
          (:where (appt/params->query {:states #{"NY"}}))))

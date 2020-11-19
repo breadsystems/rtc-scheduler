@@ -8,7 +8,8 @@
    [honeysql.core :as sql]
    [honeysql.helpers :as sqlh]
    [java-time :as t]
-   [rtc.db :as d])
+   [rtc.db :as d]
+   [rtc.util :refer [six-hours one-day one-week]])
   (:import
     [java.util Date]))
 
@@ -69,7 +70,7 @@
   {:select [:*]
    :from   [[:availabilities :a]]
    :join
-           (when states [[:users :p] [:= :p.id :a.provider_id]])
+           (when states [[:users :p] [:and [:= :p.id :a.provider_id] [:= :p.is_provider true]]])
    :where
            (filter some? [:and
                           [:= 1 1]
@@ -89,33 +90,7 @@
   (d/query (sql/format {:select [:*] :from [:availabilities]}))
   (d/query (sql/format {:select [:*] :from [:appointments]}))
 
-  (d/get-provider {:id 1})
-
-  (def one-hour (* 60 60 1000))
-  (def six-hours (* 6 60 60 1000))
-  (def one-day (* 24 60 60 1000))
-  (def one-week (* 7 24 60 60 1000))
   (def now (Date.))
-
-  (d/create-availability! {:start (c/to-sql-time now)
-                           :end   (c/to-sql-time (+ (inst-ms now) six-hours))
-                           :provider-id 1})
-  (d/create-availability! {:start       (c/to-sql-time (+ (inst-ms now) one-day))
-                           :end         (c/to-sql-time (+ (inst-ms now) one-day six-hours))
-                           :provider-id 1})
-  (d/create-availability! {:start       (c/to-sql-time (+ (inst-ms now) (* 2 one-day)))
-                           :end         (c/to-sql-time (+ (inst-ms now) (* 2 one-day) six-hours))
-                           :provider-id 1})
-
-  (d/create-availability! {:start       (c/to-sql-time (+ one-week (inst-ms now)))
-                           :end         (c/to-sql-time (+ one-week (inst-ms now) six-hours))
-                           :provider-id 1})
-  (d/create-availability! {:start       (c/to-sql-time (+ one-week (inst-ms now) one-day))
-                           :end         (c/to-sql-time (+ one-week (inst-ms now) one-day six-hours))
-                           :provider-id 1})
-  (d/create-availability! {:start       (c/to-sql-time (+ one-week (inst-ms now) (* 2 one-day)))
-                           :end         (c/to-sql-time (+ one-week (inst-ms now) (* 2 one-day) six-hours))
-                           :provider-id 1})
 
   (get-availabilities {})
   (get-availabilities {:states #{"WA"}})

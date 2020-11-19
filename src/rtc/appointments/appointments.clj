@@ -51,7 +51,7 @@
   {:select [:*]
    :from [[:appointments :a]]
    :join
-           (when states [[:users :p] [:= :p.id :a.provider_id]])
+           (when states [[:users :p] [:and [:= :p.id :a.provider_id] [:= :p.is_provider true]]])
    :where
            (filter some? [:and
                           [:= 1 1]

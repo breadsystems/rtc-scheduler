@@ -26,6 +26,4 @@
 
   (def now (java.util.Date.))
   (w/->windows [] [] (inst-ms now) (+ 360000000 (inst-ms now)) WINDOW-MS)
-  (appt-req->windows {:from (inst-ms now) :to (+ (inst-ms now) (* 12 7 24 60 60 1000)) :state "WA"})
-
-  )
+  (appt-req->windows {:from (inst-ms now) :to (+ (inst-ms now) (* 12 7 24 60 60 1000)) :state "WA"}))
