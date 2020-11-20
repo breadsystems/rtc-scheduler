@@ -53,9 +53,11 @@
 ;;
 (rf/reg-event-db
  ::init-db
- (fn [_]
-   ;; Just make first view the default?
-   {:step 0
+ (fn [_db [_ {:keys [csrf-token]}]]
+   {;; CRSF token comes from the DOM
+    :csrf-token csrf-token
+    
+    :step 0
     :viewed-up-to-step 0
 
     :i18n compiled-i18n-data
@@ -455,14 +457,15 @@
 (rf/reg-event-fx
  ::confirm!
  (fn [{:keys [db]}]
-   (let [{:keys [answers appointment loading? confirmed-info]} db
+   (let [{:keys [csrf-token answers appointment loading? confirmed-info]} db
          should-mutate? (and (not loading?) (not confirmed-info))]
      ;; Dispatching this event when the UI is already loading or an appointment
      ;; has already been confirmed is a noop.
      (when should-mutate?
        {:db (assoc db :loading? true)
-        ;; TODO book appt
-        ::book-appointment! {:answers answers :appointment appointment}}))))
+        ::book-appointment! {:__anti-forgery-token csrf-token
+                             :answers answers
+                             :appointment appointment}}))))
 
 (rf/reg-event-db
  ::confirmed
@@ -733,7 +736,8 @@
   (dom/render [intake-ui] (.getElementById js/document "rtc-intake-app")))
 
 (defn init! []
-  (rf/dispatch-sync [::init-db])
+  (let [token (.-content (js/document.querySelector "meta[name=csrf-token]"))]
+    (rf/dispatch-sync [::init-db {:csrf-token token}]))
   (let [browser-lang (or (.-language js/navigator)
                          (.-userLanguage js/navigator))
         supported-lang (i18n/best-supported-lang browser-lang

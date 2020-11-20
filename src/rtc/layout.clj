@@ -5,6 +5,7 @@
    [hiccup.core :refer [html]]
    [hiccup.page :refer [doctype]]
    [markdown.core :as md]
+   [ring.middleware.anti-forgery :refer [*anti-forgery-token*]]
    [rtc.assets.core :as assets]))
 
 
@@ -42,7 +43,7 @@
                      [:title (if title (str title " | Radical Telehealth Collective") "Radical Telehealth Collective")]
                      [:meta {:charset "utf-8"}]
                      [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-                     [:meta {:name "csrf-token" :content (:anti-forgery-token req)}]
+                     [:meta {:name "csrf-token" :content *anti-forgery-token*}]
                      [:link {:href "https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&display=swap" :rel "stylesheet"}]
                      [:link {:href (assets/style-href :intake) :rel "stylesheet"}]]
                     head))

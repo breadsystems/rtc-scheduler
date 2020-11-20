@@ -31,7 +31,7 @@
   (ring/ring-handler
    (ring/router
     [""
-     {:middleware [wrap-params auth/wrap-identity wrap-anti-forgery]}
+     {:middleware [wrap-params auth/wrap-identity]}
      ["/" {:get (fn [_req]
                   (layout/markdown-page
                    {:file "home.md"
@@ -82,9 +82,9 @@
       (println "NOTICE: Authentication is disabled!"))
     (reset! stop-http
             (http/run-server (-> app
+                                 (wrap-anti-forgery)
                                  (wrap-session)
                                  (wrap-params)
-                                ;;  (wrap-anti-forgery)
                                  (env/middleware))
                              {:port port})))
   nil)
