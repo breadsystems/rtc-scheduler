@@ -10,10 +10,6 @@
       (wrap-reload)))
 
 
-(def ^:private style-namespaces #{'rtc.intake.style
-                                  'foo
-                                  'rtc.style.core})
-
 ;; TODO use Thread.interrupt() or similar to :stop watch
 (defstate garden-watcher
   :start (do
