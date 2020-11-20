@@ -63,6 +63,7 @@
     :lang :en-US
 
     :loading? false
+    :global-error nil
 
     ;; Where we collect info about the Person Seeking Care.
     :careseeker-info {}
@@ -236,6 +237,7 @@
 
 
 (rf/reg-sub ::loading? :loading?)
+(rf/reg-sub ::global-error :global-error)
 (rf/reg-sub ::steps accessible-steps)
 (rf/reg-sub ::appointment-windows :appointment-windows)
 (rf/reg-sub ::current-step current-step)
@@ -265,6 +267,8 @@
   @(rf/subscribe [::current-step])
   @(rf/subscribe [::last-step?])
   @(rf/subscribe [::errors])
+  @(rf/subscribe [::global-error])
+  (rf/dispatch [::global-error :unexpected-error])
 
   @(rf/subscribe [::can-go-next?])
 
@@ -287,6 +291,12 @@
   @(rf/subscribe [::i18n :states])
   @(rf/subscribe [::i18n :description-of-needs])
 
+  @(rf/subscribe [::appointment-windows])
+  (def earliest (moment (:start (first @(rf/subscribe [::appointment-windows])))))
+  (.week earliest)
+  (.minutes earliest)
+  (.format earliest "hh:mm:ss")
+
   @(rf/subscribe [::lang])
   @(rf/subscribe [::confirmed-info])
   @(rf/subscribe [::appointment])
@@ -296,6 +306,13 @@
     @(rf/subscribe [::i18n phrase-key]))
 
   @(rf/subscribe [::steps])
+
+  ;; Fill out required stuff and jump to schedule step
+  (do
+    (rf/dispatch [::answer! :state "WA"])
+    (rf/dispatch [::answer! :email "coby@tamayo.email"])
+    (rf/dispatch [::answer! :description-of-needs "Life is pain"])
+    (rf/dispatch [::update-step {:name :confirmation :step 4}]))
 
   ;; Fill out required stuff and jump to last step
   (do
@@ -406,6 +423,13 @@
       ;; Make a network request for the available appointment windows.
       ::fetch-appointment-windows [(:answers db)]})))
 
+;; Called when we get an error from the REST API, or some other event we need
+;; to alert the user to.
+(rf/reg-event-db
+ ::global-error
+ (fn [db [_ err]]
+   (assoc db :loading? false :global-error :unexpected-error)))
+
 ;; Called when we get the appointment windows back from the server.
 (rf/reg-event-db
  ::load-appointment-windows
@@ -417,7 +441,8 @@
  (fn [[answers]]
    (rest/get! "/api/v1/windows"
               {:form-params {:state (:state answers)}}
-              ::load-appointment-windows)))
+              ::load-appointment-windows
+              #(rf/dispatch [::global-error "OH NOEZ"]))))
 
 (rf/reg-fx
  ::book-appointment!
@@ -512,9 +537,11 @@
 
 
 (defn- intake-step [{:keys [sub-heading content]}]
-  (let [show-next? (not @(rf/subscribe [::last-step?]))]
+  (let [show-next? (not @(rf/subscribe [::last-step?]))
+        error @(rf/subscribe [::global-error])]
     [:section
      [:header
+      (when error [:p.error-message (t error)])
       (when sub-heading [:h3 (t sub-heading)])]
      [:div
       content]
@@ -604,6 +631,7 @@
 
 (defn- schedule []
   (let [windows @(rf/subscribe [::appointment-windows])
+        earliest (moment (:start (first windows)))
         on-event-click (fn [info]
                          (rf/dispatch [::update-appointment (fc-event->appointment
                                                              (.-event info))])
@@ -614,10 +642,11 @@
       "Select a time by clicking on one of the available appointment windows"
       :sub-heading :select-appointment-time
       :content
-      [:> FullCalendar {:default-view "listWeek"
+      [:> FullCalendar {:initial-view "listWeek"
                         :events windows
                         :eventClick on-event-click
                         :plugins [listPlugin timeGridPlugin]
+                        :scrollTime (.format earliest "hh:mm:00")
                         ;; TODO why is "TODAY" text not switching on locale?
                         :locale lang}]})))
 

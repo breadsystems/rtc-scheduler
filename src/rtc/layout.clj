@@ -95,8 +95,9 @@
    (merge
     opts
     {:title          "Get Care"
-     :head           [[:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/fullcalendar@5.1.0/main.min.css"}]
-                      [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/@fullcalendar/list@5.1.0/main.min.css"}]]
+     :head           [[:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.css"}]
+                      [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/@fullcalendar/list@5.4.0/main.min.css"}]
+                      [:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@5.4.0/main.min.css"}]]
      :content        [:div#rtc-intake-app]
      :footer-content [:div
                       [:script {:src (assets/js-src :shared) :type "text/javascript"}]
@@ -109,11 +110,11 @@
   (page
    (merge
     opts
-    {:head           [[:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/fullcalendar@5.1.0/main.min.css"}]
+    {:head           [[:link {:rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.css"}]
                       [:link {:rel "stylesheet" :href (assets/style-href :admin)}]]
      :content        [:div#rtc-admin-app]
      :footer-content [:div
-                      [:script {:src "https://cdn.jsdelivr.net/npm/fullcalendar@5.1.0/main.min.js" :type "text/javascript"}]
+                      [:script {:src "https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js" :type "text/javascript"}]
                       [:script {:src (assets/js-src :shared) :type "text/javascript"}]
                       [:script {:src (assets/js-src :admin) :type "text/javascript"}]]})))
 
