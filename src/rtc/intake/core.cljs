@@ -428,7 +428,7 @@
 (rf/reg-event-db
  ::global-error
  (fn [db [_ err]]
-   (assoc db :loading? false :global-error :unexpected-error)))
+   (assoc db :loading? false :global-error err)))
 
 ;; Called when we get the appointment windows back from the server.
 (rf/reg-event-db
@@ -442,14 +442,15 @@
    (rest/get! "/api/v1/windows"
               {:form-params {:state (:state answers)}}
               ::load-appointment-windows
-              #(rf/dispatch [::global-error "OH NOEZ"]))))
+              #(rf/dispatch [::global-error :unexpected-error]))))
 
 (rf/reg-fx
  ::book-appointment!
  (fn [params]
    (rest/post! "/api/v1/appointment"
                {:form-params params}
-               ::confirmed)))
+               ::confirmed
+               #(rf/dispatch [::global-error :unexpected-error]))))
 
 (rf/reg-event-fx
  ::confirm!
