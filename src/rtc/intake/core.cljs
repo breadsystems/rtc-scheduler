@@ -647,6 +647,7 @@
                         :eventClick on-event-click
                         :plugins [listPlugin timeGridPlugin]
                         :scrollTime (.format earliest "hh:mm:00")
+                        :noEventsContent #(t :no-appointments-this-week)
                         ;; TODO why is "TODAY" text not switching on locale?
                         :locale lang}]})))
 
