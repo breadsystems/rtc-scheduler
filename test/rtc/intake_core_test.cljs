@@ -140,14 +140,6 @@
                             {:questions [{:key :optional-d}]}]}]
     (is (false? (intake/can-go-next? incomplete)))))
 
-(deftest fc-event->appointment-translates-event-obj-to-appt-map
-  (is (= {:start "2020-01-02 16:00:00"
-          :end   "2020-01-02 16:20:00"
-          :provider_id 3}
-         (intake/fc-event->appointment #js {:start "2020-01-02 16:00:00"
-                                            :end   "2020-01-02 16:20:00"
-                                            :extendedProps #js {:provider_id 3}}))))
-
 (deftest update-appt-sets-appointment-data
   (let [db {:appointment {}}]
     (is (= {:appointment {:fake :appointment}}

@@ -364,11 +364,6 @@
   (update db :touched conj k))
 
 
-(defn fc-event->appointment [fc-event]
-  {:start (.-start fc-event)
-   :end   (.-end fc-event)
-   :provider_id (.. fc-event -extendedProps -provider_id)})
-
 (defn update-appointment [db [_ appt]]
   (assoc db :appointment appt))
 
@@ -459,13 +454,12 @@
  (fn [{:keys [db]}]
    (let [{:keys [csrf-token answers appointment loading? confirmed-info]} db
          should-mutate? (and (not loading?) (not confirmed-info))]
+     (prn (merge answers appointment))
      ;; Dispatching this event when the UI is already loading or an appointment
      ;; has already been confirmed is a noop.
      (when should-mutate?
        {:db (assoc db :loading? true)
-        ::book-appointment! {:__anti-forgery-token csrf-token
-                             :answers answers
-                             :appointment appointment}}))))
+        ::book-appointment! (merge {:__anti-forgery-token csrf-token} answers appointment)}))))
 
 (rf/reg-event-db
  ::confirmed
@@ -637,8 +631,8 @@
   (let [windows @(rf/subscribe [::appointment-windows])
         earliest (moment (:start (first windows)))
         on-event-click (fn [info]
-                         (rf/dispatch [::update-appointment (fc-event->appointment
-                                                             (.-event info))])
+                         (rf/dispatch [::update-appointment {:start (.. info -event -start)
+                                                             :end (.. info -event -end)}])
                          (rf/dispatch [::next-step]))
         lang @(rf/subscribe [::lang])]
     (intake-step
