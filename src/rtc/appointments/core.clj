@@ -6,11 +6,6 @@
     [rtc.appointments.windows :as w]))
 
 
-;; TODO DELETE
-(defn book-appointment-resolver [_context args _value]
-  (println "BOOK" args))
-
-
 ;; Define our window length to be half an hour
 (defonce WINDOW-MS (* 30 60 1000))
 
