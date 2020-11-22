@@ -4,8 +4,7 @@
    [cognitect.transit :as transit]
    [rtc.admin.schedule :as schedule]
    [rtc.auth.core :as auth]
-   [rtc.appointments.core :as appt]
-   [rtc.util :as util])
+   [rtc.appointments.core :as appt])
   (:import
     [java.io ByteArrayOutputStream]
     [java.lang Throwable]
@@ -55,27 +54,18 @@
          :body    (transform {:success false
                               :errors  (:errors res)})}))))
 
-(defonce ONE-DAY-MS (* 24 60 60 1000))
-
 (defn endpoints [{:keys [mount]}]
   [mount
    ["/windows"
     {:get (rest-handler (fn [{:keys [params]}]
-                          (let [;; TODO tighten up this logic for more accurate availability
-                                ;; Look for availabilities starting this time five days from now
-                                from (+ (inst-ms (util/midnight-this-morning)) (* 5 ONE-DAY-MS))
-                                to (+ from (* 28 ONE-DAY-MS))
-                                state (get params "state")]
-                            {:success true
-                             :data    (appt/appt-req->windows {:from from
-                                                               :to to
-                                                               :state state})})))}]
+                          {:success true
+                           :data (appt/get-available-windows params)}))}]
    ["/appointment"
     {:post (fn [req]
              {:status 200
               :headers {"Content-Type" "application/transit+edn"}
-              :body (->transit {:success true
-                                :appointment (:params req)})})}]
+              :body (rest-handler (fn [{:keys [params]}]
+                                    (appt/book-appointment! params)))})}]
    ["/schedule"
     ;; TODO AUTHORIZE REQUEST!!
     {:get (rest-handler (fn [req]
