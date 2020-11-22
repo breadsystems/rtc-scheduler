@@ -504,9 +504,9 @@
 (defn t* [ks]
   (join " " (map t ks)))
 
-(defn appointment->str [{:keys [start end]}]
-  (let [s (moment start "en_US")
-        e (moment end "en_US")]
+(defn appointment->str [{:keys [start end lang]}]
+  (let [s (moment start (name lang))
+        e (moment end (name lang))]
     (str (.format s "h:mma - ") (.format e "h:mma ") (.format s "dddd, MMM Do"))))
 
 (defn- on-enter
@@ -519,11 +519,15 @@
 
 (comment
   (t :name)
+  (t :unexpected-error)
+  (t :no-appointments-this-week)
+  (i18n-data/i18n-data)
   (t* [:please-enter :name])
   (map (comp t* :message) @(rf/subscribe [::errors-for :state]))
 
-  (appointment->str {:start "2020-07-06 16:00:00"
-                     :end "2020-07-06 16:30:00"}))
+  (appointment->str {:start #inst "2020-07-06T16:00:00"
+                     :end #inst "2020-07-06T16:30:00"
+                     :lang :en_US}))
 
 
 
@@ -659,7 +663,8 @@
               answers)]))
 
 (defn- confirmation []
-  (let [appt @(rf/subscribe [::appointment])]
+  (let [appt @(rf/subscribe [::appointment])
+        lang @(rf/subscribe [::lang])]
     (intake-step
      {:sub-heading :confirm-details
       :content
@@ -667,15 +672,20 @@
        [confirmation-details]
        [:div.detail
         [:div [:label.field-label (t :appointment-details)]]
-        [:div [:b (appointment->str appt)]]]
+        [:div [:b (appointment->str (assoc appt :lang lang))]]]
        [:div.confirm-container
         [:button.call-to-action {:on-click #(rf/dispatch [::confirm!])}
          (t :book-appointment)]]]})))
 
 (defn- confirmed []
-  [:div
-   [:h3.highlight.spacious (t :appointment-confirmed)]
-   [confirmation-details]])
+  (let [appt @(rf/subscribe [::appointment])
+        lang @(rf/subscribe [::lang])]
+    [:div
+     [:h3.highlight.spacious (t :appointment-confirmed)]
+     [confirmation-details]
+     [:div.detail
+      [:div [:label.field-label (t :appointment-details)]]
+      [:div [:b (appointment->str (assoc appt :lang lang))]]]]))
 
 
 (defn- progress-nav []
