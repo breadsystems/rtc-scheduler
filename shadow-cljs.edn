@@ -21,4 +21,4 @@
                             :http-port 3002}}}
  :nrepl {:port 7001
          :middleware []}
- :cache-blockers #{rtc.i18n.data}}
+ :cache-blockers #{rtc.i18n.data rtc.i18n.core}}

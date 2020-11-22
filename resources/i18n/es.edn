@@ -1,4 +1,9 @@
-{:lang :es
+{;; NOTE: if you update this file, touch one of these files to get it to reload:
+ ;; * i18n/core.cljc
+ ;; * i18n/data.clj
+ ;; * i18n/data.cljs
+ ;; After that, you need to refresh the browser to force recompilation.
+ :lang :es
  :lang-name "Español"
  :get-care "Recibe Atencion Médica"
  :choose-a-language "Seleccione un idioma"
@@ -6,11 +11,13 @@
           {:value 0 :label "No"}]
  :communication-methods [{:value "phone" :label "Teléfono"}
                          {:value "email" :label "Dirección de correo electrónica"}]
+ :unexpected-error "TODO An unexpected error occurred. Please try again."
  :basic-info "Información Basica"
  :contact-info "Información de Contacto"
  :access-needs "Necesidades de Accesso"
  :medical-needs "Necesidades Médicas"
  :schedule "Programar una Cita"
+ :no-appointments-this-week "TODO No citas etsa semana"
  :confirmation "Confirmar"
  :confirm-details "Por favor confirmar"
  :appointment-confirmed "Su cita está confirmada!"

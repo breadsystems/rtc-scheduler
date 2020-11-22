@@ -4,7 +4,8 @@
 
 
 (defn t
-  "Translate a phrase into the given lang. Fetches from the db or something. I dunno."
+  "Translate a phrase identified by phrase-key into the given lang. If key
+   does not exist at lang inside the given i18n map, returns nil."
   [{:keys [lang i18n]} phrase-key]
   (get-in i18n [lang phrase-key]))
 

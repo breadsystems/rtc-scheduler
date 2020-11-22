@@ -499,7 +499,7 @@
 
 
 (defn t [k]
-  @(rf/subscribe [::i18n k]))
+  (or @(rf/subscribe [::i18n k]) ""))
 
 (defn t* [ks]
   (join " " (map t ks)))
