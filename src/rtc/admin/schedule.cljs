@@ -6,8 +6,7 @@
   ;;  ["@fullcalendar/timegrid" :default timeGridPlugin]
    ["moment" :as moment]
    [reagent.core :as r]
-   [re-frame.core :as rf]
-   [rtc.api.core :as api]))
+   [re-frame.core :as rf]))
 
 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

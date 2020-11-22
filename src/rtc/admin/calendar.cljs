@@ -8,7 +8,6 @@
    ["moment" :as moment]
    [reagent.core :as r]
    [re-frame.core :as rf]
-   [rtc.api.core :as api]
    [rtc.style.colors :as colors]))
 
 

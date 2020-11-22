@@ -1,7 +1,7 @@
+;; TODO move to rtc.users.invites
 (ns rtc.users.invites.ui
   (:require
-   [re-frame.core :as rf]
-   [rtc.api.core :as api]))
+   [re-frame.core :as rf]))
 
 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -47,12 +47,14 @@
  ::invite!
  (fn [db [_ {:keys [email]}]]
    (if (seq email)
-     (api/query! [:mutate [:invite
-                           {:email email}
-                           :email
-                           :date_invited
-                           :code]]
-                 ::on-invite-response)
+     ;; TODO rest/post!
+     (prn email)
+     #_(api/query! [:mutate [:invite
+                             {:email email}
+                             :email
+                             :date_invited
+                             :code]]
+                   ::on-invite-response)
      (js/console.error "no email?"))))
 
 (rf/reg-event-db

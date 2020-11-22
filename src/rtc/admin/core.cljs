@@ -14,7 +14,6 @@
    [reitit.frontend :as reitit]
    [reitit.frontend.easy :as easy]
    [rtc.admin.calendar :as calendar]
-   [rtc.api.core :as api]
    [rtc.rest.core :as rest]
    [rtc.style.colors :as colors]
    [rtc.users.invites.ui :as invites]))
