@@ -18,6 +18,7 @@
  :medical-needs "Necesidades Médicas"
  :schedule "Programar una Cita"
  :no-appointments-this-week "TODO No citas etsa semana"
+ :window-unavailable "TODO Lo siento, that appointment window is no longer available."
  :confirmation "Confirmar"
  :confirm-details "Por favor confirmar"
  :appointment-confirmed "Su cita está confirmada!"

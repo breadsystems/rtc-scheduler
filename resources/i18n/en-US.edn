@@ -14,6 +14,7 @@
  :medical-needs "Medical Needs"
  :schedule "Schedule an Appointment"
  :no-appointments-this-week "No appointments available this week. Use the arrows above to check other weeks."
+ :window-unavailable "We're sorry, that appointment window is no longer available."
  :confirmation "Confirm"
  :confirm-details "Please confirm your details"
  :appointment-confirmed "Your appointment is confirmed!"
