@@ -76,7 +76,7 @@
 (defonce stop-http (atom nil))
 
 (defn- read-token [{:keys [form-params headers]}]
-  (or (:__anti-forgery-token form-params)
+  (or (get form-params "__anti-forgery-token")
       (get headers "x-csrf-token")))
 
 (defn start! []
