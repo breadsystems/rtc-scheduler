@@ -68,6 +68,8 @@
   (mount/start #'*db*)
   (reconnect!)
 
+  (get-all-users)
+  (get-all-providers)
   (query "SELECT * FROM appointments")
 
   (get-invitations {:redeemed false :invited_by 1}))

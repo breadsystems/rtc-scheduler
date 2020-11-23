@@ -10,6 +10,17 @@ UPDATE users SET email = :email WHERE id = :id
 -- :doc retrieves a user record given the id
 SELECT * FROM users WHERE id = :id
 
+-- :name get-all-users :? :*
+-- :doc retrieves useful fields for all users in the database
+SELECT id, email, first_name, last_name, pronouns, phone, state, is_admin, is_provider
+FROM users
+
+-- :name get-all-providers :? :*
+-- :doc retrieves common fields for all users in the database
+SELECT id, email, first_name, last_name, pronouns, phone, state, is_admin
+FROM users
+WHERE is_provider = true
+
 -- :name get-user-by-email :? :1
 -- :doc retrieves a user record given an email
 SELECT u.* FROM users u WHERE email = :email
