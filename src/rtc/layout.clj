@@ -147,7 +147,10 @@
                   :name "password"
                   ;; TODO
                   :value (or password "")}]
-         [:button {:type :submit} "Login"]]]]})))
+         [:button {:type :submit} "Login"]
+         [:input {:type :hidden
+                  :name :__anti-forgery-token
+                  :value *anti-forgery-token*}]]]]})))
 
 
 (defn two-factor-page

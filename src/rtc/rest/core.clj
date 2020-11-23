@@ -71,16 +71,18 @@
                                 :errors [{:message (.getMessage e)
                                           :reason (:reason (ex-data e))}]
                                 :data (ex-data e)}))))}]
-   ["/schedule"
-    ;; TODO AUTHORIZE REQUEST!!
-    {:get (rest-handler (fn [req]
-                          (try
-                            {:success true
-                             :data    (merge {:user {:id 1}}
-                                             (schedule/schedule req))}
-                            (catch Throwable e
-                              {:success false
-                               :errors [{:message "Unexpected error"}]}))))}]])
+   ["/admin"
+    {:middleware [auth/wrap-auth]}
+    ["/schedule"
+     {:get (rest-handler (fn [req]
+                           (prn (:identity req))
+                           (try
+                             {:success true
+                              :data    (merge {:user {:id 1}}
+                                              (schedule/schedule req))}
+                             (catch Throwable e
+                               {:success false
+                                :errors [{:message (.getMessage e)}]}))))}]]])
 
 (comment
 

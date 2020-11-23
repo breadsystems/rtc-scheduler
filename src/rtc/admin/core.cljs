@@ -159,7 +159,7 @@
 (rf/reg-fx
  ::schedule
  (fn []
-   (rest/get! "/api/v1/schedule" {} ::load-schedule)))
+   (rest/get! "/api/v1/admin/schedule" {} ::load-schedule)))
 
 ;; Dispatched once the schedule data is ready
 (rf/reg-event-db
