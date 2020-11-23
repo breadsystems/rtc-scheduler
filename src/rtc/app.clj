@@ -75,6 +75,10 @@
 
 (defonce stop-http (atom nil))
 
+(defn- read-token [{:keys [form-params headers]}]
+  (or (:__anti-forgery-token form-params)
+      (get headers "x-csrf-token")))
+
 (defn start! []
   (let [port (Integer. (:port config/env 80))]
     (println (str "Running HTTP server at localhost:" port))
@@ -82,7 +86,7 @@
       (println "NOTICE: Authentication is disabled!"))
     (reset! stop-http
             (http/run-server (-> app
-                                 (wrap-anti-forgery)
+                                 (wrap-anti-forgery {:read-token read-token})
                                  (wrap-session)
                                  (wrap-params)
                                  (env/middleware))
