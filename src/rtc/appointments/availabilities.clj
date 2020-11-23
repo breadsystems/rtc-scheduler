@@ -9,6 +9,7 @@
    [honeysql.helpers :as sqlh]
    [java-time :as t]
    [rtc.db :as d]
+   [rtc.users.core :as u]
    [rtc.util :refer [six-hours one-day one-week]])
   (:import
     [java.util Date]))
@@ -58,11 +59,6 @@
   (create! {:start_time #inst "2020-11-07T10:00:00-08:00"
             :end_time #inst "2020-11-07T17:00:00-08:00"
             :provider_id 456}))
-
-(defn window-resolver [{:keys [from to state]}]
-  [{:start_time ""
-    :end_time ""
-    :provider (d/get-provider {:id 5})}])
 
 (defn params->query
   "Takes a map of params and returns a HoneySQL query map"

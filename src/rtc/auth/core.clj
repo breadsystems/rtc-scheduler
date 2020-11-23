@@ -18,7 +18,7 @@
 
 (defn authenticate-user [email password]
   (if (and email password)
-    (let [user (db/get-user-by-email {:email email})]
+    (let [user (u/email->user email)]
       (when (hash/check password (:pass user))
         (dissoc user :pass)))
     nil))
