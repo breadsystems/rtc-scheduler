@@ -1,7 +1,6 @@
 (ns rtc.users.core
   (:require
    [crypto.random :as crypto]
-   [rtc.auth.util :as util]
    [rtc.db :as db]))
 
 

@@ -2,6 +2,7 @@
   (:require
    [rtc.appointments.appointments :as appt]
    [rtc.appointments.availabilities :as avail]
+   [rtc.db :as d]
    [rtc.util :refer [index-by]])
   (:import
    [java.util Date]))
@@ -23,7 +24,8 @@
    (index-by :id (avail/get-availabilities
                   {:from (one-week-ago)
                    :to (* 8 (one-week-from-now))}))
-   :users          []
+   :users
+   (index-by :id (d/get-all-providers))
    :params query-params})
 
 

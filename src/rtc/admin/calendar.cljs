@@ -67,8 +67,6 @@
   ;; TODO filter by role?
   (vals (users-by-id db)))
 
-(providers {:users {1 {:id 1} 2 {:id 2}} :colors [1]})
-
 (defn current-user [{:keys [users user-id]}]
   (get users user-id))
 

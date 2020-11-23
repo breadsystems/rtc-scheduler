@@ -43,17 +43,11 @@
     :user-id 4
     :filters {:availabilities? true
               :appointments? true
-              :providers #{3 4} ;; TODO
+              :providers #{}
               :access-needs #{}}
     :availabilities {}
     :appointments {}
-    :users {3 {:id 3
-               :first_name "Lauren"
-               :last_name "Olamina"
-               :roles #{:doc :kin}}
-            4 {:id 4
-               :first_name "Shevek"
-               :roles #{:doc :kin}}}
+    :users {}
     :needs {1 {:id 1 :need/type :interpreter :name "Interpreter"}
             2 {:id 2 :need/type :closed-captioning :name "Closed Captioning"}}
     :current-invite {:email ""}
@@ -144,10 +138,9 @@
 (rf/reg-event-fx
  ::update-route
  (fn [{:keys [db]} [_ view]]
-   (prn view)
-   (let [event (:name @(rf/subscribe [::current-view]))]
+   (let [effect (:name view)]
      {:db (assoc db :current-view view)
-      event []})))
+      effect []})))
 
 ;; Dispatched on initial page load
 (rf/reg-event-fx
@@ -161,6 +154,15 @@
  (fn []
    (rest/get! "/api/v1/admin/schedule" {} ::load-schedule)))
 
+;; TODO implement invites & settings fx
+(rf/reg-fx
+ ::invites
+ #(prn 'invites!))
+
+(rf/reg-fx
+ ::settings
+ #(prn 'settings!))
+
 ;; Dispatched once the schedule data is ready
 (rf/reg-event-db
  ::load-schedule
@@ -169,10 +171,10 @@
      ;; TODO some kind of real error handling
      (do (prn errors) db)
      (assoc db
+            :users          (:users data)
             :my-invitations (:invitations data)
             :availabilities (:availabilities data)
-            :appointments   (:appointments data)
-            ))))
+            :appointments   (:appointments data)))))
 
 (comment
   (rf/dispatch [::init-admin]))
