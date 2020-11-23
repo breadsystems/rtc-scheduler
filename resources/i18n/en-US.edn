@@ -18,6 +18,7 @@
  :confirmation "Confirm"
  :confirm-details "Please confirm your details"
  :appointment-confirmed "Your appointment is confirmed!"
+ :we-will-follow-up "Honoring your preferences, we will follow up with you by phone or email. Thank you."
  :select-appointment-time "Please select an appointment time"
  :book-appointment "Book your appointment"
  :appointment-time "Appointment time"

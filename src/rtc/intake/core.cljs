@@ -700,6 +700,7 @@
         lang @(rf/subscribe [::lang])]
     [:div
      [:h3.highlight.spacious (t :appointment-confirmed)]
+     [:p.help.spacious (t :we-will-follow-up)]
      [:div.detail
       [:div [:label.field-label (t :appointment-time)]]
       [:div (appointment->str (assoc appt :lang lang))]]
