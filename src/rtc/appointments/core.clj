@@ -1,10 +1,15 @@
 (ns rtc.appointments.core
   (:require
+   [clj-time.coerce :as c]
+   [clojure.java.jdbc :as jdbc]
+   [clojure.spec.alpha :as spec]
    [rtc.appointments.appointments :as appt]
    [rtc.appointments.availabilities :as avail]
    [rtc.appointments.states :as st]
    [rtc.appointments.windows :as w]
-   [rtc.util :as util]))
+   [rtc.util :as util])
+  (:import
+   [java.text SimpleDateFormat]))
 
 
 (defonce ONE-DAY-MS (* 24 60 60 1000))
@@ -31,13 +36,57 @@
         state (get params "state")]
     (params->windows {:from from :to to :state state})))
 
-(defn book-appointment! [{:keys [start end state] :as appt}]
-  (let [[from to] (window-range)]
-    {:success true
-     :data "TODO"}))
+(def ^:private fmt (SimpleDateFormat. "yyyy-MM-dd HH:mm:ss"))
+
+(defn- flatten-formatted [{:keys [start end]}]
+  [(.format fmt start) (.format fmt end)])
+
+(defn- available-provider-ids [windows appt]
+  (get (into {} (map (fn [w]
+                       [(flatten-formatted w) (:ids w)])
+                     windows))
+       (flatten-formatted appt)))
+
+(defn book-appointment! [appt]
+  (let [{:keys [name
+                pronouns
+                state
+                start
+                end
+                email
+                alias
+                text-ok
+                other-access-needs
+                description-of-needs
+                preferred-communication-method
+                anything-else]} appt
+        windows (get-available-windows {:state state})
+        pid (first (available-provider-ids windows appt))]
+    (if pid
+      (appt/create! {:name name
+                     :pronouns pronouns
+                     :start_time (c/to-sql-time start)
+                     :end_time (c/to-sql-time end)
+                     :email email
+                     :alias alias
+                     :ok_to_text (= 1 text-ok)
+                       ;; TODO rename db field to :other_access_needs
+                     :other_needs other-access-needs
+                       ;; TODO add these db fields
+                      ;;  :anything_else anything-else
+                      ;;  :preferred_communication_method preferred-communication-method
+                     :provider_id pid
+                     :reason description-of-needs
+                     :state state})
+      (throw (ex-info "Appointment window is unavailable!" {:windows windows
+                                                            :reason :window-unavailable})))))
 
 (comment
 
   (def now (java.util.Date.))
   (w/->windows [] [] (inst-ms now) (+ 360000000 (inst-ms now)) WINDOW-MS)
-  (appt-req->windows {:from (inst-ms now) :to (+ (inst-ms now) (* 12 7 24 60 60 1000)) :state "WA"}))
+
+  (book-appointment! {:start #inst "2020-11-29T11:30-08:00"
+                      :end #inst "2020-11-29T12:00-08:00"
+                      :reason "My everything hurts"
+                      :state "WA"}))

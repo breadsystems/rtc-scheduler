@@ -226,3 +226,36 @@
                                  {:value 0 :label "No"}]}}}]
     (is (= {:a "Ayy" :b "Bee" :d "Anon" :e "Yes"}
            (intake/confirmation-values db)))))
+
+(deftest appointment-response-honors-success
+  (let [db {:global-error nil
+            :confirmed-info nil
+            :step 6
+            :loading? true
+            :appointment-windows [:fake :appointment :windows]}]
+    (is (= {:global-error nil
+            :confirmed-info {:start "fake start" :end "fake end"}
+            :step 6
+            :loading? false
+            :appointment-windows [:fake :appointment :windows]}
+           (intake/process-appointment-response db [:_ {:success true
+                                                        :data {:appointment
+                                                               {:start "fake start"
+                                                                :end "fake end"}}}])))
+    (is (= {:global-error :unexpected-error
+            :step 5
+            :loading? false
+            :confirmed-info nil
+            ;; appointment-windows should remain untouched
+            :appointment-windows [:fake :appointment :windows]}
+           (intake/process-appointment-response db [:_ {:success false
+                                                        :errors nil
+                                                        :data {:windows nil}}])))
+    (is (= {:global-error :something-bad-happened
+            :step 5
+            :loading? false
+            :confirmed-info nil
+            :appointment-windows [:one :two]}
+           (intake/process-appointment-response db [:_ {:success false
+                                                        :errors [{:reason :something-bad-happened}]
+                                                        :data {:windows [:one :two]}}])))))

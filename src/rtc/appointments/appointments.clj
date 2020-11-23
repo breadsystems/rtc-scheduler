@@ -26,24 +26,26 @@
 (defn create! [appt]
   {:pre [(spec/valid? ::appointment appt)]}
   (-> (sqlh/insert-into :appointments)
-      (sqlh/values [appt])
+      (sqlh/values [(assoc appt :date_created (c/to-sql-time (Date.)))])
+      (assoc :returning :id)
       (sql/format)
-      (d/execute!)))
+      (d/execute! {:return-keys true}))
+  ;; TODO There's probably a nicer way to do this...
+  (first (d/query ["SELECT * FROM appointments ORDER BY id DESC LIMIT 1"])))
 
 (comment
   (def provider (p/email->provider "lauren@tamayo.email"))
 
-  (def now (Date.))
-  (create! {:start_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000)))
-            :end_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000) (* 30 60 1000)))
-            :name "Zoey"
-            :email "zoey@dyke4prez.blue"
-            :alias ""
-            :pronouns "she/her"
-            :ok_to_text true
-            :date_created (c/to-sql-time now)
-            :other_needs "I shall require forty-five green M&Ms"
-            :provider_id (:id provider)}))
+  (def created (create! {:start_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000)))
+                         :end_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000) (* 30 60 1000)))
+                         :name "Zoey"
+                         :email "zoey@dyke4prez.blue"
+                         :alias ""
+                         :pronouns "she/her"
+                         :ok_to_text true
+                         :reason "idk"
+                         :other_needs "I shall require forty-five green M&Ms"
+                         :provider_id (:id provider)})))
 
 (defn params->query
   "Takes a map of params and returns a HoneySQL query map"

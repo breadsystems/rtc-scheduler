@@ -43,16 +43,17 @@
           json? (boolean (get (:params req) "json"))
           transform (if json? ->json ->transit)
           content-type (if json? "application/json" "application/transit+edn")
-          res (f req)]
-      (if (:success res)
-        {:status  200
-         :headers {"Content-Type" content-type}
-         :body    (transform {:success true
-                              :data    (:data res)})}
-        {:status 400
-         :headers {"Content-Type" content-type}
-         :body    (transform {:success false
-                              :errors  (:errors res)})}))))
+          res (f req)
+          status (if (:success res) 200 400)]
+      {:status  status
+       :headers {"Content-Type" content-type}
+       :body    (transform {:success (:success res)
+                            :data    (:data res)
+                            :errors  (:errors res)})})))
+
+(defn- transit-params [{:keys [body]}]
+  (let [reader (transit/reader body :json)]
+    (transit/read reader)))
 
 (defn endpoints [{:keys [mount]}]
   [mount
@@ -61,11 +62,15 @@
                           {:success true
                            :data (appt/get-available-windows params)}))}]
    ["/appointment"
-    {:post (fn [req]
-             {:status 200
-              :headers {"Content-Type" "application/transit+edn"}
-              :body (rest-handler (fn [{:keys [params]}]
-                                    (appt/book-appointment! params)))})}]
+    {:post (rest-handler (fn [req]
+                           (try
+                             {:success true
+                              :data {:appointment (appt/book-appointment! (transit-params req))}}
+                             (catch clojure.lang.ExceptionInfo e
+                               {:success false
+                                :errors [{:message (.getMessage e)
+                                          :reason (:reason (ex-data e))}]
+                                :data (ex-data e)}))))}]
    ["/schedule"
     ;; TODO AUTHORIZE REQUEST!!
     {:get (rest-handler (fn [req]

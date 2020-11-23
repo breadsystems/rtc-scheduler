@@ -48,8 +48,10 @@
 
 (defn execute!
   "Run an effectful SQL query, such as a DELETE or INSERT"
-  [sql]
-  (jdbc/execute! {:connection-uri url} sql))
+  ([sql]
+   (jdbc/execute! {:connection-uri url} sql))
+  ([sql opts]
+   (jdbc/execute! {:connection-uri url} sql opts)))
 
 (bind!)
 

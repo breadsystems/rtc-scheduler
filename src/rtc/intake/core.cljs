@@ -56,7 +56,7 @@
  (fn [_db [_ {:keys [csrf-token]}]]
    {;; CRSF token comes from the DOM
     :csrf-token csrf-token
-    
+
     :step 0
     :viewed-up-to-step 0
 
@@ -70,6 +70,7 @@
     ;; Where we collect info about the Person Seeking Care.
     :careseeker-info {}
     :appointment-windows []
+    :appointment nil
     :answers {}
     :touched #{}
     :confirmed-info nil
@@ -276,6 +277,8 @@
 
   @(rf/subscribe [::answers])
   @(rf/subscribe [::answer :name])
+  @(rf/subscribe [::answer :text-ok])
+  @(rf/subscribe [::answer :preferred-communication-method])
   (rf/dispatch [::answer! :name "Coby"])
 
   @(rf/subscribe [::answer :state])
@@ -316,12 +319,20 @@
     (rf/dispatch [::answer! :description-of-needs "Life is pain"])
     (rf/dispatch [::update-step {:name :confirmation :step 4}]))
 
-  ;; Fill out required stuff and jump to last step
+  ;; Fill out all fields and jump to schedule step
   (do
+    (rf/dispatch [::answer! :name "Coby"])
+    (rf/dispatch [::answer! :pronouns "he/him"])
     (rf/dispatch [::answer! :state "WA"])
     (rf/dispatch [::answer! :email "coby@tamayo.email"])
+    (rf/dispatch [::answer! :phone "253 555 1234"])
+    (rf/dispatch [::answer! :text-ok 1])
+    (rf/dispatch [::answer! :preferred-communication-method "phone"])
+    (rf/dispatch [::answer! :interpreter-lang "Amharic"])
+    (rf/dispatch [::answer! :other-access-needs "Other"])
     (rf/dispatch [::answer! :description-of-needs "Life is pain"])
-    (rf/dispatch [::update-step {:name :confirmation :step 5}]))
+    (rf/dispatch [::answer! :anything-else "Nah"])
+    (rf/dispatch [::update-step {:name :confirmation :step 4}]))
 
   (rf/dispatch [::confirm!]))
 
@@ -445,8 +456,9 @@
  ::book-appointment!
  (fn [params]
    (rest/post! "/api/v1/appointment"
-               {:form-params params}
-               ::confirmed
+               {:transit-params params
+                :headers {"x-csrf-token" (:csrf-token params)}}
+               ::appointment-response
                #(rf/dispatch [::global-error :unexpected-error]))))
 
 (rf/reg-event-fx
@@ -454,20 +466,24 @@
  (fn [{:keys [db]}]
    (let [{:keys [csrf-token answers appointment loading? confirmed-info]} db
          should-mutate? (and (not loading?) (not confirmed-info))]
-     (prn (merge answers appointment))
      ;; Dispatching this event when the UI is already loading or an appointment
      ;; has already been confirmed is a noop.
      (when should-mutate?
        {:db (assoc db :loading? true)
-        ::book-appointment! (merge {:__anti-forgery-token csrf-token} answers appointment)}))))
+        ::book-appointment! (merge {:csrf-token csrf-token} answers appointment)}))))
 
-(rf/reg-event-db
- ::confirmed
- (fn [db [_ response]]
-   (prn response)
-   (assoc db
-          :loading? false
-          :confirmed-info response)))
+(defn process-appointment-response [db [_ {:keys [success data errors]}]]
+  (if success
+    (assoc db
+           :loading? false
+           :confirmed-info (:appointment data))
+    (assoc (prev-step db)
+           :loading? false
+           :global-error (or (:reason (first errors)) :unexpected-error)
+           :appointment-windows (or (:windows data)
+                                    (:appointment-windows db)))))
+
+(rf/reg-event-db ::appointment-response process-appointment-response)
 
 (comment
   ;; Moment.js experiments
@@ -543,8 +559,8 @@
         error @(rf/subscribe [::global-error])]
     [:section
      [:header
-      (when error [:p.error-message (t error)])
       (when sub-heading [:h3 (t sub-heading)])]
+     (when error [:h3.error-message (t error)])
      [:div
       content]
      [:footer.intake-footer
