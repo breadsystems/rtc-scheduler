@@ -31,21 +31,25 @@
       (sql/format)
       (d/execute! {:return-keys true}))
   ;; TODO There's probably a nicer way to do this...
-  (first (d/query ["SELECT * FROM appointments ORDER BY id DESC LIMIT 1"])))
+  (first (d/query ["SELECT a.id, a.name, a.pronouns, a.start_time, a.end_time,
+                    u.first_name provider_first_name, u.last_name provider_last_name
+                    FROM appointments a
+                    INNER JOIN users u ON (a.provider_id = u.id)
+                    ORDER BY id DESC LIMIT 1"])))
 
 (comment
   (def provider (p/email->provider "lauren@tamayo.email"))
 
-  (def created (create! {:start_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000)))
-                         :end_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000) (* 30 60 1000)))
-                         :name "Zoey"
-                         :email "zoey@dyke4prez.blue"
-                         :alias ""
-                         :pronouns "she/her"
-                         :ok_to_text true
-                         :reason "idk"
-                         :other_needs "I shall require forty-five green M&Ms"
-                         :provider_id (:id provider)})))
+  (create! {:start_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000)))
+            :end_time (c/to-sql-time (+ (inst-ms now) (* 24 60 60 1000) (* 30 60 1000)))
+            :name "Zoey"
+            :email "zoey@dyke4prez.blue"
+            :alias ""
+            :pronouns "she/her"
+            :ok_to_text true
+            :reason "idk"
+            :other_needs "I shall require forty-five green M&Ms"
+            :provider_id (:id provider)}))
 
 (defn params->query
   "Takes a map of params and returns a HoneySQL query map"

@@ -687,7 +687,7 @@
       [:div.intake-step--confirmation
        [confirmation-details]
        [:div.detail
-        [:div [:label.field-label (t :appointment-details)]]
+        [:div [:label.field-label (t :appointment-time)]]
         [:div [:b (appointment->str (assoc appt :lang lang))]]]
        [:div.confirm-container
         [:button.call-to-action {:on-click #(rf/dispatch [::confirm!])}
@@ -695,13 +695,17 @@
 
 (defn- confirmed []
   (let [appt @(rf/subscribe [::appointment])
+        {:keys [provider_first_name provider_last_name start_time end_time]} @(rf/subscribe [::confirmed-info])
+        provider-name (str provider_first_name " " provider_last_name)
         lang @(rf/subscribe [::lang])]
     [:div
      [:h3.highlight.spacious (t :appointment-confirmed)]
-     [confirmation-details]
      [:div.detail
-      [:div [:label.field-label (t :appointment-details)]]
-      [:div [:b (appointment->str (assoc appt :lang lang))]]]]))
+      [:div [:label.field-label (t :appointment-time)]]
+      [:div (appointment->str (assoc appt :lang lang))]]
+     [:div.detail
+      [:div [:label.field-label (t :provider-name)]]
+      [:div provider-name]]]))
 
 
 (defn- progress-nav []
