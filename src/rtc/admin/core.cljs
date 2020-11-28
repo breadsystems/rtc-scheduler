@@ -37,8 +37,11 @@
 ;;
 (rf/reg-event-db
  ::init-db
- (fn [_]
-   {:view :schedule
+ (fn [_db [_ {:keys [csrf-token]}]]
+   {;; CSRF token from the DOM
+    :csrf-token csrf-token
+    
+    :view :schedule
     ;; TODO get this stuff from GraphQL
     :user-id 4
     :filters {:availabilities? true
@@ -234,6 +237,7 @@
 
 (defn init! []
   (init-routing!)
-  (rf/dispatch-sync [::init-db])
+  (let [csrf-token (.-content (js/document.querySelector "meta[name=csrf-token]"))]
+    (rf/dispatch-sync [::init-db {:csrf-token csrf-token}]))
   (rf/dispatch [::init-admin])
   (mount!))
