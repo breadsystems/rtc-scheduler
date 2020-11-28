@@ -8,7 +8,7 @@
 ;;
 (ns rtc.admin.core
   (:require
-   [clojure.set :refer [intersection]]
+   [clojure.set :refer [intersection union]]
    [reagent.dom :as dom]
    [re-frame.core :as rf]
    [reitit.frontend :as reitit]
@@ -170,11 +170,16 @@
    (if (seq errors)
      ;; TODO some kind of real error handling
      (do (prn errors) db)
-     (assoc db
-            :users          (:users data)
-            :my-invitations (:invitations data)
-            :availabilities (:availabilities data)
-            :appointments   (:appointments data)))))
+     (-> db
+         (assoc
+          :users          (:users data)
+          :my-invitations (:invitations data)
+          :availabilities (:availabilities data)
+          :appointments   (:appointments data))
+         (assoc-in
+          [:filters :providers]
+          (union (set (keys (:availabilies data)))
+                 (set (keys (:appointments data)))))))))
 
 (comment
   (rf/dispatch [::init-admin]))
