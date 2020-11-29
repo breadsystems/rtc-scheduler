@@ -7,7 +7,6 @@
    [rtc.auth.two-factor :as two-factor]
    [rtc.users.core :as u]
    [rtc.auth.util]
-   [rtc.db :as db]
    [rtc.layout :as layout]
    [ring.util.response :refer [redirect]]))
 
@@ -79,13 +78,6 @@
 
     :logged-in
     (redirect (destination-uri req))))
-
-(defn admin-only-resolver [resolver]
-  (fn [{:keys [request] :as context} query-string value]
-    (if (or (:auth-disabled? (:env request))
-            (u/admin? (:identity (:session request))))
-      (resolver context query-string value)
-      {:errors [{:message "You do not have permission to do that"}]})))
 
 (defn wrap-identity
   "Persist session identity directly into request"
