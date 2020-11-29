@@ -2,6 +2,8 @@
   (:require
    [buddy.hashers :as hash]
    [crypto.random :as crypto]
+   [rtc.auth.util :as auth-util]
+   [rtc.auth.two-factor :as two-factor]
    [rtc.db :as db]))
 
 
@@ -27,17 +29,30 @@
 (defn validate-invitation [invitation]
   (boolean (db/get-invitation invitation)))
 
-(defn register! [user]
-  ;; TODO wrap this in a tx
-  (let [created (db/create-user! user)]
-    (db/redeem-invitation! user)
-    created))
+(defn invitation-url [{:keys [scheme server-name server-port]} {:keys [email code]}]
+  (format "%s://%s/register?email=%s&code=%s"
+          (name scheme)
+          (if server-port (str server-name ":" server-port) server-name)
+          email
+          code))
 
 (defn id->user [id]
   (dissoc (db/get-user {:id id}) :pass))
 
 (defn email->user [email]
   (dissoc (db/get-user-by-email {:email email}) :pass))
+
+(defn register! [{:keys [email phone] :as user}]
+  (let [authy-payload {:email email
+                       :cellphone phone
+                       :country_code "1"}
+        {authy-user :user} (two-factor/create-authy-user! authy-payload)]
+    (-> user
+        (update :pass hash/derive)
+        (assoc :authy_id (:id authy-user))
+        (db/create-user!)))
+  (db/redeem-invitation! user)
+  (email->user (:email user)))
 
 (defn authenticate [email password]
   (when (and email password)
@@ -47,22 +62,31 @@
         ;; so hide it from the caller.
         (dissoc user :pass)))))
 
-(defn filters->users [filters]
-  [])
-
 (comment
-  (authenticate "rtc@example.com" "Y91eTSu4Pff9CfT/jcyh7A==")
+  (def admin (email->user "rtc@example.com"))
 
-  (def invitation (invite! (str (crypto/url-part 6) "@example.com") 1))
+  (def invitation (invite! (str (crypto/url-part 6) "@example.com") (:id admin)))
   (validate-invitation invitation)
   (validate-invitation (assoc invitation :email "bogus@example.email"))
 
-  (db/get-invitations {:redeemed false :invited_by 1})
-  (db/get-invitations {:redeemed true :invited_by 1})
+  (db/get-invitations {:redeemed false :invited_by (:id admin)})
+  (db/get-invitations {:redeemed true :invited_by (:id admin)})
 
-  (register! (conj (select-keys invitation [:code :email])
-                   {:pass (crypto/url-part 16)
-                    :is_admin false}))
+  (invitation-url {:scheme :http :server-name "localhost" :server-port "8080"} invitation)
+
+  (def user (merge (select-keys invitation [:code :email])
+                   {:pass (auth-util/tmp-password)
+                    :first_name "New"
+                    :last_name "User"
+                    :pronouns "they/them"
+                    :phone "2532229139"
+                    :state "WA"
+                    :is_admin true
+                    :authy_id nil
+                    :preferences {}}))
+
+  user
+  (register! user)
 
   (email->user "rtc@example.com")
   (admin? (email->user "rtc@example.com"))
