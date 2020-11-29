@@ -8,7 +8,7 @@
 ;;
 (ns rtc.admin.core
   (:require
-   [clojure.set :refer [intersection union]]
+   [clojure.set :refer [intersection]]
    [reagent.dom :as dom]
    [re-frame.core :as rf]
    [reitit.frontend :as reitit]
@@ -155,7 +155,7 @@
 (rf/reg-fx
  ::schedule
  (fn []
-   (rest/get! "/api/v1/admin/schedule" {} ::load-schedule)))
+   (rest/get! "/api/v1/admin/schedule" {} :calendar/load)))
 
 ;; TODO implement invites & settings fx
 (rf/reg-fx
@@ -165,24 +165,6 @@
 (rf/reg-fx
  ::settings
  #(prn 'settings!))
-
-;; Dispatched once the schedule data is ready
-(rf/reg-event-db
- ::load-schedule
- (fn [db [_ {:keys [data errors]}]]
-   (if (seq errors)
-     ;; TODO some kind of real error handling
-     (do (prn errors) db)
-     (-> db
-         (assoc
-          :users          (:users data)
-          :my-invitations (:invitations data)
-          :availabilities (:availabilities data)
-          :appointments   (:appointments data))
-         (assoc-in
-          [:filters :providers]
-          (union (set (keys (:availabilies data)))
-                 (set (keys (:appointments data)))))))))
 
 (comment
   (rf/dispatch [::init-admin]))

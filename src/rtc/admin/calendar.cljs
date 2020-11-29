@@ -1,5 +1,6 @@
 (ns rtc.admin.calendar
   (:require
+   [clojure.set :refer [union]]
    [clojure.string :refer [join]]
   ;;  ["@fullcalendar/interaction" :default interactionPlugin]
   ;;  ["@fullcalendar/list" :default listPlugin]
@@ -323,14 +324,23 @@
                                          {:db (delete-availability db dispatch)
                                           ::render-calendar nil}))
 
+(rf/reg-fx
+ ::create-availability!
+ (fn [{:keys [availability csrf-token]}]
+   (rest/post! "/api/v1/admin/availability"
+               {:transit-params availability
+                :headers {"x-csrf-token" csrf-token}})))
+
 (rf/reg-event-db ::focus-appointment (fn [db [_ id]]
                                        (assoc db :focused-appointment id)))
 
 ;; Keep our FullCalendar instance around so we can re-render on demand.
 (def !calendar (r/atom nil))
 
-(rf/reg-fx ::render-calendar (fn [_]
-                               (.refetchEvents @!calendar)))
+(defn render-calendar! [_]
+  (.refetchEvents @!calendar))
+
+(rf/reg-fx ::render-calendar render-calendar!)
 
 (rf/reg-event-fx ::update-filter (fn [{:keys [db]} dispatch]
                                    {:db (update-filter db dispatch)
@@ -340,6 +350,25 @@
                                   {:db (clear-filter db filter-key)
                                    ::render-calendar nil}))
 
+;; Dispatched once the schedule data is ready
+(rf/reg-event-db
+ :calendar/load
+ [(rf/after render-calendar!)]
+ (fn [db [_ {:keys [data errors]}]]
+   (if (seq errors)
+     ;; TODO some kind of real error handling
+     (do (prn errors) db)
+     (-> db
+         (assoc
+          :users          (:users data)
+          :my-invitations (:invitations data)
+          :availabilities (:availabilities data)
+          :appointments   (:appointments data))
+         (assoc-in
+          [:filters :providers]
+          (union (set (map :user/id (vals (:availabilies data))))
+                 (set (map :user/id (vals (:appointments data))))))))))
+
 (comment
   @(rf/subscribe [::my-availabilities])
   @(rf/subscribe [::my-appointments])
@@ -347,11 +376,6 @@
   @(rf/subscribe [::filters])
   @(rf/subscribe [::providers])
   @(rf/subscribe [::access-needs-filter-summary])
-
-  (rf/dispatch [::create-availability {:db {:start "2020-07-31T10:00"
-                                            :end "2020-07-31T17:00"
-                                            :event/type :availability
-                                            :user/id 3}}])
 
   (rf/dispatch [::update-filter :providers 3])
   (rf/dispatch [::update-filter :providers 4]))
