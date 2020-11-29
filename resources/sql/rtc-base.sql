@@ -1,3 +1,10 @@
+-- :name create-user! :! :n
+-- :doc creates a new user record
+INSERT INTO users (email, pass, first_name, last_name, pronouns, phone, state,
+last_login, date_created, date_modified, is_admin, authy_id, preferences)
+VALUES (:email, :pass, :first_name, :last_name, :pronouns, :phone, :state,
+NOW(), NOW(), NOW(), :is_admin, :authy_id, :preferences)
+
 -- :name get-user :? :1
 -- :doc retrieves a user record given the id
 SELECT * FROM users WHERE id = :id

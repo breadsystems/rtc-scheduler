@@ -2,7 +2,6 @@
   (:require
    [buddy.hashers :as hash]
    [crypto.random :as crypto]
-   [mount.core :refer [defstate]]
    [rtc.db :as db]
    [rtc.env :refer [env]]))
 
@@ -18,22 +17,33 @@
 
 (defn create-first-admin-user! []
   (try
+    (println 'here)
     ;; TODO get env vars from config
     ;; TODO email an invite to redeem instead of printing the pw
-    (let [pw (or (System/getenv "ADMIN_PASSWORD") (tmp-password))
+    (let [pw (or (:default-admin-password env) (tmp-password))
+          email (or (:default-admin-email env) "rtc@example.com")
           pw-hash (hash/derive pw)
-          email (or (System/getenv "ADMIN_EMAIL") "rtc@example.com")
           authy-id (:default-authy-user-id env)
-          data {:email email :pass pw-hash :is_admin true :authy_id authy-id}]
-      (db/create-user! data)
-      (println "admin email:" email)
-      (println "admin password: " pw)
-      (println "authy user ID: " authy-id)
-      {:email email
-       :pass  pw})
+          data {:email email
+                :pass pw-hash
+                :first_name "Admin"
+                :last_name "Auto"
+                :pronouns "they/them"
+                :phone "1234567890"
+                :state "WA"
+                :is_admin true
+                :authy_id authy-id
+                :preferences {}}]
+      (if (db/get-user-by-email {:email email})
+        (println (format "user with email %s exists" email))
+        (do
+          (db/create-user! data)
+          (println "admin email:" email)
+          (println "admin password: " pw)
+          (println "authy user ID: " authy-id)))
+      nil)
     (catch Exception e
       (.getMessage e))))
 
-;; Create an admin user on first startup
-(defstate admin-user
-  :start (create-first-admin-user!))
+(comment
+  (create-first-admin-user!))

@@ -3,9 +3,10 @@
    [buddy.auth :refer [authenticated? throw-unauthorized]]
    [buddy.auth.backends.session :refer [session-backend]]
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
+   [mount.core :refer [defstate]]
    [ring.util.response :refer [redirect]]
    [rtc.auth.two-factor :as two-factor]
-   [rtc.auth.util]
+   [rtc.auth.util :as util]
    [rtc.env :refer [env]]
    [rtc.layout :as layout]
    [rtc.users.core :as u]))
@@ -108,3 +109,8 @@
       (wrap-require-auth)
       (wrap-authorization auth-backend)
       (wrap-authentication auth-backend)))
+
+
+;; Create an admin user on first startup, if one does not exist
+(defstate admin-user
+  :start (util/create-first-admin-user!))

@@ -134,7 +134,7 @@
 
   ;; Recreate the test admin user.
   (do
-    (when-let [admin-uid (:id (u/email->user "rtc@example.com"))]
+    (when-let [admin-uid (:id (u/email->user (:default-admin-email env)))]
       (db/delete-user! {:id admin-uid}))
     (restart!))
 

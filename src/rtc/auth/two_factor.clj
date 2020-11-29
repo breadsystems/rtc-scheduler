@@ -6,8 +6,7 @@
    [config.core :as config :refer [env]]
    [mount.core :as mount :refer [defstate]]
    [ring.util.response :refer [redirect]]
-   [rtc.layout :as layout]
-   [rtc.users.core :as u]))
+   [rtc.layout :as layout]))
 
 
 (defstate authy-api-key
@@ -48,9 +47,10 @@
   (boolean (:verified-2fa-token? (:session req))))
 
 (defn require-verification? [{:keys [session] :as req}]
+  ;; TODO
   (let [user (:identity session)]
-    (and (u/two-factor-enabled? user)
-         (not (verified? req)))))
+    (and ;(u/two-factor-enabled? user)
+     (not (verified? req)))))
 
 (comment
 
