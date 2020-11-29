@@ -1,8 +1,15 @@
 (ns rtc.env
   (:require
+   [config.core :as config]
    [mount.core :as mount :refer [defstate]]
    [ring.middleware.reload :refer [wrap-reload]]
    [rtc.style.build :as style]))
+
+
+;; Environment variables, all in one place.
+;; https://github.com/yogthos/config
+(defstate env
+  :start (config/load-env))
 
 
 (defn middleware [app]

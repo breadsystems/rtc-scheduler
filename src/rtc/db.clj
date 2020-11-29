@@ -1,12 +1,12 @@
 (ns rtc.db
   (:require
    [cheshire.core :as cheshire]
-   [config.core :as config :refer [env]]
    [conman.core :as conman]
    [clojure.java.jdbc :as jdbc]
    [clojure.string :as string]
    [migratus.core :as migratus]
-   [mount.core :as mount :refer [defstate]])
+   [mount.core :as mount :refer [defstate]]
+   [rtc.env :refer [env]])
   (:import
    [org.postgresql.util PGobject]
    [java.net URI]))
@@ -63,6 +63,8 @@
 
 
 (comment
+  (:dev-disable-auth env)
+
   ;; connect/disconnect/reconnect database
   (mount/stop #'*db*)
   (mount/start #'*db*)

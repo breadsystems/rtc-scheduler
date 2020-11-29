@@ -6,6 +6,12 @@
    [rtc.intake.style :as intake-style]))
 
 
+;; Environment variables, all in one place.
+;; https://github.com/yogthos/config
+(defstate env
+  :start (config/load-env))
+
+
 (defn middleware [handler]
   handler)
 

@@ -3,7 +3,6 @@
 (ns rtc.app
   (:require
    [clojure.string :as string]
-   [config.core :as config]
    [mount.core :as mount :refer [defstate]]
    [org.httpkit.server :as http]
    [reitit.ring :as ring]
@@ -15,7 +14,7 @@
    [rtc.assets.core :as assets]
    [rtc.auth.core :as auth]
    [rtc.db :as db]
-   [rtc.env :as env]
+   [rtc.env :refer [env]]
    [rtc.intake.core :as intake]
    [rtc.layout :as layout]
    [rtc.users.core :as u]
@@ -80,16 +79,17 @@
       (get headers "x-csrf-token")))
 
 (defn start! []
-  (let [port (Integer. (:port config/env 80))]
+  (let [port (Integer. (:port env 80))]
     (println (str "Running HTTP server at localhost:" port))
-    (when (:dev-disable-auth config/env)
+    (when (:dev-disable-auth env)
       (println "NOTICE: Authentication is disabled!"))
     (reset! stop-http
             (http/run-server (-> app
+                                 ;; TODO move this to prod only?
                                  (wrap-anti-forgery {:read-token read-token})
                                  (wrap-session)
                                  (wrap-params)
-                                 (env/middleware))
+                                 (rtc.env/middleware))
                              {:port port})))
   nil)
 
@@ -112,6 +112,7 @@
   (mount/start))
 
 (comment
+  (:dev-disable-auth env)
 
   ;; Evaluate this to start the app in the REPL.
   (mount/start)
@@ -125,4 +126,5 @@
       (db/delete-user! {:id admin-uid}))
     (restart!))
 
+  ;;
   )
