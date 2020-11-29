@@ -39,14 +39,7 @@
 
   (id->provider 1) ;; user may exist, but not as a provider => nil
   (id->provider 2)
-  (email->provider "coby02@cobytamayo.com")
-
-  (try
-    (db/create-user! {:email "me@example.com" :pass "password123" :is_admin true :state "WA"})
-    (db/create-user! {:email "you@example.com" :pass "password234" :is_admin false})
-    (db/create-user! {:email "them@example.com" :pass "password345" :is_admin false})
-    (catch Exception e
-      (.getMessage e)))
+  (email->provider "shevek@tamayo.email")
 
   (db/get-user {:id 1})
   (db/get-provider {:id 1})

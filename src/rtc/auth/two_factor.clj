@@ -32,7 +32,7 @@
 (defn app-details []
   (api-call http/get "/app/details"))
 
-(defn create-user! [data]
+(defn create-authy-user! [data]
   (api-call http/post "/users/new" {:form-params {:user data}
                                     :flatten-nested-form-params true}))
 
@@ -56,9 +56,9 @@
 
   (app-details)
 
-  (def user (create-user! {:email "coby02@cobytamayo.com"
-                           :cellphone "253-222-9139"
-                           :country_code "1"}))
+  (def user (create-authy-user! {:email "coby02@cobytamayo.com"
+                                 :cellphone "253-222-9139"
+                                 :country_code "1"}))
 
   (verify-token "15 644 34" (get-in user [:user :id]))
 

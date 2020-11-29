@@ -1,12 +1,3 @@
--- :name create-user! :! :n
--- :doc creates a new user record
-INSERT INTO users (email, pass, is_admin, authy_id)
-VALUES (:email, :pass, :is_admin, :authy_id)
-
--- :name update-user! :! :n
--- :doc updates an existing user record
-UPDATE users SET email = :email WHERE id = :id
-
 -- :name get-user :? :1
 -- :doc retrieves a user record given the id
 SELECT * FROM users WHERE id = :id
