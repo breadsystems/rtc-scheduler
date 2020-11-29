@@ -345,22 +345,23 @@
                                    ::render-calendar nil}))
 
 ;; Dispatched once the schedule data is ready
-(rf/reg-event-db
+(rf/reg-event-fx
  :calendar/load
- (fn [db [_ {:keys [data errors]}]]
+ (fn [{:keys [db]} [_ {:keys [data errors]}]]
    (if (seq errors)
      ;; TODO some kind of real error handling
-     (do (prn errors) db)
-     (-> db
-         (assoc
-          :users          (:users data)
-          :my-invitations (:invitations data)
-          :availabilities (:availabilities data)
-          :appointments   (:appointments data))
-         (assoc-in
-          [:filters :providers]
-          (union (set (map :user/id (vals (:availabilies data))))
-                 (set (map :user/id (vals (:appointments data))))))))))
+     (do (prn errors) {:db db})
+     {:db (-> db
+              (assoc
+               :users          (:users data)
+               :my-invitations (:invitations data)
+               :availabilities (:availabilities data)
+               :appointments   (:appointments data))
+              (assoc-in
+               [:filters :providers]
+               (union (set (map :user/id (vals (:availabilies data))))
+                      (set (map :user/id (vals (:appointments data)))))))
+      ::render-calendar nil})))
 
 (rf/reg-event-fx
  ::new-availability
