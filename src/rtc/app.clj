@@ -79,6 +79,15 @@
   (or (:__anti-forgery-token params)
       (get headers "x-csrf-token")))
 
+(defn env-anti-forgery
+  "Wrap handler in anti-forgery middleware unless explicitly disabled."
+  [handler]
+  (when (:dev-disable-anti-forgery env)
+    (println "NOTICE: Anti-forgery protection is disabled!"))
+  (if-not (:dev-disable-anti-forgery env)
+    (wrap-anti-forgery handler {:read-token read-token})
+    handler))
+
 (defn start! []
   (let [port (Integer. (:port env 80))]
     (println (str "Running HTTP server at localhost:" port))
@@ -86,8 +95,7 @@
       (println "NOTICE: Authentication is disabled!"))
     (reset! stop-http
             (http/run-server (-> app
-                                 ;; TODO move this to prod only?
-                                 (wrap-anti-forgery {:read-token read-token})
+                                 (env-anti-forgery)
                                  (wrap-session)
                                  (wrap-keyword-params)
                                  (wrap-params)
