@@ -3,12 +3,12 @@
    [buddy.auth :refer [authenticated? throw-unauthorized]]
    [buddy.auth.backends.session :refer [session-backend]]
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
-   [config.core :as config :refer [env]]
+   [ring.util.response :refer [redirect]]
    [rtc.auth.two-factor :as two-factor]
-   [rtc.users.core :as u]
    [rtc.auth.util]
+   [rtc.env :refer [env]]
    [rtc.layout :as layout]
-   [ring.util.response :refer [redirect]]))
+   [rtc.users.core :as u]))
 
 
 (defn- auth-disabled? []
@@ -79,13 +79,12 @@
     :logged-in
     (redirect (destination-uri req))))
 
+;; TODO do we still need this?
 (defn wrap-identity
   "Persist session identity directly into request"
   [handler]
-  (fn [{:keys [session] :as req}]
-    (handler (-> req
-                 (assoc :identity (:identity session))
-                 (assoc-in [:env :auth-disabled?] (auth-disabled?))))))
+  (fn [req]
+    (handler (assoc req :identity (get-in req [:session :identity])))))
 
 (defn wrap-require-auth [handler]
   (fn [req]
