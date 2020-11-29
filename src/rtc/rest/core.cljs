@@ -29,6 +29,9 @@
 (defn post! [& args]
   (apply request! http/post args))
 
+(defn delete! [& args]
+  (apply request! http/delete args))
+
 (comment
   (js/console.clear)
   (get! "/api/v1/windows" {:form-params {:state "WA"}} :foo))
