@@ -263,10 +263,8 @@
                                           (contains? (:roles user) :doc))))
 
 (comment
-  @(rf/subscribe [::my-availabilities])
-  @(rf/subscribe [::my-appointments])
   @(rf/subscribe [::focused-appointment])
-
+  @(rf/subscribe [::events])
   @(rf/subscribe [::filters])
   @(rf/subscribe [::providers])
   @(rf/subscribe [::access-needs-filter-summary]))
@@ -303,21 +301,13 @@
 (defn clear-filter [db [_ k]]
   (assoc-in db [:filters k] #{}))
 
-(rf/reg-event-fx ::create-availability (fn [{:keys [db]} [_ avail]]
-                                         ;; TODO do id and overlap check server-side
-                                         (let [{:keys [availabilities user-id csrf-token]} db
-                                               id (inc (apply max (keys availabilities)))
-                                               avail (merge avail {:availability/id id
-                                                                   :event/type :availability
-                                                                   :user/id user-id})]
-                                           (if (overlaps-any? avail (vals availabilities))
-                                             ;; Overlap in availability is not allowed!
-                                             {:db db}
-                                             ;; No overlaps; update db
-                                             {:db (assoc-in db [:availabilities id] avail)
-                                              ::render-calendar nil
-                                              ::create-availability! {:availability avail
-                                                                      :csrf-token csrf-token}}))))
+(rf/reg-event-fx
+ ::create-availability
+ (fn [{:keys [db]} [_ avail]]
+   (let [{:keys [user-id csrf-token]} db
+         avail (merge {:user/id user-id} avail)]
+     {::create-availability! {:availability avail
+                              :csrf-token csrf-token}})))
 
 (rf/reg-event-fx ::update-availability (fn [{:keys [db]} dispatch]
                                          {:db (update-availability db dispatch)
@@ -332,7 +322,8 @@
  (fn [{:keys [availability csrf-token]}]
    (rest/post! "/api/v1/admin/availability"
                {:transit-params availability
-                :headers {"x-csrf-token" csrf-token}})))
+                :headers {"x-csrf-token" csrf-token}}
+               ::new-availability)))
 
 (rf/reg-event-db ::focus-appointment (fn [db [_ id]]
                                        (assoc db :focused-appointment id)))
@@ -372,10 +363,14 @@
           (union (set (map :user/id (vals (:availabilies data))))
                  (set (map :user/id (vals (:appointments data))))))))))
 
+(rf/reg-event-db
+ ::new-availability
+ [(rf/after render-calendar!)]
+ (fn [db [_ {:keys [data]}]]
+   (let [avail (:availability data)]
+     (assoc-in db [:availabilities (:id avail)] avail))))
+
 (comment
-  @(rf/subscribe [::my-availabilities])
-  @(rf/subscribe [::my-appointments])
-  @(rf/subscribe [::focused-appointment*])
   @(rf/subscribe [::filters])
   @(rf/subscribe [::providers])
   @(rf/subscribe [::access-needs-filter-summary])
