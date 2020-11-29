@@ -9,7 +9,8 @@
    ["moment" :as moment]
    [reagent.core :as r]
    [re-frame.core :as rf]
-   [rtc.style.colors :as colors]))
+   [rtc.style.colors :as colors]
+   [rtc.rest.core :as rest]))
 
 
 
@@ -304,7 +305,7 @@
 
 (rf/reg-event-fx ::create-availability (fn [{:keys [db]} [_ avail]]
                                          ;; TODO do id and overlap check server-side
-                                         (let [{:keys [availabilities user-id]} db
+                                         (let [{:keys [availabilities user-id csrf-token]} db
                                                id (inc (apply max (keys availabilities)))
                                                avail (merge avail {:availability/id id
                                                                    :event/type :availability
@@ -314,7 +315,9 @@
                                              {:db db}
                                              ;; No overlaps; update db
                                              {:db (assoc-in db [:availabilities id] avail)
-                                              ::render-calendar nil}))))
+                                              ::render-calendar nil
+                                              ::create-availability! {:availability avail
+                                                                      :csrf-token csrf-token}}))))
 
 (rf/reg-event-fx ::update-availability (fn [{:keys [db]} dispatch]
                                          {:db (update-availability db dispatch)
