@@ -24,6 +24,20 @@
                           #(< (inst-ms (:start_time %)) (inst-ms (:end_time %)))))
 
 
+(defn get-overlapping [{:keys [start_time end_time provider_id]}]
+  (let [from (c/to-sql-time start_time)
+        to (c/to-sql-time end_time)]
+    (d/query
+     (sql/format
+      {:select [:*]
+       :from [[:availabilities :a]]
+       :where [:and
+               [:= :a.provider_id provider_id]
+               [:or
+                [:between :a.start_time from to]
+                [:and [:<= from :a.end_time] [:>= from :a.start_time]]
+                [:between :a.end_time from to]]]}))))
+
 (defn create!
   "Given a provider_id and a time range, ({:start_time x :end_time y}), create an availility."
   [{:keys [start_time end_time provider_id] :as avail}]

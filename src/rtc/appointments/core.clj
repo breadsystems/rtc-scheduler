@@ -81,6 +81,18 @@
       (throw (ex-info "Appointment window is unavailable!" {:windows windows
                                                             :reason :window-unavailable})))))
 
+(defn schedule-availability! [avail]
+  (def $avail avail)
+  (let [avail {:start_time (:start avail)
+               :end_time (:end avail)
+               :provider_id (:user/id avail)}
+        existing (avail/get-overlapping avail)]
+    (if (seq existing)
+      (throw (ex-info "Availability overlaps with an existing one!"
+                      {:reason :overlaps-exiting
+                       :availabilities existing}))
+      (avail/create! avail))))
+
 (comment
 
   (def now (java.util.Date.))

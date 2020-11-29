@@ -82,7 +82,17 @@
                                               (schedule/schedule req))}
                              (catch Throwable e
                                {:success false
-                                :errors [{:message (.getMessage e)}]}))))}]]])
+                                :errors [{:message (.getMessage e)}]}))))}]
+    ["/availability"
+     {:post (rest-handler (fn [req]
+                            (try
+                              {:success true
+                               :data    {:availability (appt/schedule-availability! (transit-params req))}}
+                              (catch clojure.lang.ExceptionInfo e
+                                {:success false
+                                 :errors [{:message (.getMessage e)
+                                           :reason (:reason (ex-data e))}]
+                                 :data (ex-data e)}))))}]]])
 
 (comment
 
