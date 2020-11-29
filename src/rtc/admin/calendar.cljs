@@ -347,7 +347,6 @@
 ;; Dispatched once the schedule data is ready
 (rf/reg-event-db
  :calendar/load
- [(rf/after render-calendar!)]
  (fn [db [_ {:keys [data errors]}]]
    (if (seq errors)
      ;; TODO some kind of real error handling
@@ -363,12 +362,12 @@
           (union (set (map :user/id (vals (:availabilies data))))
                  (set (map :user/id (vals (:appointments data))))))))))
 
-(rf/reg-event-db
+(rf/reg-event-fx
  ::new-availability
- [(rf/after render-calendar!)]
- (fn [db [_ {:keys [data]}]]
+ (fn [{:keys [db]} [_ {:keys [data]}]]
    (let [avail (:availability data)]
-     (assoc-in db [:availabilities (:id avail)] avail))))
+     {:db (assoc-in db [:availabilities (:id avail)] avail)
+      ::render-calendar nil})))
 
 (comment
   @(rf/subscribe [::filters])
