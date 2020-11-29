@@ -4,9 +4,7 @@
    [clojure.data.json :as json]
    [clojure.walk :as walk]
    [config.core :as config :refer [env]]
-   [mount.core :as mount :refer [defstate]]
-   [ring.util.response :refer [redirect]]
-   [rtc.layout :as layout]))
+   [mount.core :as mount :refer [defstate]]))
 
 
 (defstate authy-api-key
@@ -46,11 +44,6 @@
 (defn verified? [req]
   (boolean (:verified-2fa-token? (:session req))))
 
-(defn require-verification? [{:keys [session] :as req}]
-  ;; TODO
-  (let [user (:identity session)]
-    (and ;(u/two-factor-enabled? user)
-     (not (verified? req)))))
 
 (comment
 
