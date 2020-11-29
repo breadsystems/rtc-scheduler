@@ -47,7 +47,11 @@
                      :end_time (c/to-sql-time end_time)
                      :provider_id provider_id}])
       (sql/format)
-      (d/execute!)))
+      (d/execute!))
+  ;; TODO improve this?
+  (let [{:keys [id provider_id start_time end_time]}
+        (first (d/query ["SELECT * FROM availabilities ORDER BY id DESC LIMIT 1"]))]
+    {:id id :user/id provider_id :start start_time :end end_time}))
 
 (comment
 

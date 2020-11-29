@@ -89,7 +89,7 @@
         existing (avail/get-overlapping avail)]
     (if (seq existing)
       (throw (ex-info "Availability overlaps with an existing one!"
-                      {:reason :overlaps-exiting
+                      {:reason :overlaps-existing
                        :availabilities existing}))
       (avail/create! avail))))
 
