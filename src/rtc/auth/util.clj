@@ -3,7 +3,8 @@
    [buddy.hashers :as hash]
    [crypto.random :as crypto]
    [mount.core :refer [defstate]]
-   [rtc.db :as db]))
+   [rtc.db :as db]
+   [rtc.env :refer [env]]))
 
 (defn tmp-password
   ([num-bytes]
@@ -22,10 +23,12 @@
     (let [pw (or (System/getenv "ADMIN_PASSWORD") (tmp-password))
           pw-hash (hash/derive pw)
           email (or (System/getenv "ADMIN_EMAIL") "rtc@example.com")
-          data {:email email :pass pw-hash :is_admin true}]
+          authy-id (:default-authy-user-id env)
+          data {:email email :pass pw-hash :is_admin true :authy_id authy-id}]
       (db/create-user! data)
       (println "admin email:" email)
       (println "admin password: " pw)
+      (println "authy user ID: " authy-id)
       {:email email
        :pass  pw})
     (catch Exception e

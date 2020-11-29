@@ -123,6 +123,8 @@
 
 (comment
   (:dev-disable-auth env)
+  (:dev-disable-anti-forgery env)
+  (:default-authy-user-id env)
 
   ;; Evaluate this to start the app in the REPL.
   (mount/start)

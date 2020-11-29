@@ -50,8 +50,8 @@
   (-> (redirect "/login")
       (assoc :session {})))
 
-(defn login-handler [{:keys [params session] :as req}]
-  (prn params)
+(defn login-handler [{:keys [params session identity] :as req}]
+  (prn identity)
   (condp = (login-step req)
     :unauthenticated
     (layout/login-page {:req req})
@@ -70,7 +70,7 @@
     (layout/two-factor-page req)
 
     :verifying
-    (if (two-factor/verify-token (:token params) 25490095)
+    (if (two-factor/verify-token (:token params) (:authy_id identity))
       (-> (redirect (destination-uri req))
           (assoc :session (assoc session :verified-2fa-token? true)))
       (layout/two-factor-page {:req req
