@@ -1,5 +1,6 @@
 (ns rtc.users.core
   (:require
+   [buddy.hashers :as hash]
    [crypto.random :as crypto]
    [rtc.db :as db]))
 
@@ -38,10 +39,20 @@
 (defn email->user [email]
   (dissoc (db/get-user-by-email {:email email}) :pass))
 
+(defn authenticate [email password]
+  (when (and email password)
+    (when-let [user (db/get-user-by-email {:email email})]
+      (when (hash/check password (:pass user))
+        ;; We won't ever need the password hash, except in this context,
+        ;; so hide it from the caller.
+        (dissoc user :pass)))))
+
 (defn filters->users [filters]
   [])
 
 (comment
+  (authenticate "rtc@example.com" "Y91eTSu4Pff9CfT/jcyh7A==")
+
   (def invitation (invite! (str (crypto/url-part 6) "@example.com") 1))
   (validate-invitation invitation)
   (validate-invitation (assoc invitation :email "bogus@example.email"))

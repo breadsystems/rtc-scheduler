@@ -6,8 +6,9 @@
    [mount.core :as mount :refer [defstate]]
    [org.httpkit.server :as http]
    [reitit.ring :as ring]
-   [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
+   [ring.middleware.anti-forgery :as anti-forgery :refer [wrap-anti-forgery]]
    [ring.middleware.params :refer [wrap-params]]
+   [ring.middleware.keyword-params :refer [wrap-keyword-params]]
    [ring.middleware.session :refer [wrap-session]]
    [ring.middleware.session.memory :as memory]
    [rtc.rest.core :as rest]
@@ -30,7 +31,7 @@
   (ring/ring-handler
    (ring/router
     [""
-     {:middleware [wrap-params auth/wrap-identity]}
+     {:middleware [auth/wrap-identity]}
      ["/" {:get (fn [_req]
                   (layout/markdown-page
                    {:file "home.md"
@@ -74,8 +75,8 @@
 
 (defonce stop-http (atom nil))
 
-(defn- read-token [{:keys [form-params headers]}]
-  (or (get form-params "__anti-forgery-token")
+(defn- read-token [{:keys [params headers]}]
+  (or (:__anti-forgery-token params)
       (get headers "x-csrf-token")))
 
 (defn start! []
@@ -88,6 +89,7 @@
                                  ;; TODO move this to prod only?
                                  (wrap-anti-forgery {:read-token read-token})
                                  (wrap-session)
+                                 (wrap-keyword-params)
                                  (wrap-params)
                                  (rtc.env/middleware))
                              {:port port})))

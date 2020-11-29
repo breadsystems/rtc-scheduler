@@ -174,4 +174,7 @@
                  :name "token"
                  :value ""
                  :placeholder "12 345 678"}]
-        [:button {:type :submit} "Confirm"]]]})))
+        [:button {:type :submit} "Confirm"]
+        [:input {:type :hidden
+                 :name :__anti-forgery-token
+                 :value *anti-forgery-token*}]]]})))

@@ -7,11 +7,11 @@
 (deftest test-login-step
   (is (= :unauthenticated (auth/login-step {:session nil})))
   (is (= :authenticating  (auth/login-step {:session nil
-                                            :form-params {"email"    "any truthy value"
-                                                          "password" "any truthy value"}})))
+                                            :params {:email "any truthy value"
+                                                     :password "any truthy value"}})))
   (is (= :two-factor      (auth/login-step {:identity {:id 123}})))
   (is (= :verifying       (auth/login-step {:identity {:id 123}
-                                            :form-params {"token" "12345678"}})))
+                                            :params {:token "12345678"}})))
   (is (= :logged-in       (auth/login-step {:identity {:id 123}
                                             :session {:verified-2fa-token? true}}))))
 

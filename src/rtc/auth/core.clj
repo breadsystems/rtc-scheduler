@@ -3,7 +3,6 @@
    [buddy.auth :refer [authenticated? throw-unauthorized]]
    [buddy.auth.backends.session :refer [session-backend]]
    [buddy.auth.middleware :refer [wrap-authentication wrap-authorization]]
-   [buddy.hashers :as hash]
    [config.core :as config :refer [env]]
    [rtc.auth.two-factor :as two-factor]
    [rtc.users.core :as u]
@@ -16,39 +15,29 @@
 (defn- auth-disabled? []
   (boolean (:dev-disable-auth env)))
 
-(defn authenticate-user [email password]
-  (if (and email password)
-    (let [user (u/email->user email)]
-      (when (hash/check password (:pass user))
-        (dissoc user :pass)))
-    nil))
-
 (comment
   (u/email->user "rtc@example.com")
   (u/admin? (u/email->user "rtc@example.com"))
   (u/preferences (u/email->user "rtc@example.com"))
   (u/two-factor-enabled? (u/email->user "rtc@example.com"))
-  (authenticate-user "rtc-admin@example.com" "[PASSWORD HERE]")
-  (authenticate-user "rtc-admin@example.com" "garbage"))
+  (u/authenticate "rtc-admin@example.com" "[PASSWORD HERE]")
+  (u/authenticate "rtc-admin@example.com" "garbage"))
 
 
-(defn login-step [{:keys [form-params] :as req}]
+(defn login-step [{:keys [params] :as req}]
   (cond
     (and
      (authenticated? req)
      (two-factor/verified? req))
     :logged-in
 
-    (and
-     (authenticated? req)
-     (get form-params "token"))
+    (and (authenticated? req) (:token params))
     :verifying
 
     (authenticated? req)
     :two-factor
 
-    (and (get form-params "email")
-         (get form-params "password"))
+    (and (:email params) (:password params))
     :authenticating
 
     :else
@@ -62,15 +51,19 @@
   (-> (redirect "/login")
       (assoc :session {})))
 
-(defn login-handler [{:keys [form-params session] :as req}]
+(defn login-handler [{:keys [params session] :as req}]
+  (prn params)
   (condp = (login-step req)
     :unauthenticated
     (layout/login-page {:req req})
 
     :authenticating
-    (if-let [user (authenticate-user (get form-params "email")
-                                     (get form-params "password"))]
-      (assoc (layout/two-factor-page req) :session {:identity user})
+    (if-let [user (u/authenticate (:email params) (:password params))]
+      (-> (layout/two-factor-page req)
+          ;; Recreate the session due to privilege escalation.
+          (assoc :session (vary-meta (:session req) assoc :recreate true))
+          ;; Persist our user identity in the session.
+          (assoc-in [:session :identity] user))
       (layout/login-page {:req req
                           :error "Invalid email or password"}))
 
@@ -78,7 +71,7 @@
     (layout/two-factor-page req)
 
     :verifying
-    (if (two-factor/verify-token (get form-params "token") 25490095)
+    (if (two-factor/verify-token (:token params) 25490095)
       (-> (redirect (destination-uri req))
           (assoc :session (assoc session :verified-2fa-token? true)))
       (layout/two-factor-page {:req req
