@@ -53,21 +53,6 @@ WHERE email = :email AND code = :code AND now() < (date_invited + interval '72 h
 INSERT INTO appointment_needs (need_id, appointment_id, info)
 VALUES (:need-id, :appointment-id, :info)
 
--- :name update-appointment! :! :n
--- :doc update an existing appointment record
-UPDATE appointments
-SET start_time = :start,
-  end_time = :end,
-  careseeker_id = :careseeker-id,
-  provider_id = :provider-id,
-  reason = :reason,
-  provider_notes = :provider-notes,
-  transcription = :transcription,
-  state = :state,
-  category = :category,
-  resolution = :resolution
-WHERE id = :id
-
 -- :name update-appointment-need! :! :n
 -- :doc update an existing appointment_need record
 UPDATE appointment_needs SET info = :info, contact_id = :contact-id
