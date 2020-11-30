@@ -86,6 +86,15 @@
                                  :errors [{:message (.getMessage e)
                                            :reason (:reason (ex-data e))}]
                                  :data (ex-data e)}))))
+      :patch (rest-handler (fn [req]
+                             (try
+                               {:success true
+                                :data    {:availability (appt/update-availability! (transit-params req))}}
+                               (catch clojure.lang.ExceptionInfo e
+                                 {:success false
+                                  :errors [{:message (.getMessage e)
+                                            :reason (:reason (ex-data e))}]
+                                  :data (ex-data e)}))))
       :delete (rest-handler (fn [req]
                               (let [avail (transit-params req)]
                                 (try

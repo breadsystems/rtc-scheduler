@@ -90,6 +90,22 @@
                        :availabilities existing}))
       (avail/create! avail))))
 
+(defn update-availability! [avail]
+  (let [avail {:id (:id avail)
+               :provider_id (:user/id avail)
+               :start_time (:start avail)
+               :end_time (:end avail)}
+        ;; Look for any other existing availabilities that
+        ;; overlap with this one.
+        conflicting (filter
+                     #(not= (:id avail) (:id %))
+                     (avail/get-overlapping avail))]
+    (if (seq conflicting)
+        (throw (ex-info "Availability overlaps with an existing one!"
+                        {:reason :overlaps-existing
+                         :availabilities conflicting}))
+        (avail/update! avail))))
+
 (defn delete-availability! [avail]
   (avail/delete! (:id avail))
   avail)

@@ -53,6 +53,19 @@
         (first (d/query ["SELECT * FROM availabilities ORDER BY id DESC LIMIT 1"]))]
     {:id id :user/id provider_id :start start_time :end end_time}))
 
+(defn update!
+  "Update an availability in the database.
+   Does not support updating provider_id."
+  [{:keys [id start_time end_time provider_id] :as avail}]
+  {:pre [(int? id) (spec/valid? ::availability avail)]}
+  (-> (sqlh/update :availabilities)
+      (sqlh/sset {:start_time (c/to-sql-time start_time)
+                  :end_time (c/to-sql-time end_time)})
+      (sqlh/where [:= :id id])
+      (sql/format)
+      (d/execute!))
+  {:id id :user/id provider_id :start start_time :end end_time})
+
 (defn delete!
   "Given an availability ID, deletes the availability from the database."
   [id]

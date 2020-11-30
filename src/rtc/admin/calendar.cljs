@@ -53,8 +53,8 @@
         (not (availability? b))
         (not= (provider-id a) (provider-id b)))))
 
-(defn update-availability [db [_ id avail-data]]
-  (update-in db [:availabilities id] merge avail-data))
+(defn update-availability [db avail]
+  (update-in db [:availabilities (:id avail)] merge avail))
 
 (defn delete-availability [db id]
   (update db :availabilities dissoc (js/parseInt id)))
@@ -309,10 +309,13 @@
      {::create-availability! {:availability avail
                               :csrf-token csrf-token}})))
 
-(rf/reg-event-fx ::update-availability (fn [{:keys [db]} dispatch]
-                                         ;; TODO
-                                         {:db (update-availability db dispatch)
-                                          ::render-calendar nil}))
+(rf/reg-event-fx
+ ::update-availability
+ (fn [{:keys [db]} [_ avail]]
+   (let [{:keys [csrf-token]} db
+         uid (get-in db [:availabilities (js/parseInt (:id avail)) :user/id])]
+     {::update-availability! {:availability (assoc avail :user/id uid)
+                              :csrf-token csrf-token}})))
 
 (rf/reg-event-fx
  ::delete-availability
@@ -322,6 +325,7 @@
      {::delete-availability! {:availability avail
                               :csrf-token csrf-token}})))
 
+;; TODO use interceptors to inject CSRF token
 (rf/reg-fx
  ::create-availability!
  (fn [{:keys [availability csrf-token]}]
@@ -329,6 +333,14 @@
                {:transit-params availability
                 :headers {"x-csrf-token" csrf-token}}
                ::new-availability)))
+
+(rf/reg-fx
+ ::update-availability!
+ (fn [{:keys [availability csrf-token]}]
+   (rest/patch! "/api/v1/admin/availability"
+                {:transit-params availability
+                 :headers {"x-csrf-token" csrf-token}}
+                ::availability-updated)))
 
 (rf/reg-fx
  ::delete-availability!
@@ -381,6 +393,13 @@
  (fn [{:keys [db]} [_ {:keys [data]}]]
    (let [avail (:availability data)]
      {:db (assoc-in db [:availabilities (:id avail)] avail)
+      ::render-calendar nil})))
+
+(rf/reg-event-fx
+ ::availability-updated
+ (fn [{:keys [db]} [_ {:keys [data]}]]
+   (let [avail (:availability data)]
+     {:db (update-availability db avail)
       ::render-calendar nil})))
 
 (rf/reg-event-fx
@@ -559,8 +578,9 @@
                         :eventChange (fn [info]
                                        (let [e (.-event info)
                                              id (js/parseInt (.-id e))]
-                                         (rf/dispatch [::update-availability id {:start (.-start e)
-                                                                                      :end (.-end e)}])))
+                                         (rf/dispatch [::update-availability {:id id
+                                                                              :start (.-start e)
+                                                                              :end (.-end e)}])))
                         :select (fn [event]
                                   (rf/dispatch [::create-availability {:start (.-start event)
                                                                             :end   (.-end event)}]))

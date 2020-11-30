@@ -29,6 +29,9 @@
 (defn post! [& args]
   (apply request! http/post args))
 
+(defn patch! [& args]
+  (apply request! http/patch args))
+
 (defn delete! [& args]
   (apply request! http/delete args))
 
