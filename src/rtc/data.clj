@@ -129,11 +129,12 @@
     ))
 
 (comment
-  (tear-it-all-down!!)
   (do
+    (d/bind!)
     (tear-it-all-down!!)
     (create-test-users!)
     (create-test-appointments!)
-    (create-test-availabilities!))
+    (create-test-availabilities!)
+    (prn "Test data created."))
 
   (u/email->user "coby01@tamayo.email"))

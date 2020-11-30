@@ -126,6 +126,9 @@
   (:dev-disable-anti-forgery env)
   (:default-authy-user-id env)
 
+  ;; Re-parse SQL helper files
+  (db/bind!)
+
   ;; Evaluate this to start the app in the REPL.
   (mount/start)
 
