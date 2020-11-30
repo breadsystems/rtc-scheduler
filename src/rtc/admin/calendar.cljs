@@ -247,22 +247,23 @@
  ;;                           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (rf/reg-sub ::focused-appointment :focused-appointment)
 (rf/reg-sub ::focused-appointment (fn [{:keys [appointments focused-appointment]}]
                                      (some->> focused-appointment
                                               (get appointments))))
 (rf/reg-sub ::events visible-events)
 (rf/reg-sub ::filters :filters)
 (rf/reg-sub ::providers providers)
+(rf/reg-sub ::user (fn [{:keys [users]} [_ id]]
+                     (get users id)))
 (rf/reg-sub ::access-needs access-needs)
 (rf/reg-sub ::access-need (fn [{:keys [needs]} [_ id]]
                             (get needs id)))
 (rf/reg-sub ::access-needs-filter-summary access-needs-filter-summary)
-(rf/reg-sub ::can-view-medical-needs? (fn [{:keys [user-id users]}]
-                                        (let [user (get users user-id)]
-                                          (contains? (:roles user) :doc))))
+(rf/reg-sub ::can-view-medical-needs? (fn [db]
+                                        (:is_provider (current-user db))))
 
 (comment
+  @(rf/subscribe [::can-view-medical-needs?])
   @(rf/subscribe [::focused-appointment])
   @(rf/subscribe [::events])
   @(rf/subscribe [::filters])
@@ -350,8 +351,6 @@
                   :headers {"x-csrf-token" csrf-token}}
                  ::availability-deleted)))
 
-(rf/reg-event-db ::focus-appointment (fn [db [_ id]]
-                                       (assoc db :focused-appointment id)))
 
 ;; Keep our FullCalendar instance around so we can re-render on demand.
 (def !calendar (r/atom nil))
@@ -408,6 +407,26 @@
    (let [avail (:availability data)]
      {:db (delete-availability db (:id avail))
       ::render-calendar nil})))
+
+
+;; Fetch appointment details
+
+(rf/reg-event-fx ::focus-appointment (fn [{:keys [db]} [_ id]]
+                                       {:db (assoc db :focused-appointment id)
+                                        ::get-appointment-details id}))
+
+(rf/reg-fx
+ ::get-appointment-details
+ (fn [id]
+   (when id
+     (rest/get! "/api/v1/admin/appointment"
+                {:query-params {:id id}}
+                ::merge-appointment-info))))
+
+(rf/reg-event-db
+ ::merge-appointment-info
+ (fn [db [_ {:keys [data]}]]
+   (update-in db [:appointments (:id data)] merge data)))
 
 (comment
   @(rf/subscribe [::filters])
@@ -505,7 +524,7 @@
 
 (defn appointment-details []
   (let [appt @(rf/subscribe [::focused-appointment])
-        {:keys [pronouns email phone ok_to_text reason access-needs]} appt
+        {:keys [pronouns email phone ok_to_text reason access-needs notes]} appt
         start (moment. (:start appt))
         can-view-medical-needs? @(rf/subscribe [::can-view-medical-needs?])]
     [:article.appointment
@@ -534,6 +553,7 @@
           [:div.access-needs-indicator.--unmet "Unmet access needs"]
           (doall (map (fn [{:need/keys [id] :as appt-need}]
                         (let [need (merge @(rf/subscribe [::access-need id]) appt-need)]
+                          ^{:key id}
                           [:p (access-need need)]))
                       access-needs))]
          [:<>
@@ -541,7 +561,17 @@
      (when can-view-medical-needs?
        [:div.appointment-field-group
         [:h3 "Medical Needs"]
-        [:p reason]])]))
+        [:p reason]])
+     [:div.appointment-notes
+      [:h3 "Notes"]
+      (doall (map (fn [{:keys [note date_created] :as appt-note}]
+                    (let [user @(rf/subscribe [::user (:user/id appt-note)])]
+                      ^{:key date_created}
+                      [:aside.appt-note
+                       [:div.appt-note__time (.format (moment date_created) "M/D H:mm a")]
+                       [:div.appt-note__text note]
+                       [:div.appt-note__attribution (user->name user)]]))
+                  (vec notes)))]]))
 
 (defn calendar []
   (let [!ref (atom nil)]

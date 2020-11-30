@@ -36,7 +36,7 @@
        (map #(rename-keys % key-mapping) $)
        (index-by :id $))
      :users
-     (index-by :id (d/get-all-providers))
+     (index-by :id (d/get-all-users))
      :params query-params}))
 
 

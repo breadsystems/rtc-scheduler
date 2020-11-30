@@ -83,6 +83,10 @@
                              (catch Throwable e
                                {:success false
                                 :errors [{:message (.getMessage e)}]}))))}]
+    ["/appointment"
+     {:get (rest-handler (fn [{:keys [params]}]
+                           {:success true
+                            :data    (appt/details (:id params))}))}]
     ["/availability"
      {:post (rest-handler (fn [req]
                             (try

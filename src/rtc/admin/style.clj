@@ -66,7 +66,13 @@
                     :color :darkslategrey
                     :font-size "2em"
                     :font-weight 700
-                    :cursor :pointer}]])
+                    :cursor :pointer}]
+   [:.appt-note {:margin "1em 0"}]
+   [:.appt-note__time {:margin-bottom "0.5em"
+                       :font-size "0.8em"}]
+   [:.appt-note__attribution {:margin-top "0.5em"
+                              :font-size "0.8em"
+                              :color core/dark-purple}]])
 
 (def appointment
   [[:.appointment-details {:display :grid

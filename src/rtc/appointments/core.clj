@@ -1,6 +1,7 @@
 (ns rtc.appointments.core
   (:require
    [clj-time.coerce :as c]
+   [clojure.set :refer [rename-keys]]
    [honeysql.core :as sql]
    [honeysql.helpers :as sqlh]
    [rtc.appointments.appointments :as appt]
@@ -127,7 +128,26 @@
                d/query first :id)]
     (assoc note :id id)))
 
+(defn details [id]
+  (let [appt (-> (sqlh/select :id :email :phone :name :pronouns :alias :state
+                              [:start_time :start] [:end_time :end]
+                              :reason :other_needs :ok_to_text)
+                 (sqlh/from :appointments)
+                 (sqlh/where [:= :id (Integer. id)])
+                 (sql/format)
+                 (d/query)
+                 first)
+        notes (-> (sqlh/select :note :user_id :date_created)
+                  (sqlh/from [:appointment_notes :n])
+                  (sqlh/where [:= :n.appointment_id 2])
+                  (sqlh/order-by [[:date_created :desc]])
+                  (sql/format)
+                  (d/query)
+                  vec)]
+    (assoc appt :notes (map #(rename-keys % {:user_id :user/id}) notes))))
+
 (comment
+
   (create-note! {:appointment/id 2
                  :user/id 1
                  :note "Lorem ipsum dolor sit amet."})
