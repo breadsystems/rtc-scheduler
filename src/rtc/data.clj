@@ -66,34 +66,34 @@
       (d/execute!)))
 
 (defn create-test-appointments! []
-  (let [now (Date.)
+  (let [today-8am (doto (Date.) (.setHours 8) (.setMinutes 0))
         lauren (p/email->provider "lauren@tamayo.email")
         shevek (p/email->provider "shevek@tamayo.email")]
     (appt/create!
      {:provider_id (:id lauren)
       ;; in one hour
-      :start_time (c/to-sql-time (+ (inst-ms now) one-hour))
-      :end_time (c/to-sql-time (+ (inst-ms now) one-hour thirty-minutes))
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-hour))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-hour thirty-minutes))
       :name "Somebody"
       :email "prc@example.com"
       :pronouns "they/them"
       :phone ""
       :ok_to_text true
-      :date_created (c/to-sql-time now)
+      :date_created (c/to-sql-time today-8am)
       :other_needs "Popsicles"
       :reason "Personal reasons"
       :state "WA"})
     (appt/create!
      {:provider_id (:id shevek)
       ;; in one day
-      :start_time (c/to-sql-time (+ (inst-ms now) one-day))
-      :end_time (c/to-sql-time (+ (inst-ms now) one-day one-hour))
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-day))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-day one-hour))
       :alias "Anon"
       :email "prc.1983@example.com"
       :pronouns "she/her"
       :phone ""
       :ok_to_text true
-      :date_created (c/to-sql-time now)
+      :date_created (c/to-sql-time today-8am)
       :other_needs ""
       :reason "Other"
       :state "CA"})
@@ -101,30 +101,31 @@
     ))
 
 (defn create-test-availabilities! []
-  (let [now (Date.)
+  (let [today-8am (doto (Date.) (.setHours 8) (.setMinutes 0))
         lauren (p/email->provider "lauren@tamayo.email")
         ursula (p/email->provider "ursula@tamayo.email")
         shevek (p/email->provider "shevek@tamayo.email")]
+    (prn "creating test availabilities starting" today-8am)
     (avail/create!
      {:provider_id (:id lauren)
       ;; in one day, for 6 hours
-      :start_time (c/to-sql-time (+ (inst-ms now) one-day))
-      :end_time (c/to-sql-time (+ (inst-ms now) one-day six-hours))})
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-day))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-day six-hours))})
     (avail/create!
      {:provider_id (:id lauren)
       ;; in two days, for 8 hours
-      :start_time (c/to-sql-time (+ (inst-ms now) (* 2 one-day)))
-      :end_time (c/to-sql-time (+ (inst-ms now) (* 2 one-day) (* 8 one-hour)))})
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) (* 2 one-day)))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) (* 2 one-day) (* 8 one-hour)))})
     (avail/create!
      {:provider_id (:id shevek)
       ;; in one week, for 8 hours
-      :start_time (c/to-sql-time (+ (inst-ms now) one-week))
-      :end_time (c/to-sql-time (+ (inst-ms now) one-week (* 8 one-hour)))})
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week (* 8 one-hour)))})
     (avail/create!
      {:provider_id (:id ursula)
       ;; in one week, for 8 hours
-      :start_time (c/to-sql-time (+ (inst-ms now) one-week one-day))
-      :end_time (c/to-sql-time (+ (inst-ms now) one-week one-day (* 8 one-hour)))})
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-day))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-day (* 8 one-hour)))})
     ;; TODO MOAR AVAILZ
     ))
 
