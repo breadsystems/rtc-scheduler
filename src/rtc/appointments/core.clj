@@ -1,13 +1,17 @@
 (ns rtc.appointments.core
   (:require
    [clj-time.coerce :as c]
+   [honeysql.core :as sql]
+   [honeysql.helpers :as sqlh]
    [rtc.appointments.appointments :as appt]
    [rtc.appointments.availabilities :as avail]
    [rtc.appointments.states :as st]
    [rtc.appointments.windows :as w]
+   [rtc.db :as d]
    [rtc.util :as util])
   (:import
-   [java.text SimpleDateFormat]))
+   [java.text SimpleDateFormat]
+   [java.util Date]))
 
 
 (defonce ONE-DAY-MS (* 24 60 60 1000))
@@ -110,7 +114,23 @@
   (avail/delete! (:id avail))
   avail)
 
+(defn create-note! [note]
+  (let [note {:appointment_id (:appointment/id note)
+              :user_id (:user/id note)
+              :note (:note note)
+              :date_created (c/to-sql-time (Date.))}]
+    (-> (sqlh/insert-into :appointment_notes)
+        (sqlh/values [note])
+        (sql/format)
+        (d/execute!)))
+  (let [id (-> ["SELECT id FROM appointment_notes ORDER BY id DESC LIMIT 1"]
+               d/query first :id)]
+    (assoc note :id id)))
+
 (comment
+  (create-note! {:appointment/id 2
+                 :user/id 1
+                 :note "Lorem ipsum dolor sit amet."})
 
   (def now (java.util.Date.))
   (w/->windows [] [] (inst-ms now) (+ 360000000 (inst-ms now)) WINDOW-MS)
