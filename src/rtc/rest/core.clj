@@ -19,6 +19,12 @@
     (.toString out)))
 
 
+(defn- ->json-key [k]
+  (if (keyword? k)
+    (let [kns (namespace k)]
+      (str (if kns (str kns "_") "") (name k)))
+    k))
+
 (defn- ->json-value [_ v]
   (let [fmt (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")]
     (cond
@@ -27,13 +33,15 @@
       :else v)))
 
 (defn- ->json [x]
-  (json/write-str x :value-fn ->json-value))
+  (json/write-str x :key-fn ->json-key :value-fn ->json-value))
+
+(->json {:user/id 123})
 
 (defn- rest-handler [f]
-  (fn [req]
+  (fn [{:keys [params] :as req}]
     (let [;; The frontend always consumes application/transit+edn data,
           ;; but application/json is useful for debugging
-          json? (boolean (get (:params req) "json"))
+          json? (boolean (:json params))
           transform (if json? ->json ->transit)
           content-type (if json? "application/json" "application/transit+edn")
           res (f req)
@@ -68,7 +76,6 @@
     {:middleware [auth/wrap-auth]}
     ["/schedule"
      {:get (rest-handler (fn [req]
-                           (prn (:identity req))
                            (try
                              {:success true
                               :data    (merge {:user {:id 1}}
