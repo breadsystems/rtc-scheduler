@@ -50,6 +50,7 @@
              :height "80vh"
              :top "10vh"
              :left "10vh"
+             :overflow :scroll
              :padding "1em"
              :background :white}
     [:h2 {:margin-top 0}]]
@@ -67,9 +68,13 @@
                     :font-size "2em"
                     :font-weight 700
                     :cursor :pointer}]
+   [:.create-note__text {:width "100%"
+                         :height "6em"}]
    [:.appt-note {:margin "1em 0"}]
    [:.appt-note__time {:margin-bottom "0.5em"
-                       :font-size "0.8em"}]
+                       :font-size "0.8em"
+                       :font-weight 700
+                       :color core/dark-purple}]
    [:.appt-note__attribution {:margin-top "0.5em"
                               :font-size "0.8em"
                               :color core/dark-purple}]])

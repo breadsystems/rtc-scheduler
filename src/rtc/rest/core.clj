@@ -84,9 +84,14 @@
                                {:success false
                                 :errors [{:message (.getMessage e)}]}))))}]
     ["/appointment"
-     {:get (rest-handler (fn [{:keys [params]}]
-                           {:success true
-                            :data    (appt/details (:id params))}))}]
+     [""
+      {:get (rest-handler (fn [{:keys [params]}]
+                            {:success true
+                             :data    (appt/details (:id params))}))}]
+     ["/note"
+      {:post (rest-handler (fn [req]
+                             {:success true
+                              :data (appt/create-note! (transit-params req))}))}]]
     ["/availability"
      {:post (rest-handler (fn [req]
                             (try

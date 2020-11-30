@@ -250,6 +250,7 @@
 (rf/reg-sub ::focused-appointment (fn [{:keys [appointments focused-appointment]}]
                                      (some->> focused-appointment
                                               (get appointments))))
+(rf/reg-sub ::note :note)
 (rf/reg-sub ::events visible-events)
 (rf/reg-sub ::filters :filters)
 (rf/reg-sub ::providers providers)
@@ -265,6 +266,7 @@
 (comment
   @(rf/subscribe [::can-view-medical-needs?])
   @(rf/subscribe [::focused-appointment])
+  @(rf/subscribe [::note])
   @(rf/subscribe [::events])
   @(rf/subscribe [::filters])
   @(rf/subscribe [::providers])
@@ -409,7 +411,17 @@
       ::render-calendar nil})))
 
 
-;; Fetch appointment details
+;; Appointment details
+
+(rf/reg-event-db ::update-note (fn [db [_ note]]
+                                 (assoc db :note note)))
+
+(rf/reg-event-fx ::create-note (fn [{{:keys [csrf-token user-id focused-appointment note]} :db}]
+                                 (let [data {:note {:note note
+                                                    :user/id user-id
+                                                    :appointment/id focused-appointment}
+                                             :csrf-token csrf-token}]
+                                   {::create-note! data})))
 
 (rf/reg-event-fx ::focus-appointment (fn [{:keys [db]} [_ id]]
                                        {:db (assoc db :focused-appointment id)
@@ -423,10 +435,26 @@
                 {:query-params {:id id}}
                 ::merge-appointment-info))))
 
+(rf/reg-fx
+ ::create-note!
+ (fn [{:keys [note csrf-token]}]
+   (rest/post! "/api/v1/admin/appointment/note"
+               {:transit-params note
+                :headers {"x-csrf-token" csrf-token}}
+               ::note-created)))
+
 (rf/reg-event-db
  ::merge-appointment-info
  (fn [db [_ {:keys [data]}]]
    (update-in db [:appointments (:id data)] merge data)))
+
+(rf/reg-event-db
+ ::note-created
+ (fn [db [_ {:keys [data]}]]
+   (prn data)
+   (-> db
+       (update-in [:appointments (:appointment/id data) :notes] #(concat [data] %))
+       (assoc :note ""))))
 
 (comment
   @(rf/subscribe [::filters])
@@ -564,6 +592,11 @@
         [:p reason]])
      [:div.appointment-notes
       [:h3 "Notes"]
+      [:div.create-note
+       [:textarea.create-note__text {:on-change #(rf/dispatch-sync [::update-note (.. % -target -value)])
+                                     :value @(rf/subscribe [::note])}]
+       [:p
+        [:button.secondary {:on-click #(rf/dispatch [::create-note])} "Create a note"]]]
       (doall (map (fn [{:keys [note date_created] :as appt-note}]
                     (let [user @(rf/subscribe [::user (:user/id appt-note)])]
                       ^{:key date_created}

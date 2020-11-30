@@ -40,7 +40,7 @@
  (fn [_db [_ {:keys [csrf-token]}]]
    {;; CSRF token from the DOM
     :csrf-token csrf-token
-    
+
     :view :schedule
     ;; TODO get this stuff from GraphQL
     :user-id 4
@@ -56,6 +56,7 @@
     :current-invite {:email ""}
     :my-invitations []
     :focused-appointment nil
+    :note ""
     :colors colors/availability-colors}))
 
 ;;

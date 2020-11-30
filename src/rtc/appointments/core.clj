@@ -116,17 +116,15 @@
   avail)
 
 (defn create-note! [note]
-  (let [note {:appointment_id (:appointment/id note)
-              :user_id (:user/id note)
-              :note (:note note)
-              :date_created (c/to-sql-time (Date.))}]
+  (let [note (assoc note :date_created (c/to-sql-time (Date.)))]
     (-> (sqlh/insert-into :appointment_notes)
-        (sqlh/values [note])
+        (sqlh/values [(rename-keys note {:appointment/id :appointment_id
+                                         :user/id :user_id})])
         (sql/format)
-        (d/execute!)))
-  (let [id (-> ["SELECT id FROM appointment_notes ORDER BY id DESC LIMIT 1"]
-               d/query first :id)]
-    (assoc note :id id)))
+        (d/execute!))
+    (let [id (-> ["SELECT id FROM appointment_notes ORDER BY id DESC LIMIT 1"]
+                 d/query first :id)]
+      (assoc note :id id))))
 
 (defn details [id]
   (let [appt (-> (sqlh/select :id :email :phone :name :pronouns :alias :state
