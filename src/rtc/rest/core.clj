@@ -23,7 +23,7 @@
   (if (keyword? k)
     (let [kns (namespace k)]
       (str (if kns (str kns "_") "") (name k)))
-    k))
+    (str k)))
 
 (defn- ->json-value [_ v]
   (let [fmt (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")]
