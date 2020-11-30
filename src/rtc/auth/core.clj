@@ -16,6 +16,7 @@
   (boolean (:dev-disable-auth env)))
 
 (comment
+  (auth-disabled?)
   (u/email->user "rtc@example.com")
   (u/admin? (u/email->user "rtc@example.com"))
   (u/preferences (u/email->user "rtc@example.com"))
@@ -23,11 +24,12 @@
   (u/authenticate "rtc-admin@example.com" "garbage"))
 
 
+(defn- logged-in? [req]
+  (and (authenticated? req) (two-factor/verified? req)))
+
 (defn login-step [{:keys [params] :as req}]
   (cond
-    (and
-     (authenticated? req)
-     (two-factor/verified? req))
+    (logged-in? req)
     :logged-in
 
     (and (authenticated? req) (:token params))
@@ -51,7 +53,6 @@
       (assoc :session {})))
 
 (defn login-handler [{:keys [params session identity] :as req}]
-  (prn identity)
   (condp = (login-step req)
     :unauthenticated
     (layout/login-page {:req req})
@@ -88,12 +89,8 @@
 
 (defn wrap-require-auth [handler]
   (fn [req]
-    (if (or
-         (and
-          (authenticated? req)
-          (two-factor/verified? req))
-         ;; Support disabling auth for nicer frontend dev workflow
-         (auth-disabled?))
+    ;; Support disabling auth for nicer frontend dev workflow
+    (if (or (logged-in? req) (auth-disabled?))
       (handler req)
       (throw-unauthorized))))
 
