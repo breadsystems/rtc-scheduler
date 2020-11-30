@@ -60,7 +60,7 @@
                              2 {:id 2 :user/id 12}
                              3 {:id 3 :user/id 13}}}]
     (is (= [1 3]
-           (keys (:availabilities (cal/delete-availability db [:_ "2"])))))))
+           (keys (:availabilities (cal/delete-availability db "2")))))))
 
 (deftest test-appointment?
   (is (true? (cal/appointment? {:event/type :appointment})))

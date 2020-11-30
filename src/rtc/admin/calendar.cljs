@@ -56,7 +56,7 @@
 (defn update-availability [db [_ id avail-data]]
   (update-in db [:availabilities id] merge avail-data))
 
-(defn delete-availability [db [_ id]]
+(defn delete-availability [db id]
   (update db :availabilities dissoc (js/parseInt id)))
 
 (defn users-by-id [{:keys [users colors]}]
@@ -310,12 +310,17 @@
                               :csrf-token csrf-token}})))
 
 (rf/reg-event-fx ::update-availability (fn [{:keys [db]} dispatch]
+                                         ;; TODO
                                          {:db (update-availability db dispatch)
                                           ::render-calendar nil}))
 
-(rf/reg-event-fx ::delete-availability (fn [{:keys [db]} dispatch]
-                                         {:db (delete-availability db dispatch)
-                                          ::render-calendar nil}))
+(rf/reg-event-fx
+ ::delete-availability
+ (fn [{:keys [db]} [_ id]]
+   (let [{:keys [csrf-token]} db
+         avail (get-in db [:availabilities (js/parseInt id)])]
+     {::delete-availability! {:availability avail
+                              :csrf-token csrf-token}})))
 
 (rf/reg-fx
  ::create-availability!
@@ -324,6 +329,14 @@
                {:transit-params availability
                 :headers {"x-csrf-token" csrf-token}}
                ::new-availability)))
+
+(rf/reg-fx
+ ::delete-availability!
+ (fn [{:keys [availability csrf-token]}]
+   (rest/delete! "/api/v1/admin/availability"
+                 {:transit-params availability
+                  :headers {"x-csrf-token" csrf-token}}
+                 ::availability-deleted)))
 
 (rf/reg-event-db ::focus-appointment (fn [db [_ id]]
                                        (assoc db :focused-appointment id)))
@@ -368,6 +381,13 @@
  (fn [{:keys [db]} [_ {:keys [data]}]]
    (let [avail (:availability data)]
      {:db (assoc-in db [:availabilities (:id avail)] avail)
+      ::render-calendar nil})))
+
+(rf/reg-event-fx
+ ::availability-deleted
+ (fn [{:keys [db]} [_ {:keys [data]}]]
+   (let [avail (:availability data)]
+     {:db (delete-availability db (:id avail))
       ::render-calendar nil})))
 
 (comment
@@ -531,7 +551,7 @@
                                            (let [id (.. info -event -id)
                                                  elem (.-el info)
                                                  delete-btn (js/document.createElement "i")
-                                                 on-click #(rf/dispatch-sync [::delete-availability id])]
+                                                 on-click #(rf/dispatch [::delete-availability id])]
                                              (.addEventListener delete-btn "click" on-click)
                                              (set! (.-innerText delete-btn) "×")
                                              (.add (.-classList delete-btn) "rtc-delete")
@@ -539,10 +559,10 @@
                         :eventChange (fn [info]
                                        (let [e (.-event info)
                                              id (js/parseInt (.-id e))]
-                                         (rf/dispatch-sync [::update-availability id {:start (.-start e)
+                                         (rf/dispatch [::update-availability id {:start (.-start e)
                                                                                       :end (.-end e)}])))
                         :select (fn [event]
-                                  (rf/dispatch-sync [::create-availability {:start (.-start event)
+                                  (rf/dispatch [::create-availability {:start (.-start event)
                                                                             :end   (.-end event)}]))
                         :eventOverlap can-overlap?
                         :events events-fn

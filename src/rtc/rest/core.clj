@@ -12,13 +12,6 @@
     [java.util Date]
     [java.text SimpleDateFormat]))
 
-
-(def ^:private default-uid
-  (when (= "1" (System/getenv "DEV_DISABLE_AUTH")) 1))
-
-(defn- req->uid [req]
-  (get-in req [:session :identity :id] default-uid))
-
 (defn- ->transit [body]
   (let [out (ByteArrayOutputStream.)
         writer (transit/writer out :json)]
@@ -92,7 +85,17 @@
                                 {:success false
                                  :errors [{:message (.getMessage e)
                                            :reason (:reason (ex-data e))}]
-                                 :data (ex-data e)}))))}]]])
+                                 :data (ex-data e)}))))
+      :delete (rest-handler (fn [req]
+                              (let [avail (transit-params req)]
+                                (try
+                                  {:success true
+                                   :data {:availability (appt/delete-availability! avail)}}
+                                  (catch clojure.lang.ExceptionInfo e
+                                    {:success false
+                                     :errors [{:message (.getMessage e)
+                                               :reason (:reason (ex-data e) :unexpected-error)}]
+                                     :data (ex-data e)})))))}]]])
 
 (comment
 

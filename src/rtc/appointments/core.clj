@@ -1,8 +1,6 @@
 (ns rtc.appointments.core
   (:require
    [clj-time.coerce :as c]
-   [clojure.java.jdbc :as jdbc]
-   [clojure.spec.alpha :as spec]
    [rtc.appointments.appointments :as appt]
    [rtc.appointments.availabilities :as avail]
    [rtc.appointments.states :as st]
@@ -82,7 +80,6 @@
                                                             :reason :window-unavailable})))))
 
 (defn schedule-availability! [avail]
-  (def $avail avail)
   (let [avail {:start_time (:start avail)
                :end_time (:end avail)
                :provider_id (:user/id avail)}
@@ -92,6 +89,10 @@
                       {:reason :overlaps-existing
                        :availabilities existing}))
       (avail/create! avail))))
+
+(defn delete-availability! [avail]
+  (avail/delete! (:id avail))
+  avail)
 
 (comment
 

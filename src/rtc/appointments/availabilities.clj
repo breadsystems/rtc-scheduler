@@ -53,6 +53,14 @@
         (first (d/query ["SELECT * FROM availabilities ORDER BY id DESC LIMIT 1"]))]
     {:id id :user/id provider_id :start start_time :end end_time}))
 
+(defn delete!
+  "Given an availability ID, deletes the availability from the database."
+  [id]
+  {:pre [(int? id)]}
+  (-> {:delete-from :availabilities :where [:= :id id]}
+      (sql/format)
+      (d/execute!)))
+
 (comment
 
   (spec/valid? ::availability {:start_time #inst "2020"
