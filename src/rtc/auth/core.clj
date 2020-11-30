@@ -19,7 +19,6 @@
   (u/email->user "rtc@example.com")
   (u/admin? (u/email->user "rtc@example.com"))
   (u/preferences (u/email->user "rtc@example.com"))
-  (u/two-factor-enabled? (u/email->user "rtc@example.com"))
   (u/authenticate "rtc-admin@example.com" "[PASSWORD HERE]")
   (u/authenticate "rtc-admin@example.com" "garbage"))
 

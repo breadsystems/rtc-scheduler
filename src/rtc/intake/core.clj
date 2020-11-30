@@ -10,10 +10,3 @@
    appointment."
   [_req]
   (layout/intake-page {:title (t "Get Care" :en)}))
-
-(defn new-careseeker-resolver
-  "GraphQL resolver for intake form submission. Creates a new
-   careseeker/appointment in the database and returns an
-   appointment confirmation."
-  [req]
-  (layout/page {:content []}))

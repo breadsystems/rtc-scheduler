@@ -16,9 +16,6 @@
 (defn preferences [user]
   (:preferences user))
 
-(defn two-factor-enabled? [user]
-  (boolean (:two-factor-enabled? (preferences user))))
-
 (defn invite! [email inviter-id]
   (let [invite-code (crypto/url-part 32)
         invitation {:email email :code invite-code :invited_by inviter-id}]
