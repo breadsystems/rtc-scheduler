@@ -94,6 +94,19 @@ CREATE TABLE IF NOT EXISTS contacts (
 );
 
 --;;
+-- Admin and/or provider notes
+
+CREATE TABLE IF NOT EXISTS appointment_notes (
+  id bigserial PRIMARY KEY,
+  appointment_id int NOT NULL,
+  note TEXT NOT NULL,
+  user_id int NOT NULL,
+  date_created timestamp NOT NULL,
+  FOREIGN KEY (appointment_id) REFERENCES appointments (id) ON DELETE RESTRICT,
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT
+);
+
+--;;
 -- Associate appointment with a specific need
 
 CREATE TABLE IF NOT EXISTS appointment_needs (

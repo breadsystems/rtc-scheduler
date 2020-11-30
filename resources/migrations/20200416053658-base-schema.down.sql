@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS appointment_notes;
+--;;
 DROP TABLE IF EXISTS appointment_needs;
 --;;
 DROP TABLE IF EXISTS appointments;
