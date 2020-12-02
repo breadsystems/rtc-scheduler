@@ -122,10 +122,17 @@
                                      :errors [{:message (.getMessage e)
                                                :reason (:reason (ex-data e) :unexpected-error)}]
                                      :data (ex-data e)})))))}]
+    ["/invites"
+     {:get (rest-handler (fn [{:keys [identity] :as req}]
+                           {:success true
+                            :data {:invitations
+                                   (map (fn [invite]
+                                          (assoc invite :url (u/invite-url req invite)))
+                                        (u/get-invitations {:invited_by (:id identity)}))}}))}]
+
     ["/invite"
      {:post (rest-handler (fn [{:keys [identity] :as req}]
                             (let [{:keys [email]} (transit-params req)]
-                              (get-in req [:reitit.core/match :result :data :middleware])
                               {:success true
                                :data (u/invite! {:email email :invited_by (:id identity)})})))}]]])
 

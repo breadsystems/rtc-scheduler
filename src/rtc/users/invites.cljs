@@ -1,5 +1,6 @@
 (ns rtc.users.invites
   (:require
+   ["moment" :as moment]
    [re-frame.core :as rf]
    [rtc.rest.core :as rest]))
 
@@ -27,14 +28,14 @@
 
 
 (rf/reg-event-db
+ :invites/load
+ (fn [db [_ {:keys [data]}]]
+   (assoc db :my-invitations (:invitations data))))
+
+(rf/reg-event-db
  ::update-invite-email
  (fn [db [_ email]]
    (assoc-in db [:current-invite :email] email)))
-
-(rf/reg-event-db
- ::my-invitations
- (fn [db [_ payload]]
-   (assoc db :my-invitations payload)))
 
 (rf/reg-event-fx
  ::invite
@@ -71,14 +72,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defn- invitation [{:keys [email code date_invited]}]
+(defn- invitation [{:keys [email code date_invited url]}]
   [:div.invite
    [:strong.email email]
-   [:em date_invited]
-   (when code
-     [:span.invite-url
-      ;; oh god why
-      (str "http://" js/window.location.host "/register?email=" email "&code=" code)])])
+   [:em (.fromNow (moment date_invited))]
+   (when url
+     [:span.invite-url url])])
 
 
 (defn invites []

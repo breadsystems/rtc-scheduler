@@ -158,11 +158,12 @@
  (fn []
    (rest/get! "/api/v1/admin/schedule" {} :calendar/load)))
 
-;; TODO implement invites & settings fx
 (rf/reg-fx
  ::invites
- #(prn 'invites!))
+ (fn []
+   (rest/get! "/api/v1/admin/invites" {} :invites/load)))
 
+;; TODO implement settings fx
 (rf/reg-fx
  ::settings
  #(prn 'settings!))

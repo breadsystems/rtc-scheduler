@@ -2,6 +2,8 @@
   (:require
    [buddy.hashers :as hash]
    [crypto.random :as crypto]
+   [honeysql.core :as sql]
+   [honeysql.helpers :as sqlh]
    [rtc.auth.util :as auth-util]
    [rtc.auth.two-factor :as two-factor]
    [rtc.db :as db]))
@@ -26,7 +28,15 @@
 (defn validate-invitation [invitation]
   (boolean (db/get-invitation invitation)))
 
-(defn invitation-url [{:keys [scheme server-name server-port]} {:keys [email code]}]
+(defn get-invitations [{:keys [invited_by]}]
+  (-> (sqlh/select :*)
+      (sqlh/from :invitations)
+      (sqlh/where [:= :invited_by invited_by])
+      (sqlh/order-by [[:date_invited :desc]])
+      (sql/format)
+      (db/query)))
+
+(defn invite-url [{:keys [scheme server-name server-port]} {:keys [email code]}]
   (format "%s://%s/register?email=%s&code=%s"
           (name scheme)
           (if server-port (str server-name ":" server-port) server-name)
@@ -70,10 +80,9 @@
   (validate-invitation invitation)
   (validate-invitation (assoc invitation :email "bogus@example.email"))
 
-  (db/get-invitations {:redeemed false :invited_by (:id admin)})
-  (db/get-invitations {:redeemed true :invited_by (:id admin)})
+  (get-invitations {:invited_by (:id admin)})
 
-  (invitation-url {:scheme :http :server-name "localhost" :server-port "8080"} invitation)
+  (invite-url {:scheme :http :server-name "localhost" :server-port "8080"} invitation)
 
   (def user (merge (select-keys invitation [:code :email])
                    {:pass (auth-util/tmp-password)
