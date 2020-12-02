@@ -16,9 +16,9 @@
 (defn preferences [user]
   (:preferences user))
 
-(defn invite! [email inviter-id]
+(defn invite! [{:keys [email invited_by]}]
   (let [invite-code (crypto/url-part 32)
-        invitation {:email email :code invite-code :invited_by inviter-id}]
+        invitation {:email email :code invite-code :invited_by invited_by}]
     (db/create-invitation! invitation)
     ;; TODO send email
     invitation))
@@ -60,9 +60,10 @@
         (dissoc user :pass)))))
 
 (comment
-  (def admin (email->user "rtc@example.com"))
+  (def admin (email->user "rtc@tamayo.email"))
 
-  (def invitation (invite! (str (crypto/url-part 6) "@example.com") (:id admin)))
+  (def invitation (invite! {:email (str (crypto/url-part 6) "@example.com")
+                            :invited_by (:id admin)}))
   (validate-invitation invitation)
   (validate-invitation (assoc invitation :email "bogus@example.email"))
 

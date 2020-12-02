@@ -4,7 +4,8 @@
    [cognitect.transit :as transit]
    [rtc.admin.schedule :as schedule]
    [rtc.auth.core :as auth]
-   [rtc.appointments.core :as appt])
+   [rtc.appointments.core :as appt]
+   [rtc.users.core :as u])
   (:import
     [java.io ByteArrayOutputStream]
     [java.lang Throwable]
@@ -120,7 +121,13 @@
                                     {:success false
                                      :errors [{:message (.getMessage e)
                                                :reason (:reason (ex-data e) :unexpected-error)}]
-                                     :data (ex-data e)})))))}]]])
+                                     :data (ex-data e)})))))}]
+    ["/invite"
+     {:post (rest-handler (fn [{:keys [identity] :as req}]
+                            (let [{:keys [email]} (transit-params req)]
+                              (get-in req [:reitit.core/match :result :data :middleware])
+                              {:success true
+                               :data (u/invite! {:email email :invited_by (:id identity)})})))}]]])
 
 (comment
 

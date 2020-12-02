@@ -1,6 +1,7 @@
 (ns rtc.users.invites
   (:require
-   [re-frame.core :as rf]))
+   [re-frame.core :as rf]
+   [rtc.rest.core :as rest]))
 
 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -35,35 +36,26 @@
  (fn [db [_ payload]]
    (assoc db :my-invitations payload)))
 
+(rf/reg-event-fx
+ ::invite
+ (fn [{:keys [csrf-token]} [_ {:keys [email]}]]
+   (when (seq email)
+     {::invite! {:csrf-token csrf-token :email email}})))
+
+(rf/reg-fx
+ ::invite!
+ (fn [{:keys [email csrf-token]}]
+   (rest/post! "/api/v1/admin/invite"
+               {:transit-params {:email email}
+                :headers {"x-csrf-token" csrf-token}}
+               ::invite-generated)))
+
 (rf/reg-event-db
  ::invite-generated
- (fn [db [_ {:keys [data error]}]]
-   (js/console.log data error)
-   (update db :my-invitations conj data)))
-
-
-(rf/reg-event-fx
- ::invite!
- (fn [db [_ {:keys [email]}]]
-   (if (seq email)
-     ;; TODO rest/post!
-     (prn email)
-     #_(api/query! [:mutate [:invite
-                             {:email email}
-                             :email
-                             :date_invited
-                             :code]]
-                   ::on-invite-response)
-     (js/console.error "no email?"))))
-
-(rf/reg-event-db
- ::on-invite-response
- (fn [db [_ {:keys [data errors]}]]
+ (fn [db [_ {:keys [data]}]]
    (-> db
        (assoc :current-invite {:email ""})
-       (update :my-invitations conj (merge (:current-invite db)
-                                           {:date_invited "Just now"
-                                            :code "asdfqwerty_x234"})))))
+       (update :my-invitations conj data))))
 
 (comment
   (rf/dispatch [::update-invite-email "foo@example.com"])
@@ -97,7 +89,7 @@
       [:h3 "Invite a comrade"]
       [:div.field
        [:form {:on-submit #(do (.preventDefault %)
-                             (rf/dispatch [::invite! current-invite]))}
+                             (rf/dispatch [::invite current-invite]))}
         [:label.field-label {:for "invite-email"} "Email"]
         [:div.field
          [:input#invite-email {:type :email
@@ -109,6 +101,6 @@
       [:h3 "Your invites"]
       (map
        (fn [invite]
-         ^{:key (:email invite)}
+         ^{:key (:code invite)}
          [invitation invite])
        my-invitations)]]))
