@@ -16,7 +16,7 @@
    [rtc.admin.calendar :as calendar]
    [rtc.rest.core :as rest]
    [rtc.style.colors :as colors]
-   [rtc.users.invites.ui :as invites]))
+   [rtc.users.invites :as invites]))
 
 
 

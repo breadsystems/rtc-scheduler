@@ -1,5 +1,4 @@
-;; TODO move to rtc.users.invites
-(ns rtc.users.invites.ui
+(ns rtc.users.invites
   (:require
    [re-frame.core :as rf]))
 
