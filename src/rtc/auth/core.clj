@@ -59,11 +59,13 @@
 
     :authenticating
     (if-let [user (u/authenticate (:email params) (:password params))]
-      (-> (layout/two-factor-page req)
-          ;; Recreate the session due to privilege escalation.
-          (assoc :session (vary-meta (:session req) assoc :recreate true))
-          ;; Persist our user identity in the session.
-          (assoc-in [:session :identity] user))
+      (do
+        (u/record-login! user)
+        (-> (layout/two-factor-page req)
+            ;; Recreate the session due to privilege escalation.
+            (assoc :session (vary-meta (:session req) assoc :recreate true))
+            ;; Persist our user identity in the session.
+            (assoc-in [:session :identity] user)))
       (layout/login-page {:req req
                           :error "Invalid email or password"}))
 

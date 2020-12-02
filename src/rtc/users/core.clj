@@ -59,6 +59,9 @@
         ;; so hide it from the caller.
         (dissoc user :pass)))))
 
+(defn record-login! [{:keys [id]}]
+  (db/execute! ["UPDATE users SET last_login = NOW() WHERE id = ?" id]))
+
 (comment
   (def admin (email->user "rtc@tamayo.email"))
 
