@@ -31,7 +31,6 @@
   (ring/ring-handler
    (ring/router
     [""
-     {:middleware [auth/wrap-identity]}
      ["/" {:get (fn [_req]
                   (layout/markdown-page
                    {:file "home.md"
@@ -79,7 +78,16 @@
   (or (:__anti-forgery-token params)
       (get headers "x-csrf-token")))
 
-(defn env-anti-forgery
+(defn- wrap-dev-identity
+  "Load default dev admin user into :identity when auth is explicitly disabled"
+  [handler]
+  (if (:dev-disable-auth env)
+    (let [admin-user (u/email->user (:default-admin-email env))]
+      (fn [req]
+        (handler (assoc req :identity admin-user))))
+    handler))
+
+(defn- env-anti-forgery
   "Wrap handler in anti-forgery middleware unless explicitly disabled."
   [handler]
   (when (:dev-disable-anti-forgery env)
@@ -96,6 +104,8 @@
     (reset! stop-http
             (http/run-server (-> app
                                  (env-anti-forgery)
+                                 (wrap-dev-identity)
+                                 (auth/wrap-identity)
                                  (wrap-session)
                                  (wrap-keyword-params)
                                  (wrap-params)

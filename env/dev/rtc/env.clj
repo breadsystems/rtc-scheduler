@@ -11,6 +11,10 @@
 (defstate env
   :start (config/load-env))
 
+(comment
+ (do
+   (mount/stop #'env)
+   (mount/start #'env)))
 
 (defn middleware [app]
   (-> app
@@ -27,7 +31,6 @@
            (style/watch! {:source-paths ["src/rtc/admin" "src/rtc/style"]
                           :styles 'rtc.admin.style/screen
                           :compiler {:output-to "resources/public/css/admin.css"}})))
-
 
 (comment
  (do
