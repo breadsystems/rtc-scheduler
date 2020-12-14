@@ -74,8 +74,11 @@
 
 (defn- invitation [{:keys [email code date_invited url]}]
   [:div.invite
-   [:strong.email email]
-   [:em (.fromNow (moment date_invited))]
+   [:div.invite__email
+    [:span email]]
+   [:div.invite__timing
+    [:span (.fromNow (moment date_invited))]]
+   ;; TODO copy code and/or send email
    (when url
      [:span.invite-url url])])
 

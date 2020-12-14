@@ -86,7 +86,10 @@
 
 (def invites
   [[:.invite {:margin "1em 0"}
-    [:.invite-url :.email {:margin "0 1em"}]]])
+    [:.invite__email {:font-weight 700
+                      :color core/dark-purple}]
+    [:.invite__timing {:font-style :italic
+                       :color core/grey}]]])
 
 
 (defstyles screen
