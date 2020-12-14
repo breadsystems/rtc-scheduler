@@ -263,9 +263,18 @@
 (rf/reg-sub ::can-view-medical-needs? (fn [db]
                                         (:is_provider (current-user db))))
 
+;; Sometimes it's nice to just get the whole db.
+;; For debugging only; not used in production code.
+(rf/reg-sub ::db identity)
+
 (comment
+  (def $db @(rf/subscribe [::db]))
+  (get-in $db [:appointments 1 :notes])
+  (get-in @(rf/subscribe [::db]) [:appointments 1 :notes])
+
   @(rf/subscribe [::can-view-medical-needs?])
   @(rf/subscribe [::focused-appointment])
+  (:notes @(rf/subscribe [::focused-appointment]))
   @(rf/subscribe [::note])
   @(rf/subscribe [::events])
   @(rf/subscribe [::filters])
@@ -451,15 +460,16 @@
 (rf/reg-event-db
  ::note-created
  (fn [db [_ {:keys [data]}]]
-   (prn data)
    (-> db
        (update-in [:appointments (:appointment/id data) :notes] #(concat [data] %))
+       ;; reset the current note
        (assoc :note ""))))
 
 (comment
   @(rf/subscribe [::filters])
   @(rf/subscribe [::providers])
   @(rf/subscribe [::access-needs-filter-summary])
+  @(rf/subscribe [::appointments])
 
   (rf/dispatch [::update-filter :providers 3])
   (rf/dispatch [::update-filter :providers 4]))
@@ -555,6 +565,9 @@
 
 (defmethod access-need :interpreter [{:keys [name interpreter/lang]}]
   [:div.access-need [:b name] ": " lang])
+
+(comment
+  @(rf/subscribe [::focused-appointment]))
 
 (defn appointment-details []
   (let [appt @(rf/subscribe [::focused-appointment])
