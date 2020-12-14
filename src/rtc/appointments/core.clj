@@ -73,11 +73,10 @@
                      :email email
                      :alias alias
                      :ok_to_text (= 1 text-ok)
-                       ;; TODO rename db field to :other_access_needs
-                     :other_needs other-access-needs
-                       ;; TODO add these db fields
-                      ;;  :anything_else anything-else
-                      ;;  :preferred_communication_method preferred-communication-method
+                     :other_access_needs other-access-needs
+                     :other_access_needs_met (boolean (> (count other-access-needs) 0))
+                     :other_notes anything-else
+                     :preferred_communication_method preferred-communication-method
                      :provider_id pid
                      :reason description-of-needs
                      :state state})
@@ -129,8 +128,9 @@
 (defn details [id]
   (let [id (Integer. id)
         appt (-> (sqlh/select :id :email :phone :name :pronouns :alias :state
-                              [:start_time :start] [:end_time :end]
-                              :reason :other_needs :ok_to_text)
+                              [:start_time :start] [:end_time :end] :reason
+                              :other_access_needs :other_access_needs_met
+                              :other_notes :ok_to_text)
                  (sqlh/from :appointments)
                  (sqlh/where [:= :id (Integer. id)])
                  (sql/format)
@@ -143,7 +143,9 @@
                   (sql/format)
                   (d/query)
                   vec)]
-    (assoc appt :notes (map #(rename-keys % {:user_id :user/id}) notes))))
+    (-> appt
+        (assoc  :notes (map #(rename-keys % {:user_id :user/id}) notes))
+        (update :other_access_needs_met boolean))))
 
 (comment
 

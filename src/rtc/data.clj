@@ -80,7 +80,7 @@
       :phone ""
       :ok_to_text true
       :date_created (c/to-sql-time today-8am)
-      :other_needs "Popsicles"
+      :other_access_needs "Popsicles"
       :reason "Personal reasons"
       :state "WA"})
     (appt/create!
@@ -94,7 +94,7 @@
       :phone ""
       :ok_to_text true
       :date_created (c/to-sql-time today-8am)
-      :other_needs ""
+      :other_access_needs ""
       :reason "Other"
       :state "CA"})
     ;; TODO MOAR APPOINZ
