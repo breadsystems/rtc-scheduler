@@ -127,7 +127,8 @@
       (assoc note :id id))))
 
 (defn details [id]
-  (let [appt (-> (sqlh/select :id :email :phone :name :pronouns :alias :state
+  (let [id (Integer. id)
+        appt (-> (sqlh/select :id :email :phone :name :pronouns :alias :state
                               [:start_time :start] [:end_time :end]
                               :reason :other_needs :ok_to_text)
                  (sqlh/from :appointments)
@@ -137,7 +138,7 @@
                  first)
         notes (-> (sqlh/select :note :user_id :date_created)
                   (sqlh/from [:appointment_notes :n])
-                  (sqlh/where [:= :n.appointment_id 2])
+                  (sqlh/where [:= :n.appointment_id id])
                   (sqlh/order-by [[:date_created :desc]])
                   (sql/format)
                   (d/query)
