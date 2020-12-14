@@ -612,9 +612,9 @@
                                                               " Confirm leaving this note? \""
                                                               current-note "\""))
                                          (rf/dispatch [::create-note]))
+                            :title (when-not can-create-note? "Note is too short.")
                             :disabled (not can-create-note?)}
-         "Create a note"]]
-       (when-not can-create-note? [:p.help "Note is too short."])]
+         "Create a note"]]]
       (doall (map (fn [{:keys [note date_created] :as appt-note}]
                     (let [user @(rf/subscribe [::user (:user/id appt-note)])]
                       ^{:key date_created}
