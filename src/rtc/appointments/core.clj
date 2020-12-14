@@ -59,6 +59,7 @@
                 email
                 alias
                 text-ok
+                interpreter-lang
                 other-access-needs
                 description-of-needs
                 preferred-communication-method
@@ -73,13 +74,12 @@
                      :email email
                      :alias alias
                      :ok_to_text (= 1 text-ok)
-                     :other_access_needs other-access-needs
-                     :other_access_needs_met (boolean (> (count other-access-needs) 0))
                      :other_notes anything-else
                      :preferred_communication_method preferred-communication-method
                      :provider_id pid
                      :reason description-of-needs
                      :state state})
+      ;; TODO insert access needs
       (throw (ex-info "Appointment window is unavailable!" {:windows windows
                                                             :reason :window-unavailable})))))
 
@@ -142,10 +142,22 @@
                   (sqlh/order-by [[:date_created :desc]])
                   (sql/format)
                   (d/query)
-                  vec)]
+                  vec)
+        ;; Get contact_id, confirmed_at
+        needs (-> (sqlh/select :need_id :fulfilled :info)
+                  (sqlh/from [:appointment_needs :an])
+                  (sqlh/where [:= :an.appointment_id id])
+                  (sql/format)
+                  (d/query)
+                  vec)
+        ->need (fn [need]
+                 (-> need
+                     (rename-keys {:need_id :need/id
+                                   :info :need/info})
+                     (update :need/id keyword)))]
     (-> appt
-        (assoc  :notes (map #(rename-keys % {:user_id :user/id}) notes))
-        (update :other_access_needs_met boolean))))
+        (assoc :notes (map #(rename-keys % {:user_id :user/id}) notes))
+        (assoc :access-needs (map ->need needs)))))
 
 (comment
 

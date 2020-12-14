@@ -114,7 +114,12 @@
       (-> (sqlh/insert-into :appointment_needs)
           (sqlh/values [{:appointment_id id
                          :need_id "interpretation"
-                         :info "ASL"}])
+                         :fulfilled false
+                         :info "ASL"}
+                        {:appointment_id id
+                         :need_id "other"
+                         :fulfilled false
+                         :info "Some other stuff"}])
           (sql/format)
           (d/execute!)))
     (let [{id :id} (appt/create!
@@ -128,13 +133,17 @@
                      :phone ""
                      :ok_to_text true
                      :date_created (c/to-sql-time today-8am)
-                     :other_access_needs "Clean room, reasonably priced"
                      :reason "Other"
                      :state "CA"})]
       (-> (sqlh/insert-into :appointment_needs)
           (sqlh/values [{:appointment_id id
                          :need_id "closed_captioning"
-                         :info "CC info"}])
+                         :fulfilled false
+                         :info "CC info"}
+                        {:appointment_id id
+                         :need_id "other"
+                         :fulfilled false
+                         :info "Clean room, reasonably priced"}])
           (sql/format)
           (d/execute!)))
     (appt/create!

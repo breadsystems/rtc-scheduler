@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS needs (
 -- Actual need data
 
 INSERT INTO needs (id, description) VALUES
+('other', 'Free-form info from Person Receiving Care'),
 ('interpretation', 'Real-time translation service'),
 ('closed_captioning', 'Closed captioning over video conference');
 
@@ -122,6 +123,7 @@ CREATE TABLE IF NOT EXISTS appointment_needs (
   appointment_id int NOT NULL,
   need_id varchar(100) NOT NULL,
   info text,
+  fulfilled boolean,
   contact_id int,
   confirmed_at timestamp,
   PRIMARY KEY (need_id, appointment_id),
