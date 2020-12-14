@@ -554,7 +554,9 @@
   (let [appt @(rf/subscribe [::focused-appointment])
         {:keys [pronouns email phone ok_to_text reason access-needs notes]} appt
         start (moment. (:start appt))
-        can-view-medical-needs? @(rf/subscribe [::can-view-medical-needs?])]
+        can-view-medical-needs? @(rf/subscribe [::can-view-medical-needs?])
+        current-note @(rf/subscribe [::note])
+        can-create-note? (> (count current-note) 5)]
     [:article.appointment
      [:header
       [:h2.appointment-name (full-name appt) (when (seq pronouns)
@@ -580,7 +582,9 @@
          [:<>
           [:div.access-needs-indicator.--unmet "Unmet access needs"]
           (doall (map (fn [{:need/keys [id] :as appt-need}]
-                        (let [need (merge @(rf/subscribe [::access-need id]) appt-need)]
+                        (let [need
+                              (merge @(rf/subscribe [::access-need id])
+                                     appt-need)]
                           ^{:key id}
                           [:p (access-need need)]))
                       access-needs))]
@@ -594,9 +598,15 @@
       [:h3 "Notes"]
       [:div.create-note
        [:textarea.create-note__text {:on-change #(rf/dispatch-sync [::update-note (.. % -target -value)])
-                                     :value @(rf/subscribe [::note])}]
+                                     :value current-note}]
        [:p
-        [:button.secondary {:on-click #(rf/dispatch [::create-note])} "Create a note"]]]
+        [:button.secondary {:on-click #(when (js/confirm (str "Notes can't be deleted (for now)."
+                                                              " Confirm leaving this note? \""
+                                                              current-note "\""))
+                                         (rf/dispatch [::create-note]))
+                            :disabled (not can-create-note?)}
+         "Create a note"]]
+       (when-not can-create-note? [:p.help "Note is too short."])]
       (doall (map (fn [{:keys [note date_created] :as appt-note}]
                     (let [user @(rf/subscribe [::user (:user/id appt-note)])]
                       ^{:key date_created}
