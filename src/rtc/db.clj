@@ -85,7 +85,7 @@
 
 (defn reset-everything!! []
   (try
-    (reconnect!)
+    (bind!)
     (migratus/rollback (migration-config))
     (mount/stop #'migrations)
     (mount/start #'migrations)

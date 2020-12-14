@@ -84,6 +84,90 @@
       :reason "Personal reasons"
       :state "WA"})
     (appt/create!
+     {:provider_id (:id lauren)
+      ;; in one hour
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-hour one-hour))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-hour one-hour thirty-minutes))
+      :name "Larry"
+      :email "prc@example.com"
+      :pronouns "they/them"
+      :phone ""
+      :ok_to_text true
+      :date_created (c/to-sql-time today-8am)
+      :other_access_needs "Things"
+      :reason "Personal reasons"
+      :state "WA"})
+    (let [{id :id} (appt/create!
+                    {:provider_id (:id shevek)
+                     :start_time (c/to-sql-time (+ (inst-ms today-8am) one-day one-day))
+                     :end_time (c/to-sql-time (+ (inst-ms today-8am) one-day one-day one-hour))
+                     :name "Laura Palmer"
+                     :alias ""
+                     :email "laura@twinpeaks.email"
+                     :pronouns "she/her"
+                     :phone ""
+                     :ok_to_text true
+                     :date_created (c/to-sql-time today-8am)
+                     :other_access_needs "Coconut"
+                     :reason "Possession by dark spirits"
+                     :state "WA"})]
+      (-> (sqlh/insert-into :appointment_needs)
+          (sqlh/values [{:appointment_id id
+                         :need_id "interpretation"
+                         :info "ASL"}])
+          (sql/format)
+          (d/execute!)))
+    (let [{id :id} (appt/create!
+                    {:provider_id (:id shevek)
+                     :start_time (c/to-sql-time (+ (inst-ms today-8am) one-day one-day one-hour))
+                     :end_time (c/to-sql-time (+ (inst-ms today-8am) one-day one-day one-hour thirty-minutes))
+                     :name "Dale Cooper"
+                     :alias ""
+                     :email "damnfinecoffee@fbi.gov"
+                     :pronouns "he/him"
+                     :phone ""
+                     :ok_to_text true
+                     :date_created (c/to-sql-time today-8am)
+                     :other_access_needs "Clean room, reasonably priced"
+                     :reason "Other"
+                     :state "CA"})]
+      (-> (sqlh/insert-into :appointment_needs)
+          (sqlh/values [{:appointment_id id
+                         :need_id "closed_captioning"
+                         :info "CC info"}])
+          (sql/format)
+          (d/execute!)))
+    (appt/create!
+     {:provider_id (:id lauren)
+      ;; in one day
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-day one-day one-hour))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-day one-day one-hour thirty-minutes))
+      :name "Josie Packard"
+      :alias ""
+      :email "prc.1983@example.com"
+      :pronouns "she/her"
+      :phone ""
+      :ok_to_text true
+      :date_created (c/to-sql-time today-8am)
+      :other_access_needs ""
+      :reason "Other"
+      :state "CA"})
+    (appt/create!
+     {:provider_id (:id lauren)
+      ;; in one day
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) (* 2 one-day) one-hour thirty-minutes))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) (* 2 one-day) one-hour one-hour))
+      :name "Audrey Horne"
+      :alias ""
+      :email "audrey@greatnorthern.com"
+      :pronouns "she/her"
+      :phone ""
+      :ok_to_text true
+      :date_created (c/to-sql-time today-8am)
+      :other_access_needs ""
+      :reason "Other"
+      :state "CA"})
+    (appt/create!
      {:provider_id (:id shevek)
       ;; in one day
       :start_time (c/to-sql-time (+ (inst-ms today-8am) one-day))

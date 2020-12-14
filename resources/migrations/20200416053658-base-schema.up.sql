@@ -74,14 +74,20 @@ CREATE TABLE IF NOT EXISTS availabilities (
 );
 
 --;;
--- A need is something like an access need, such as interpretation
+-- A need is something like an access need, such as interpretation.
+-- For simplicity's sake, id is simply the name, NOT a serial.
 
 CREATE TABLE IF NOT EXISTS needs (
-  id bigserial PRIMARY KEY,
-  name varchar(100),
-  description text,
-  UNIQUE (name)
+  id varchar(100) PRIMARY KEY,
+  description text
 );
+
+--;;
+-- Actual need data
+
+INSERT INTO needs (id, description) VALUES
+('interpretation', 'Real-time translation service'),
+('closed_captioning', 'Closed captioning over video conference');
 
 --;;
 -- A contact is someone who is not a provider or a careseeker whom we may need to
@@ -114,9 +120,10 @@ CREATE TABLE IF NOT EXISTS appointment_notes (
 
 CREATE TABLE IF NOT EXISTS appointment_needs (
   appointment_id int NOT NULL,
-  need_id int NOT NULL,
+  need_id varchar(100) NOT NULL,
   info text,
   contact_id int,
+  confirmed_at timestamp,
   PRIMARY KEY (need_id, appointment_id),
   FOREIGN KEY (appointment_id) REFERENCES appointments (id) ON DELETE RESTRICT,
   FOREIGN KEY (need_id) REFERENCES needs (id) ON DELETE RESTRICT,
