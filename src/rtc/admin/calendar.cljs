@@ -473,6 +473,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+;; PRC = Person Receiving Care
+(defn- prc-name [person]
+  (if (> (count (:name person)) 0)
+    [:span (:name person)]
+    [:i "Anonymous"]))
+
 (defn modal [children]
   [:div.modal-bg
    [:aside.modal
@@ -559,8 +565,10 @@
         can-create-note? (> (count current-note) 5)]
     [:article.appointment
      [:header
-      [:h2.appointment-name (full-name appt) (when (seq pronouns)
-                                               (str " (" pronouns ")"))]
+      [:h2.appointment-name
+       (prc-name appt)
+       (when (seq pronouns)
+         (str " (" pronouns ")"))]
       [:h3 (.format start "h:mma ddd, MMM D")]]
      [:div.appointment-details
       [:div.appointment-field-group
