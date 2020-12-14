@@ -54,6 +54,7 @@
            :max-width "90%"
            :margin "1em auto"
            :padding-top "2em"
+           :line-height 1.5
 
            :font-family "'Libre Franklin', sans-serif"
            :font-weight 400}]
