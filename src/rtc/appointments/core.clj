@@ -67,18 +67,27 @@
         windows (get-available-windows {:state state})
         pid (first (available-provider-ids windows appt))]
     (if pid
-      (appt/create! {:name name
-                     :pronouns pronouns
-                     :start_time (c/to-sql-time start)
-                     :end_time (c/to-sql-time end)
-                     :email email
-                     :alias alias
-                     :ok_to_text (= 1 text-ok)
-                     :other_notes anything-else
-                     :preferred_communication_method preferred-communication-method
-                     :provider_id pid
-                     :reason description-of-needs
-                     :state state})
+      (let [{:keys [id]}
+            (appt/create! {:name name
+                           :pronouns pronouns
+                           :start_time (c/to-sql-time start)
+                           :end_time (c/to-sql-time end)
+                           :email email
+                           :alias alias
+                           :ok_to_text (= 1 text-ok)
+                           :other_notes anything-else
+                           :preferred_communication_method preferred-communication-method
+                           :provider_id pid
+                           :reason description-of-needs
+                           :state state})]
+        (when (seq other-access-needs)
+          (d/create-appointment-need! {:appointment/id id
+                                       :need/id "other"
+                                       :info other-access-needs}))
+        (when (seq interpreter-lang)
+          (d/create-appointment-need! {:appointment/id id
+                                       :need/id "interpretation"
+                                       :info interpreter-lang})))
       ;; TODO insert access needs
       (throw (ex-info "Appointment window is unavailable!" {:windows windows
                                                             :reason :window-unavailable})))))

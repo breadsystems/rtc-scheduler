@@ -46,8 +46,8 @@ WHERE email = :email AND code = :code AND now() < (date_invited + interval '72 h
 
 -- :name create-appointment-need! :! :n
 -- :doc create an appointment_need record
-INSERT INTO appointment_needs (need_id, appointment_id, info)
-VALUES (:need-id, :appointment-id, :info)
+INSERT INTO appointment_needs (need_id, appointment_id, info, fulfilled)
+VALUES (:need/id, :appointment/id, :info, false)
 
 -- :name update-appointment-need! :! :n
 -- :doc update an existing appointment_need record

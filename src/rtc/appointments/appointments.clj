@@ -98,7 +98,7 @@
   (d/get-appointment {:id 1})
   (d/get-appointment {:id 5})
 
-  (d/create-appointment-need! {:need-id 1 :appointment-id 1 :info "Mandarin"})
+  (d/create-appointment-need! {:need/id "other" :appointment/id 1 :info "Stuff"})
   (d/get-appointment-need {:appointment-id 1})
   (d/delete-appointment-need! {:need-id 1 :appointment-id 1})
   (get-appointments {:from (Date.) :to (Date.) :states #{"WA"}})
