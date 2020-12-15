@@ -151,6 +151,7 @@
             box-field
             purple-box
             &purple-box-focus]
+    [:&+label {:cursor :pointer}]
     [:&:disabled {:cursor :not-allowed}
      [:&+label {:cursor :not-allowed}]]]
    [:select
