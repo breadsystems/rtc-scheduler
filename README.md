@@ -109,25 +109,6 @@ shadow-cljs -A:dev server start
 
 Go to `localhost:9630` to start watching the `app` and `test` builds. Once it's watching `test` you can go to `localhost:3002` to see CLJS test results, and even enable desktop notifications as test results come in.
 
-### Lando installation (work in progress)
-
-To build the dev environment, you will first need to install [Lando](https://docs.lando.dev/), the official dev environment for RTC. It's the best local dev tool in the galaxy! Note that Lando runs on top of Docker, but it will install a recent version of Docker for you if you don't already have it.
-
-Next, get the RTC source code:
-
-```sh
-git clone git@github.com:breadsystems/rtc-care-schedule.git
-cd rtc-care-schedule
-```
-
-Once Lando is installed, you can start the dev environment with a single command:
-
-```sh
-lando start 
-```
-
-This will initialize the database and start the dev environment. This may take a few minutes the first time, so be patient. When it's done, it will print the URL of the local RTC app to your terminal screen.
-
 ### TODO
 
 * Link to Clojure guides
