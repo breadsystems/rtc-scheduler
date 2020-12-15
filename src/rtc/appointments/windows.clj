@@ -46,6 +46,43 @@
 (defn format-window [m]
   (-> m (update :start #(Date. %)) (update :end #(Date. %))))
 
+(comment
+  (def $args
+    [[{:id 3
+       :start (inst-ms #inst "2020-12-20T10:00:00-08:00")
+       :end   (inst-ms #inst "2020-12-20T12:00:00-08:00")}]
+     [#_{:id 3, :start 1608481800000, :end 1608483600000}]
+    ;;  1608364800000
+    ;;  1610784000000
+     (inst-ms #inst "2020-12-20T08:00:00-08:00")
+     (inst-ms #inst "2021-12-20T11:00:00-08:00")
+     (* 30 60 1000)])
+
+  (def fmt (SimpleDateFormat. "HH:mm:ssZ"))
+  (defn df [dt] (.format fmt dt))
+  (map #(-> % (update :start df) (update :end df)) (apply ->windows $args))
+
+  $args
+  (.format fmt 1608490000000)
+  ;; => "2020-12-20T10:46:40"
+  (.format fmt 1608500000000)
+  ;; => "2020-12-20T13:33:20"
+
+  (import '[java.text SimpleDateFormat])
+  (.format fmt 1608364800000)
+  (.format fmt 1610784000000)
+
+  (-> $args first first :start df)
+  #inst "2020-12-20T08:00:00"
+
+  (-> $args first first :end df)
+  (inst-ms #inst "2020-12-20T10:00:00")
+
+  (-> $args second first :start df)
+  (-> $args second first :end df)
+  #inst "2020-12-20T08:00:08"
+
+  (apply ->windows $args))
 
 (defn ->windows [avails appts from to w]
   {:pre [(> to from)
@@ -96,7 +133,7 @@
   ;;   and counterintuitive, but it's also what we want because it
   ;;   means we won't disingenuously say that provider is available
   ;;   from 1:00 to 1:30.
-  
+
   (let [;; Initialize each window start time with a noop.
         ;; It's important to do this first, otherwise we may
         ;; miss windows where nothing changes availability-wise.
