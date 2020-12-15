@@ -1,11 +1,13 @@
 (ns rtc.appointments.appointments
   (:require
+   [clojure.set :refer [rename-keys]]
    [clojure.spec.alpha :as spec]
    [clj-time.coerce :as c]
    [honeysql.helpers :as sqlh]
    [honeysql.core :as sql]
    [rtc.db :as d]
-   [rtc.providers.core :as p])
+   [rtc.providers.core :as p]
+   [rtc.util :as util])
   (:import
     [java.util Date]))
 
@@ -22,6 +24,22 @@
               :opt-un [::id])
    #(> (inst-ms (:end_time %)) (inst-ms (:start_time %)))))
 
+
+(defn id->needs [id]
+  (let [needs (-> (sqlh/select :need_id :fulfilled :info)
+                  (sqlh/from [:appointment_needs :an])
+                  (sqlh/where [:= :an.appointment_id id])
+                  (sql/format)
+                  (d/query)
+                  vec)
+        ;; TODO Get contact_id, confirmed_at
+        format (fn [need]
+                 (-> need
+                     (rename-keys {:need_id :need/id
+                                   :fulfilled :need/fulfilled?
+                                   :info :need/info})
+                     (update :need/id keyword)))]
+    (->> needs (map format) (util/index-by :need/id))))
 
 (defn create! [appt]
   {:pre [(spec/valid? ::appointment appt)]}
