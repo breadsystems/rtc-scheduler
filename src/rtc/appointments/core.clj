@@ -125,6 +125,20 @@
                  d/query first :id)]
       (assoc note :id id))))
 
+(defn fulfill-need! [{:need/keys [id fulfilled?]
+                      appt-id :appointment/id
+                      :as need}]
+  {:pre [(boolean? fulfilled?) (boolean appt-id) (boolean id)]}
+  (-> (sqlh/update :appointment_needs)
+      (sqlh/sset {:fulfilled fulfilled?
+                  :confirmed_at (c/to-sql-time (Date.))})
+      (sqlh/where [:and
+                   [:= :appointment_id (Integer. appt-id)]
+                   [:= :need_id (name id)]])
+      (sql/format)
+      (d/execute!))
+  need)
+
 (defn details [id]
   (let [id (Integer. id)
         appt (-> (sqlh/select :id :email :phone :name :pronouns :alias :state
@@ -143,21 +157,12 @@
                   (sql/format)
                   (d/query)
                   vec)
-        ;; Get contact_id, confirmed_at
-        needs (-> (sqlh/select :need_id :fulfilled :info)
-                  (sqlh/from [:appointment_needs :an])
-                  (sqlh/where [:= :an.appointment_id id])
-                  (sql/format)
-                  (d/query)
-                  vec)
-        ->need (fn [need]
-                 (-> need
-                     (rename-keys {:need_id :need/id
-                                   :info :need/info})
-                     (update :need/id keyword)))]
+        ;; format notes & access needs
+        notes (map #(rename-keys % {:user_id :user/id}) notes)
+        access-needs (appt/id->needs id)]
     (-> appt
-        (assoc :notes (map #(rename-keys % {:user_id :user/id}) notes))
-        (assoc :access-needs (map ->need needs)))))
+        (assoc :notes notes)
+        (assoc :access-needs access-needs))))
 
 (comment
 

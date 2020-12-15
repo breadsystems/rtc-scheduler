@@ -72,6 +72,14 @@
 (defn current-user [{:keys [users user-id]}]
   (get users user-id))
 
+(defn focused-appointment [{:keys [appointments focused-appointment]}]
+  (some->> focused-appointment
+           (get appointments)))
+
+(defn current-access-needs [db]
+  (when-let [{:keys [access-needs]} (focused-appointment db)]
+    (vals access-needs)))
+
 (defn user->name [{:keys [first_name last_name]}]
   (str first_name " " last_name))
 
@@ -101,11 +109,11 @@
       :else
       "Showing all appointments")))
 
-(defn- fulfilled? [appt need]
-  (contains? (set (map :need/id (:fulfillments appt))) need))
+(defn- fulfilled? [{:keys [access-needs]} need-id]
+  (boolean (get-in access-needs [need-id :need/fulfilled?])))
 
 (defn- needs? [appt need]
-  (and (contains? (set (map :need/id (:access-needs appt))) need)
+  (and (contains? (set (map :need/id (vals (:access-needs appt)))) need)
        (not (fulfilled? appt need))))
 
 (defn- needs-any? [appt needs]
@@ -114,62 +122,83 @@
       (boolean ((apply some-fn predicates) appt)))
     false))
 
-(defn- any-unfulfilled? [appt]
-  (let [need-ids (map :need/id (:access-needs appt))]
-    (not (every? (partial fulfilled? appt) need-ids))))
+(defn- any-unfulfilled? [{:keys [access-needs]}]
+  (boolean (seq (filter (complement :need/fulfilled?) (vals access-needs)))))
 
 (comment
-  (any-unfulfilled? {:access-needs #{{:need/id 1} {:need/id 2}}
-                     :fulfillments #{{:need/id 1} {:need/id 2}}})
+  (def needs-both
+    {:access-needs {:interpretation
+                    #:need{:id :interpretation :fulfilled? false}
+                    :other
+                    #:need{:id :other :fulfilled? false}}})
+  (def needs-other
+    {:access-needs {:interpretation
+                    #:need{:id :interpretation :fulfilled? true}
+                    :other
+                    #:need{:id :other :fulfilled? false}}})
+  (def needs-interpreter
+    {:access-needs {:interpretation
+                    #:need{:id :interpretation :fulfilled? false}
+                    :other
+                    #:need{:id :other :fulfilled? true}}})
+  (def needs-neither
+    {:access-needs {:interpretation
+                    #:need{:id :interpretation :fulfilled? true}
+                    :other
+                    #:need{:id :other :fulfilled? true}}})
+  (def no-access-needs {:access-needs {}})
+
+  (fulfilled? needs-both :interpretation)
   ;; => false
-  (any-unfulfilled? {:access-needs #{{:need/id 1} {:need/id 2}}
-                     :fulfillments #{{:need/id 1}}})
+  (fulfilled? needs-other :interpretation)
   ;; => true
-  (any-unfulfilled? {:access-needs #{{:need/id 1} {:need/id 2}}
-                     :fulfillments #{{:need/id 42}}})
+  (fulfilled? needs-other :other)
+  ;; => false
+  (fulfilled? needs-neither :interpretation)
   ;; => true
-  (any-unfulfilled? {:access-needs #{}
-                     :fulfillments #{{:need/id 42}}})
+  (any-unfulfilled? needs-both)
+  ;; => true
+  (any-unfulfilled? needs-interpreter)
+  ;; => true
+  (any-unfulfilled? needs-other)
+  ;; => true
+  (any-unfulfilled? needs-neither)
+  ;; => false
+  (any-unfulfilled? no-access-needs)
   ;; => false
 
-  (def with-needs {:access-needs #{{:need/id 1} {:need/id 2}}})
-  (needs? with-needs 1)
+  (needs? needs-both :interpretation)
   ;; => true
-  (needs? with-needs 2)
+  (needs? needs-interpreter :interpretation)
   ;; => true
-  (needs? with-needs 3)
+  (needs? needs-other :interpretation)
   ;; => false
-  (needs-any? with-needs [1])
+  (needs-any? needs-both [:other])
   ;; => true
-  (needs-any? with-needs [1 2])
+  (needs-any? needs-both [:interpretation])
   ;; => true
-  (needs-any? with-needs [1 3])
+  (needs-any? needs-both [:other :interpretation])
   ;; => true
-  (needs-any? with-needs [3 4])
+  (needs-any? needs-neither [:other :interpretation])
   ;; => false
-
-  (def fulfilled {:access-needs #{{:need/id 1} {:need/id 2}}
-                  :fulfillments #{{:need/id 1}}})
-  (fulfilled? fulfilled 1)
-  ;; => true
-  (needs? fulfilled 1)
-  ;; => false
-  (needs? fulfilled 2)
-  ;; => true
-  (needs? fulfilled 3)
-  ;; => false
-
-  (needs-any? fulfilled [1])
-  ;; => false
-  (needs-any? fulfilled [2])
-  ;; => true
-  (needs-any? fulfilled [1 2])
-  ;; => true
-  (needs-any? fulfilled [3])
+  (needs-any? no-access-needs [:other :interpretation])
   ;; => false
 
   ;;
   )
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;                           ;;
+  ;;      Event Visibility     ;;
+ ;;                           ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;
+;; Calendar events (appointments, availabilities) logic i.e. whether
+;; they are visible in the calendar
+;;
 
 (defn- by-access-need [appts needs]
   (if (seq needs)
@@ -247,9 +276,8 @@
  ;;                           ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(rf/reg-sub ::focused-appointment (fn [{:keys [appointments focused-appointment]}]
-                                     (some->> focused-appointment
-                                              (get appointments))))
+(rf/reg-sub ::focused-appointment focused-appointment)
+(rf/reg-sub ::current-access-needs current-access-needs)
 (rf/reg-sub ::note :note)
 (rf/reg-sub ::events visible-events)
 (rf/reg-sub ::filters :filters)
@@ -268,13 +296,10 @@
 (rf/reg-sub ::db identity)
 
 (comment
-  (def $db @(rf/subscribe [::db]))
-  (get-in $db [:appointments 1 :notes])
-  (get-in @(rf/subscribe [::db]) [:appointments 1 :notes])
+  (get-in @(rf/subscribe [::db]) [:appointments 1])
 
   @(rf/subscribe [::can-view-medical-needs?])
   @(rf/subscribe [::focused-appointment])
-  (:notes @(rf/subscribe [::focused-appointment]))
   @(rf/subscribe [::note])
   @(rf/subscribe [::events])
   @(rf/subscribe [::filters])
@@ -419,6 +444,15 @@
      {:db (delete-availability db (:id avail))
       ::render-calendar nil})))
 
+(rf/reg-event-db
+ ::need-fulfilled
+ (fn [db [_ {{appt-id :appointment/id
+              need-id :need/id
+              fulfilled? :need/fulfilled?}
+             :data}]]
+   (let [coord [:appointments appt-id :access-needs need-id :need/fulfilled?]]
+     (assoc-in db coord fulfilled?))))
+
 
 ;; Appointment details
 
@@ -431,6 +465,11 @@
                                                     :appointment/id focused-appointment}
                                              :csrf-token csrf-token}]
                                    {::create-note! data})))
+
+(rf/reg-event-fx ::fulfill (fn [{{:keys [csrf-token]} :db} [_ appt-need]]
+                             (let [data {:appt-need appt-need
+                                         :csrf-token csrf-token}]
+                               {::fulfill! data})))
 
 (rf/reg-event-fx ::focus-appointment (fn [{:keys [db]} [_ id]]
                                        {:db (assoc db :focused-appointment id)
@@ -451,6 +490,14 @@
                {:transit-params note
                 :headers {"x-csrf-token" csrf-token}}
                ::note-created)))
+
+(rf/reg-fx
+ ::fulfill!
+ (fn [{:keys [appt-need csrf-token]}]
+   (rest/post! "/api/v1/admin/appointment/need/fulfill"
+               {:transit-params appt-need
+                :headers {"x-csrf-token" csrf-token}}
+               ::need-fulfilled)))
 
 (rf/reg-event-db
  ::merge-appointment-info
@@ -532,7 +579,7 @@
                                 :disabled (not showing-appointments?)
                                 :style {}}]
                        [:label.filter-label {:for html-id}
-                        (str "Needs " name)]]))
+                        (str name)]]))
                   access-needs))
       [:p.instruct summary]
       (when can-clear-access-needs?
@@ -571,7 +618,8 @@
 
 (defn appointment-details []
   (let [appt @(rf/subscribe [::focused-appointment])
-        {:keys [pronouns email phone ok_to_text reason access-needs notes]} appt
+        {:keys [pronouns email phone ok_to_text reason notes]} appt
+        access-needs @(rf/subscribe [::current-access-needs])
         start (moment. (:start appt))
         can-view-medical-needs? @(rf/subscribe [::can-view-medical-needs?])
         current-note @(rf/subscribe [::note])
@@ -599,18 +647,27 @@
         [:dd (if ok_to_text "yes" "no")]]]
       [:div.appointment-field-group
        [:h3 "Access Needs"]
-       (if (seq access-needs)
-         [:<>
-          [:div.access-needs-indicator.--unmet "Unmet access needs"]
-          (doall (map (fn [{:need/keys [id] :as appt-need}]
-                        (let [need
-                              (merge @(rf/subscribe [::access-need id])
-                                     appt-need)]
-                          ^{:key id}
-                          [:p (access-need need)]))
-                      access-needs))]
-         [:<>
-          [:div.access-needs-indicator.--met "Access needs met!"]])]]
+       (if (seq (filter (complement :need/fulfilled?) access-needs))
+         [:div.access-needs-indicator.--unmet "Unmet access needs"]
+         [:div.access-needs-indicator.--met "Access needs met!"])
+       (doall
+        (map (fn [need]
+               (let [{:need/keys [id info fulfilled?] label :name}
+                     (merge @(rf/subscribe [::access-need (:need/id need)])
+                            need)]
+                 ^{:key id}
+                 [:p
+                  [:input {:id (str "fulfilled-" (name id))
+                           :type :checkbox
+                           :on-change #(rf/dispatch
+                                        [::fulfill
+                                         {:need/id id
+                                          :appointment/id (:id appt)
+                                          :need/fulfilled? (not fulfilled?)}])
+                           :checked fulfilled?}]
+                  [:label {:for (str "fulfilled-" (name id))}
+                   label ": " info]]))
+             access-needs))]]
      (when can-view-medical-needs?
        [:div.appointment-field-group
         [:h3 "Medical Needs"]
@@ -677,7 +734,7 @@
                                                                               :end (.-end e)}])))
                         :select (fn [event]
                                   (rf/dispatch [::create-availability {:start (.-start event)
-                                                                            :end   (.-end event)}]))
+                                                                       :end   (.-end event)}]))
                         :eventOverlap can-overlap?
                         :events events-fn
                         :initialView "timeGridWeek"})]

@@ -36,7 +36,8 @@
 (defn- ->json [x]
   (json/write-str x :key-fn ->json-key :value-fn ->json-value))
 
-(->json {:user/id 123})
+(comment
+  (->json {:user/id 123}))
 
 (defn- rest-handler [f]
   (fn [{:keys [params] :as req}]
@@ -92,7 +93,11 @@
      ["/note"
       {:post (rest-handler (fn [req]
                              {:success true
-                              :data (appt/create-note! (transit-params req))}))}]]
+                              :data (appt/create-note! (transit-params req))}))}]
+     ["/need/fulfill"
+      {:post (rest-handler (fn [req]
+                             {:success true
+                              :data (appt/fulfill-need! (transit-params req))}))}]]
     ["/availability"
      {:post (rest-handler (fn [req]
                             (try

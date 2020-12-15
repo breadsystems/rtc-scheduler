@@ -83,25 +83,35 @@
             :appointments {;; Octavia needs CC, so should show up
                            ;; when filtering by access need/CC.
                            1 {:id 1 :user/id 3 :name "Octavia"
-                              :access-needs #{{:need/id 10}}}
+                              :access-needs {:closed_captioning
+                                             #:need{:id :closed_captioning
+                                                    :info "Misc. etc."
+                                                    :fulfilled? false}}}
                            ;; Usula needs Spanish interpretation, so should show up
                            ;; when filtering by access need/interpreter.
                            2 {:id 2 :user/id 2 :name "Ursula"
-                              :access-needs #{{:need/id 11 :interpreter-lang "Khmer"}}}
+                              :access-needs {:interpretation
+                                             #:need{:id :interpretation
+                                                    :info "Khmer"
+                                                    :fulfilled? false}}}
                            ;; Anon needs Spanish interpretation, so should show up
                            ;; when filtering by access need/interpreter.
                            3 {:id 3 :user/id 4 :name "Anonymous"
-                              :access-needs #{{:need/id 11 :interpreter-lang "Español"}}}
+                              :access-needs {:interpretation
+                                             #:need{:id :interpretation
+                                                    :info "Español"
+                                                    :fulfilled? false}}}
                            ;; Kim has no access needs to accommodate, so should not show up
                            ;; when filtering by access need.
                            4 {:id 4 :user/id 2 :name "Kim"
                               :access-needs #{}}
-                           ;; Janelle needs a Somali interpreter, but that has been fulfilled
-                           ;; by contact 14 (Weglot), so this should not show up when filtering
-                           ;; by access need.
+                           ;; Janelle needs a Somali interpreter, but that has been fulfilled,
+                           ;; so this should not show up when filtering by access need.
                            5 {:id 5 :user/id 2 :name "Janelle"
-                              :access-needs #{{:need/id 11 :interpreter-lang "Somali"}}
-                              :fulfillments #{{:need/id 11 :contact/id 14}}}}
+                              :access-needs {:interpretation
+                                             #:need{:id :interpretation
+                                                    :info "Somali"
+                                                    :fulfilled? true}}}}
             :users {2 {:id 2 :first_name "Lauren" :last_name "Olamina"}
                     3 {:id 3 :first_name "Shevek"}
                     4 {:id 4 :first_name "Genly" :last_name "Ai"}}
@@ -109,9 +119,12 @@
                       :availabilities? true
                       :providers #{2 3 4}
                       :access-needs #{}}
-            :needs {10 {:id 10 :name "Closed Captioning"}
-                    11 {:id 11 :name "Interpreter"}
-                    12 {:id 12 :name "VRT"}}
+            :needs {:closed_captioning {:id :closed_captioning
+                                        :description "Closed Captioning"}
+                    :interpretation {:id :interpretation
+                                     :description "Interpreter"}
+                    :other {:id :other
+                            :description "VRT"}}
             :contacts {13 {:id 13 :name "Language Link"}
                        14 {:id 14 :name "Weglot"}}
             :user-id 3
@@ -169,18 +182,19 @@
     (testing "when filtering by access need"
       (is (= [{:id 2 :event/type :appointment}
               {:id 3 :event/type :appointment}]
-             ;; Filter by Needs Interpreter and Needs VRT
-             (simplify (cal/visible-events (with-filters db {:access-needs #{11 12}
+             ;; Filter by Needs Interpreter
+             (simplify (cal/visible-events (with-filters db {:access-needs #{:interpretation}
                                                              :availabilities? false})))))
       (is (= [{:id 1 :event/type :appointment}
               {:id 2 :event/type :appointment}
               {:id 3 :event/type :appointment}]
              ;; Filter by Needs CC and Needs Interpreter
-             (simplify (cal/visible-events (with-filters db {:access-needs #{10 11}
+             (simplify (cal/visible-events (with-filters db {:access-needs #{:interpretation
+                                                                             :closed_captioning}
                                                              :availabilities? false})))))
       (is (= [{:id 1 :event/type :appointment}]
              ;; Filter by Needs CC only
-             (simplify (cal/visible-events (with-filters db {:access-needs #{10}
+             (simplify (cal/visible-events (with-filters db {:access-needs #{:closed_captioning}
                                                              :availabilities? false})))))
       (is (= []
              ;; Filter by Needs VRT only
@@ -346,3 +360,27 @@
            (cal/access-needs-filter-summary (with-needs #{1 2 3}))))
     (is (= "Showing appointments that need Love, Fulfillment, Food, OR Shelter"
            (cal/access-needs-filter-summary (with-needs #{1 2 3 4}))))))
+
+(deftest test-current-access-needs
+  
+  (testing "it includes user-specified (PRC) other_access_needs"
+    (let [interpreter-need {:need/id :interpretation
+                            :need/fulfilled false
+                            :need/info "ASL"}
+          other-need {:need/id :other
+                      :need/fulfilled false
+                      :need/info "Stuff"}
+          db {:focused-appointment 1
+              :appointments {1 {:appointment/id 1
+                                :access-needs {:interpretation interpreter-need
+                                               :other other-need}}}}]
+      (is (= [interpreter-need other-need]
+             (cal/current-access-needs db)))))
+  
+  (testing "when no appointment is focused"
+    (let [db {:focused-appointment nil
+              :appointments {1 {:appointment/id 1
+                                :access-needs nil
+                                :other_access_needs "Stuff"
+                                :other_access_needs_met false}}}]
+      (is (nil? (cal/current-access-needs db))))))

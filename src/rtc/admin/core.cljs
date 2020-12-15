@@ -51,8 +51,12 @@
     :availabilities {}
     :appointments {}
     :users {}
-    :needs {1 {:id 1 :need/type :interpreter :name "Interpreter"}
-            2 {:id 2 :need/type :closed-captioning :name "Closed Captioning"}}
+    :needs {:interpretation    {:id :interpretation
+                                :name "Interpreter"}
+            :closed_captioning {:id :closed_captioning
+                                :name "Closed Captioning"}
+            :other             {:id :other
+                                :name "Other"}}
     :current-invite {:email ""}
     :my-invitations []
     :focused-appointment nil

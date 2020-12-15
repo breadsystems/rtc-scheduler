@@ -24,16 +24,17 @@
         avails (avail/get-availabilities
                 {:from (one-week-ago)
                  :to (* 8 (one-week-from-now))})
-        key-mapping {:provider_id :user/id
-                     :start_time :start
-                     :end_time :end}]
+        rename-keys* #(rename-keys % {:provider_id :user/id
+                                      :start_time :start
+                                      :end_time :end})
+        assoc-access-needs #(assoc % :access-needs (appt/id->needs (:id %)))]
     {:appointments
      (as-> appts $
-       (map #(rename-keys % key-mapping) $)
+       (map (comp assoc-access-needs rename-keys*) $)
        (index-by :id $))
      :availabilities
      (as-> avails $
-       (map #(rename-keys % key-mapping) $)
+       (map rename-keys* $)
        (index-by :id $))
      :users
      (index-by :id (d/get-all-users))
