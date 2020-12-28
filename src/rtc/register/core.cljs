@@ -8,11 +8,11 @@
 
 (defonce app (r/atom {:email ""
                       :code ""
-                      :user {:first-name ""
-                             :last-name ""
+                      :user {:first_name ""
+                             :last_name ""
                              :phone ""
-                             :password ""
-                             :password-confirmation ""}}
+                             :pass ""
+                             :pass-confirmation ""}}
                      :errors {}))
 
 (def user (r/cursor app [:user]))
@@ -32,7 +32,7 @@
   (get @errors field []))
 
 (defn field->class [field]
-  (when (seq (field->errors field)) "error"))
+  (when (seq (field->errors field)) "has-errors"))
     
 
 (defn check-required! [field message value]
@@ -42,7 +42,7 @@
 (defn check-password-fields! []
   (let [validation (pass/validate-passwords @user)]
     (if (true? validation)
-      (set-field-errors! {:password [] :password-confirmation []})
+      (set-field-errors! {:pass [] :pass-confirmation []})
       (set-field-errors! validation))))
 
 (defn emitter
@@ -62,63 +62,75 @@
 (comment
   @app
   @user
-  (field->errors :password))
+  (field->errors :pass))
 
 
 (defn errors-for [field]
   (if-let [messages (map :message (field->errors field))]
-    [:div (join ", " messages)]
+    [:div.error-message (join ", " messages)]
     [:<>]))
 
 
 (defn registration []
   [:main
    [:h2 "Register"]
-   [:div
+   [:div.stack
     [:div
-     [:b "Email: "] (:email @app)
-     [:p "You can change your email once you finish setting up your account."]]
-    [:div.field {:class (field->class :first-name)}
-     [:label {:for "first-name"} "First Name"]
-     [:input {:id "first-name"
-              :on-change (emitter update-user-field! :first-name)
-              :on-blur (emitter check-required! :first-name "Please enter your first name")
-              :value (:first-name @user)}]
-     [errors-for :first-name]]
-    [:div.field {:class (field->class :last-name)}
-     [:label {:for "last-name"} "Last Name"]
-     [:input {:id "last-name"
-              :on-change (emitter update-user-field! :last-name)
-              :on-blur (emitter check-required! :last-name "Please enter your last name")
-              :value (:last-name @user)}]
-     [errors-for :last-name]]
-    [:div.field
-     [:label {:for "phone"} "Phone"]
+     [:span [:strong "Email: "] (:email @app)]
+     [:p.help "You can change your email once you finish setting up your account."]]
+    [:div.flex-field
+     [:label.field-label {:for "first_name"} "First Name"]
+     [:div.field
+      [:input {:type :text
+               :id "first_name"
+               :class (field->class :first_name)
+               :on-change (emitter update-user-field! :first_name)
+               :on-blur (emitter check-required! :first_name "Please enter your first name")
+               :value (:first_name @user)}]
+      [errors-for :first_name]]]
+    [:div.flex-field
+     [:label.field-label {:for "last_name"} "Last Name"]
+     [:div.field
+      [:input {:type :text
+               :id "last_name"
+               :class (field->class :last_name)
+               :on-change (emitter update-user-field! :last_name)
+               :on-blur (emitter check-required! :last_name "Please enter your last name")
+               :value (:last_name @user)}]
+      [errors-for :last_name]]]
+    [:div.flex-field
+     [:label.field-label {:for "phone"} "Phone"]
       ;; TODO phone input
-     [:input {:id "phone"
-              :on-change (emitter update-user-field! :phone)
-              :value (:phone @user)}]
-     [errors-for :phone]]
-    [:div.field {:class (field->class :password)}
-     [:label {:for "password"} "Password"]
-     [:input {:type :password
-              :id "password"
-              :on-change (emitter update-user-field! :password)
-              :on-blur #(check-password-fields!)
-              :value (:password @user)}]
-     [errors-for :password]]
-    [:div.field {:class (field->class :password-confirmation)}
-     [:label {:for "password-confirmation"} "Confirm Password"]
-     [:input {:type :password
-              :id "password-confirmation"
-              :on-change (emitter update-user-field! :password-confirmation)
-              :on-blur #(check-password-fields!)
-              :value (:password-confirmation @user)}]
-     [errors-for :password-confirmation]]
+     [:div.field
+      [:input {:type :text
+               :id "phone"
+               :class (field->class :phone)
+               :on-change (emitter update-user-field! :phone)
+               :value (:phone @user)}]
+      [errors-for :phone]]]
+    [:div.flex-field
+     [:label.field-label {:for "password"} "Password"]
+     [:div.field
+      [:input {:type :password
+               :id "password"
+               :class (field->class :pass)
+               :on-change (emitter update-user-field! :pass)
+               :on-blur #(check-password-fields!)
+               :value (:pass @user)}]
+      [errors-for :pass]]]
+    [:div.flex-field
+     [:label.field-label {:for "password-confirmation"} "Confirm Password"]
+     [:div.field
+      [:input {:type :password
+               :id "password-confirmation"
+               :class (field->class :pass-confirmation)
+               :on-change (emitter update-user-field! :pass-confirmation)
+               :on-blur #(check-password-fields!)
+               :value (:pass-confirmation @user)}]
+      [errors-for :pass-confirmation]]]
     [:div
      [:button.btn {:type :submit
-                   :disabled (not @(r/track valid?))
-                   :on-click #(register!)}
+                   :disabled (not @(r/track valid?))}
       "Register"]]]])
 
 

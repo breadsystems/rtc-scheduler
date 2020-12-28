@@ -1,19 +1,19 @@
 (ns rtc.users.passwords)
 
 
-(defn validate-passwords [{:keys [password password-confirmation]}]
+(defn validate-passwords [{:keys [pass pass-confirmation]}]
   (cond
-    (empty? password)
-    {:password [{:message "Please enter a password"}]
-     :password-confirmation []}
+    (empty? pass)
+    {:pass [{:message "Please enter a password"}]
+     :pass-confirmation []}
     
-    (< (count password) 8)
-    {:password [{:message "Please choose a longer password"}]
-     :password-confirmation []}
+    (< (count pass) 8)
+    {:pass [{:message "Please choose a longer password"}]
+     :pass-confirmation []}
     
-    (not= password password-confirmation)
-    {:password []
-     :password-confirmation [{:message "Passwords do not match"}]}
+    (not= pass pass-confirmation)
+    {:pass []
+     :pass-confirmation [{:message "Passwords do not match"}]}
     
     :else
     true))

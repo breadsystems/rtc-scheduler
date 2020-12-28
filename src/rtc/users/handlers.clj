@@ -1,5 +1,6 @@
 (ns rtc.users.handlers
   (:require
+   [rtc.assets.core :as assets]
    [rtc.layout :as layout]
    [rtc.users.core :as u]))
 
@@ -7,6 +8,8 @@
 (defn- register-page [req]
   (layout/page
    {:title "Register"
+    :head
+    [[:link {:rel :stylesheet :href (assets/style-href :admin)}]]
     :content
     [:div#rtc-registration]
     :footer-content

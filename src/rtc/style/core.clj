@@ -171,6 +171,9 @@
     &purple-box-focus
     [:&:ms-expand {:display :none}]]
    [:.field {:margin "0.7em 0"}]
+   [:.flex-field {:display :flex}
+    [:label {:margin-top "2em"
+             :flex-basis "20ch"}]]
    [:.radio-option {:margin "0 2em 0 0"}]
    [:.required {:color pink}]
    [:.has-errors {:color dark-purple

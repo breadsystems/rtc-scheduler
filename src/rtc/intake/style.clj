@@ -2,6 +2,7 @@
   (:require
    [rtc.style.core :as core]
    [garden.def :refer [defstyles]]
+   [garden.color :refer [as-hex]]
    [garden.stylesheet :refer [at-media]]))
 
 
@@ -17,7 +18,7 @@
 (def questions
   [[:.question {:margin "2em 0"}]
    [:.field-label {:font-weight 700
-                   :color core/dark-purple}]
+                   :color (as-hex core/dark-purple)}]
    [:.intake-footer {:display :flex
                      :max-width "65em"
                      :margin "3em auto 5em"
