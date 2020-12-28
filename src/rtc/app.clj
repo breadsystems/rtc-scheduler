@@ -132,18 +132,19 @@
   (mount/start))
 
 (comment
-  (:dev-disable-auth env)
-  (:dev-disable-anti-forgery env)
-  (:default-authy-user-id env)
+  ;; Evaluate this to start the app in the REPL.
+  (mount/start)
 
   ;; Re-parse SQL helper files
   (db/bind!)
 
-  ;; Evaluate this to start the app in the REPL.
-  (mount/start)
-
   ;; Restart the dev environment.
   (restart!)
+
+  ;; Check environment variables.
+  (:dev-disable-auth env)
+  (:dev-disable-anti-forgery env)
+  (:default-authy-user-id env)
 
   ;; Recreate the test admin user.
   (do
