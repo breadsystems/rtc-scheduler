@@ -1,9 +1,12 @@
 (ns rtc.style.core
+  (:refer-clojure :exclude [> *])
   (:require
    [garden.color :refer [rgb as-hex]]
    [garden.def :refer [defcssfn]]
-   [garden.selectors :refer [attr &]]))
+   [garden.selectors :refer [attr defselector > &]]))
 
+
+(defselector *)
 
 (defcssfn url)
 (defcssfn calc)
@@ -62,7 +65,8 @@
    [:dl {:display :grid
          :grid-template-columns "1fr 5fr"}]
    [:dt {:margin-bottom "0.3em"
-         :font-weight 700}]])
+         :font-weight 700}]
+   [:.slack]])
 
 (def typography
   [;; Main typographical elements
