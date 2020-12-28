@@ -30,12 +30,12 @@
 (def button-base {:padding "0.7em 1.3em"
                   :border-width "3px"
                   :border-style :solid
-                  :border-color pink
+                  :border-color (as-hex pink)
                   :cursor :pointer
                   :font-weight 700
                   :text-transform :uppercase
                   :color :white
-                  :background pink})
+                  :background (as-hex pink)})
 
 (def button-secondary (merge button-base {:background indigo
                                           :border-color indigo}))
@@ -66,7 +66,8 @@
          :grid-template-columns "1fr 5fr"}]
    [:dt {:margin-bottom "0.3em"
          :font-weight 700}]
-   [:.slack]])
+   [:.stack
+    [(> * *) {:margin-top "1em"}]]])
 
 (def typography
   [;; Main typographical elements

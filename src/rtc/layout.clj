@@ -134,20 +134,23 @@
         [:h1 "Radical Telehealth Collective"]
         [:h2 "Login"]]
        [:main
-        [:form {:action (str "/login?" query-string) :method "POST"}
+        [:form.stack {:action (str "/login?" query-string) :method "POST"}
          (when error
            [:div.error
             [:p error]])
-         [:input {:type :email
-                  :name "email"
+         [:div
+          [:input {:type :email
+                   :name "email"
                   ;; TODO
-                  :value (or email "")
-                  :placeholder "me@example.com"}]
-         [:input {:type :password
-                  :name "password"
+                   :value (or email "")
+                   :placeholder "me@example.com"}]]
+         [:div
+          [:input {:type :password
+                   :name "password"
                   ;; TODO
-                  :value (or password "")}]
-         [:button {:type :submit} "Login"]
+                   :value (or password "")}]]
+         [:div
+          [:button {:type :submit} "Login"]]
          [:input {:type :hidden
                   :name :__anti-forgery-token
                   :value *anti-forgery-token*}]]]]})))
@@ -164,17 +167,18 @@
        [:header
         [:h1 "Radical Telehealth Collective"]
         [:h2 "Login"]]
-       [:form {:action (str "/login?next=" dest)
-               :method "POST"}
-        [:p "Please confirm the token shown in your authenticator app."]
+       [:form.stack {:action (str "/login?next=" dest) :method "POST"}
+        [:div "Please confirm the token shown in your authenticator app."]
         (when error
           [:div.error
            [:p error]])
-        [:input {:type :text
-                 :name "token"
-                 :value ""
-                 :placeholder "12 345 678"}]
-        [:button {:type :submit} "Confirm"]
+        [:div
+         [:input {:type :text
+                  :name "token"
+                  :value ""
+                  :placeholder "12 345 678"}]]
+        [:div
+         [:button {:type :submit} "Confirm"]]
         [:input {:type :hidden
                  :name :__anti-forgery-token
                  :value *anti-forgery-token*}]]]})))
