@@ -1,4 +1,5 @@
 .cpcache/
+.lsp/
 env/**/config.edn
 lock
 *.repl-file
