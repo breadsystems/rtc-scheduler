@@ -132,7 +132,9 @@
                            {:success true
                             :data {:invitations
                                    (map (fn [invite]
-                                          (assoc invite :url (u/invite-url req invite)))
+                                          (assoc invite
+                                                 :url (u/invite-url req invite)
+                                                 :expired? (u/expired? invite)))
                                         (u/get-invitations {:invited_by (:id identity)}))}}))}]
 
     ["/invite"

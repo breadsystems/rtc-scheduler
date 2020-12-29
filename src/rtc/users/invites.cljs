@@ -72,14 +72,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defn- invitation [{:keys [email code date_invited url]}]
+(defn- invitation [{:keys [email date_invited expired? redeemed url]}]
   [:div.invite
    [:div.invite__email
     [:span email]]
    [:div.invite__timing
     [:span (.fromNow (moment date_invited))]]
    ;; TODO copy code and/or send email
-   (when url
+   (cond
+     redeemed
+     [:span "Redeemed"]
+     expired?
+     [:span "Expired"]
+     :else
      [:span.invite-url url])])
 
 
@@ -101,6 +106,7 @@
         [:button {:disabled (empty? (:email current-invite))} "Invite!"]]]]
      [:section
       [:h3 "Your invites"]
+      [:p.help "To resend an open invitation, just copy and paste the URL!"]
       (map
        (fn [invite]
          ^{:key (:code invite)}

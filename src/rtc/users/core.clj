@@ -6,7 +6,9 @@
    [honeysql.helpers :as sqlh]
    [rtc.auth.util :as auth-util]
    [rtc.auth.two-factor :as two-factor]
-   [rtc.db :as db]))
+   [rtc.db :as db])
+  (:import
+   [java.util Date]))
 
 
 (defn admin? [user]
@@ -20,13 +22,20 @@
 
 (defn invite! [{:keys [email invited_by]}]
   (let [invite-code (crypto/url-part 32)
-        invitation {:email email :code invite-code :invited_by invited_by}]
+        invitation {:email email
+                    :code invite-code
+                    :invited_by invited_by
+                    :redeemed false
+                    :date_invited (Date.)}]
     (db/create-invitation! invitation)
     ;; TODO send email
     invitation))
 
 (defn validate-invitation [invitation]
   (boolean (db/get-invitation invitation)))
+
+(defn expired? [{:keys [date_invited]}]
+  (> (inst-ms (Date.)) (inst-ms date_invited)))
 
 (defn get-invitations [{:keys [invited_by]}]
   (-> (sqlh/select :*)
