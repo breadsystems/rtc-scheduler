@@ -62,7 +62,9 @@
                     :type :checkbox
                     :label "I am a provider"}]
     [:div
-     [:button {:on-click #(prn 'UPDATE)}
+     [:button {:on-click #(prn 'UPDATE)
+               :disabled true
+               :title "Sorry, this doesn't work yet!"}
       "Update Details"]]]
 
    [:div.stack.spacious
@@ -73,5 +75,7 @@
     [setting-field {:setting :pass-confirmation
                     :type :password
                     :label "Confirm new password"}]
-    [:button {:on-click #(prn 'PWD)}
+    [:button {:on-click #(prn 'PWD)
+              :disabled true
+              :title "Sorry, this doesn't work yet!"}
      "Update Password"]]])
