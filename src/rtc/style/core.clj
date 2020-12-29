@@ -172,8 +172,10 @@
     [:&:ms-expand {:display :none}]]
    [:.field {:margin "0.7em 0"}]
    [:.flex-field {:display :flex}
-    [:label {:margin-top "2em"
-             :flex-basis "20ch"}]]
+    [:label {:margin-top "1.5em"
+             :flex-basis "20ch"}]
+    [:field {:margin-top 0
+             :margin-bottom 0}]]
    [:.radio-option {:margin "0 2em 0 0"}]
    [:.required {:color pink}]
    [:.has-errors {:color dark-purple

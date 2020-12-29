@@ -163,7 +163,19 @@
                                                :invited_by (:id identity)})
                                   url (u/invite-url req invitation)]
                               {:success true
-                               :data (assoc invitation :url url)})))}]]])
+                               :data (assoc invitation :url url)})))}]
+    ["/settings"
+     {:get (rest-handler (fn [req]
+                           {:success true
+                            :data (select-keys (:identity req)
+                                               [:id
+                                                :email
+                                                :first_name
+                                                :last_name
+                                                :pronouns
+                                                :phone
+                                                :state
+                                                :is_provider])}))}]]])
 
 (comment
 

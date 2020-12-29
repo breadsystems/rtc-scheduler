@@ -14,6 +14,7 @@
    [reitit.frontend :as reitit]
    [reitit.frontend.easy :as easy]
    [rtc.admin.calendar :as calendar]
+   [rtc.admin.settings :as settings]
    [rtc.rest.core :as rest]
    [rtc.style.colors :as colors]
    [rtc.users.invites :as invites]))
@@ -42,8 +43,7 @@
     :csrf-token csrf-token
 
     :view :schedule
-    ;; TODO get this stuff from GraphQL
-    :user-id 4
+    :user-id nil
     :filters {:availabilities? true
               :appointments? true
               :providers #{}
@@ -170,7 +170,8 @@
 ;; TODO implement settings fx
 (rf/reg-fx
  ::settings
- #(prn 'settings!))
+ (fn []
+   (rest/get! "/api/v1/admin/settings" {} :settings/load)))
 
 (comment
   (rf/dispatch [::init-admin]))
@@ -204,10 +205,9 @@
      [:main
       (condp = name
         ::welcome [:p "Welcome!"]
-        ::new-careseekers [:p "TODO NEW CARESEEKERS"]
         ::schedule [calendar/care-schedule]
         ::invites [invites/invites]
-        ::settings [:p "TODO SETTINGS HERE"]
+        ::settings [settings/settings]
         [:p "Uh oh, that page was not found!"])]]))
 
 

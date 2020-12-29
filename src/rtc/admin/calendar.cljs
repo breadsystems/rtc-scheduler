@@ -413,6 +413,7 @@
      (do (prn errors) {:db db})
      {:db (-> db
               (assoc
+               :user-id        (:user-id data)
                :users          (:users data)
                :my-invitations (:invitations data)
                :availabilities (:availabilities data)

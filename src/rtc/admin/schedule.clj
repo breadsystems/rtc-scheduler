@@ -17,7 +17,7 @@
 (defn- one-week-from-now []
   (+ (inst-ms (Date.)) one-week))
 
-(defn schedule [{:keys [query-params]}]
+(defn schedule [{:keys [identity query-params]}]
   (let [appts (appt/get-appointments
                {:from (one-week-ago)
                 :to (* 8 (one-week-from-now))})
@@ -36,6 +36,7 @@
      (as-> avails $
        (map rename-keys* $)
        (index-by :id $))
+     :user-id (:id identity)
      :users
      (index-by :id (d/get-all-users))
      :params query-params}))
