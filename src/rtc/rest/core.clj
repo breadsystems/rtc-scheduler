@@ -74,6 +74,24 @@
                                 :errors [{:message (.getMessage e)
                                           :reason (:reason (ex-data e))}]
                                 :data (ex-data e)}))))}]
+   ["/register"
+    {:post (rest-handler (fn [req]
+                           (try
+                             (let [user (transit-params req)]
+                               (if (u/validate-invitation user)
+                                 (do
+                                   (u/register! (assoc user
+                                                       :is_admin true
+                                                       :preferences {}))
+                                   {:success true
+                                    :data {:redirect-to "/comrades"}})
+                                 {:success false
+                                  :errors [{:message "Invalid or expired invite code."
+                                            :reason :invalid-invite}]}))
+                             (catch Throwable e
+                               {:success false
+                                :errors [:message (.getMessage e)
+                                         :reason :unknown]}))))}]
    ["/admin"
     {:middleware [auth/wrap-auth]}
     ["/schedule"
