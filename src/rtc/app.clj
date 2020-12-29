@@ -52,17 +52,16 @@
 
      ;; Make sure any route matching /comrades/* serves the admin center.
      ;; From here on down, routing is done client-side.
-     (let [conf {:middleware [auth/wrap-auth]
-                 :get (fn [_req]
-                        (layout/admin-page {:title "Comrades"}))}]
-       ["/comrades"
-        ["" conf]
-        ["*" {:middleware [auth/wrap-auth]
-              :get (fn [{:keys [uri]}]
-                     (if (string/ends-with? uri "/")
-                       {:headers {"Location" (string/replace uri #"/$" "")}
-                        :status 302}
-                       (layout/admin-page {:title "Comrades"})))}]])])
+     ["/comrades"
+      ["" {:middleware [auth/wrap-auth]
+           :get (fn [_req]
+                  (layout/admin-page {:title "Comrades"}))}]
+      ["*" {:middleware [auth/wrap-auth]
+            :get (fn [{:keys [uri]}]
+                   (if (string/ends-with? uri "/")
+                     {:headers {"Location" (string/replace uri #"/$" "")}
+                      :status 302}
+                     (layout/admin-page {:title "Comrades"})))}]]])
 
    (ring/routes
     (assets/wrap-asset-headers (ring/create-resource-handler {:path "/"}))
