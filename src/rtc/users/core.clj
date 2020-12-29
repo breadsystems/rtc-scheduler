@@ -6,7 +6,8 @@
    [honeysql.helpers :as sqlh]
    [rtc.auth.util :as auth-util]
    [rtc.auth.two-factor :as two-factor]
-   [rtc.db :as db])
+   [rtc.db :as db]
+   [rtc.util :refer [one-hour]])
   (:import
    [java.util Date]))
 
@@ -35,7 +36,7 @@
   (boolean (db/get-invitation invitation)))
 
 (defn expired? [{:keys [date_invited]}]
-  (> (inst-ms (Date.)) (inst-ms date_invited)))
+  (>= (- (inst-ms (Date.)) (* 72 one-hour)) (inst-ms date_invited)))
 
 (defn get-invitations [{:keys [invited_by]}]
   (-> (sqlh/select :*)

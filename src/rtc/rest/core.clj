@@ -139,9 +139,14 @@
 
     ["/invite"
      {:post (rest-handler (fn [{:keys [identity] :as req}]
-                            (let [{:keys [email]} (transit-params req)]
+                            (let [{:keys [email]} (transit-params req)
+                                  invitation (update
+                                              (u/invite!
+                                               {:email email
+                                                :invited_by (:id identity)})
+                                              :url #(u/invite-url req %))]
                               {:success true
-                               :data (u/invite! {:email email :invited_by (:id identity)})})))}]]])
+                               :data invitation})))}]]])
 
 (comment
 
