@@ -39,9 +39,9 @@
 
 (rf/reg-event-fx
  ::invite
- (fn [{:keys [csrf-token]} [_ {:keys [email]}]]
+ (fn [{:keys [db]} [_ {:keys [email]}]]
    (when (seq email)
-     {::invite! {:csrf-token csrf-token :email email}})))
+     {::invite! {:csrf-token (:csrf-token db) :email email}})))
 
 (rf/reg-fx
  ::invite!
