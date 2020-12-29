@@ -158,13 +158,12 @@
     ["/invite"
      {:post (rest-handler (fn [{:keys [identity] :as req}]
                             (let [{:keys [email]} (transit-params req)
-                                  invitation (update
-                                              (u/invite!
-                                               {:email email
-                                                :invited_by (:id identity)})
-                                              :url #(u/invite-url req %))]
+                                  invitation (u/invite!
+                                              {:email email
+                                               :invited_by (:id identity)})
+                                  url (u/invite-url req invitation)]
                               {:success true
-                               :data invitation})))}]]])
+                               :data (assoc invitation :url url)})))}]]])
 
 (comment
 
