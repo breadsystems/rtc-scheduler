@@ -37,9 +37,11 @@
   (api-call http/get (str "/sms/" id)))
 
 (defn verify-token [token id]
-  (->> (api-call http/get (format "/verify/%s/%s" token id))
-       (:success)
-       (= "true")))
+  (let [resp (api-call http/get (format "/verify/%s/%s" token id))]
+    (prn resp)
+    (->> resp
+         (:success)
+         (= "true"))))
 
 (defn verified? [req]
   (boolean (:verified-2fa-token? (:session req))))
