@@ -106,7 +106,7 @@
         [:button {:disabled (empty? (:email current-invite))} "Invite!"]]]]
      [:section
       [:h3 "Your invites"]
-      [:p.help "To resend an open invitation, just copy and paste the URL!"]
+      [:p.help "To resend an open invitation, copy and paste the URL in an email."]
       (map
        (fn [invite]
          ^{:key (:code invite)}
