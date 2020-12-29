@@ -83,13 +83,16 @@ In most cases you can leave the `:database-url` value alone.
 
 #### Running the dev environment
 
-Once you've done all the above, you should be able to run:
+Start a REPL from your editor and load the file `src/rtc/app.clj`. This is the main entrypoint for the application.
 
-```sh
-clojure -A:dev -m rtc.app
-```
+Find and evaluate the `(mount/start)` form at the beginning of the `comment` form towards the end of the file. This should perform any necessary database migrations and warn you in the REPL window in case you disabled auth/anti-forgery protection in your config. If no admin test user exists, it will also create one for you and print the credentials to the REPL window.
 
 If the app is able to start up correctly, you should be able to see it running at `localhost:8080`.
+
+From there, you can...
+
+* Click **Get Care** to test out the intake process.
+* Visit `/comrades` to test out the admin
 
 #### Tests
 
