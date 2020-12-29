@@ -170,7 +170,7 @@
        [:form.stack {:action (str "/login?next=" dest) :method "POST"}
         [:div "Please confirm the token shown in your authenticator app."]
         (when error
-          [:div.error
+          [:div.error-message
            [:p error]])
         [:div
          [:input {:type :text
