@@ -38,7 +38,6 @@
 
 (defn verify-token [token id]
   (let [resp (api-call http/get (format "/verify/%s/%s" token id))]
-    (prn resp)
     (->> resp
          (:success)
          (= "true"))))
