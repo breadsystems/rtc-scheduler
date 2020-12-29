@@ -12,6 +12,14 @@
    [rtc.users.core :as u]))
 
 
+;; Create an admin user on first startup, if one does not exist
+(defstate admin-user
+  :start (util/create-first-admin-user!))
+
+(defstate default-user
+  :start (u/email->user (:default-admin-email env)))
+
+
 (defn- auth-disabled? []
   (boolean (:dev-disable-auth env)))
 
@@ -107,8 +115,3 @@
       (wrap-require-auth)
       (wrap-authorization auth-backend)
       (wrap-authentication auth-backend)))
-
-
-;; Create an admin user on first startup, if one does not exist
-(defstate admin-user
-  :start (util/create-first-admin-user!))

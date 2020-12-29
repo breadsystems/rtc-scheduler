@@ -98,7 +98,7 @@
      {:get (rest-handler (fn [req]
                            (try
                              {:success true
-                              :data    (merge {:user {:id 1}}
+                              :data    (merge {:user auth/default-user}
                                               (schedule/schedule req))}
                              (catch Throwable e
                                {:success false

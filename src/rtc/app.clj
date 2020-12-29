@@ -145,6 +145,8 @@
   (:dev-disable-auth env)
   (:dev-disable-anti-forgery env)
   (:default-authy-user-id env)
+  
+  auth/default-user
 
   ;; Recreate the test admin user.
   (do
