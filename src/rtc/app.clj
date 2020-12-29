@@ -57,7 +57,8 @@
                         (layout/admin-page {:title "Comrades"}))}]
        ["/comrades"
         ["" conf]
-        ["*" {:get (fn [{:keys [uri]}]
+        ["*" {:middleware [auth/wrap-auth]
+              :get (fn [{:keys [uri]}]
                      (if (string/ends-with? uri "/")
                        {:headers {"Location" (string/replace uri #"/$" "")}
                         :status 302}
