@@ -42,6 +42,10 @@
    {;; CSRF token from the DOM
     :csrf-token csrf-token
 
+    :errors {:error/calendar nil
+             :error/contact-info nil
+             :error/password-reset nil}
+
     :view :schedule
     :user-id nil
     :filters {:availabilities? true
@@ -125,6 +129,9 @@
                          (filter (partial accessible-by? (:my-roles db)) $))))
 
 (rf/reg-sub :admin/users :users)
+
+(rf/reg-sub :error-message (fn [{:keys [errors]} [_ error-key]]
+                             (:message (errors error-key))))
 
 (comment
   routes

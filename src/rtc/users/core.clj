@@ -71,6 +71,29 @@
   (db/redeem-invitation! user)
   (email->user (:email user)))
 
+(defn updating-password? [{:keys [pass]}]
+  (> (count pass) 0))
+
+(defn update-password! [{:keys [id pass pass-confirmation]}]
+  (when (not= pass pass-confirmation)
+    (throw (ex-info "Password and confirmation do not match!"
+                    {:reason :pass-confirmation-mismatch})))
+  (db/execute!
+   ["UPDATE users SET pass = ? WHERE id = ?" (hash/derive pass) id]))
+
+(defn update-contact-info! [user]
+  (let [user-keys [:first_name :last_name :email :phone :is_provider]]
+    (-> (sqlh/update :users)
+        (sqlh/sset (select-keys user user-keys))
+        (sqlh/where [:= :id (:id user)])
+        (sql/format)
+        (db/execute!))))
+
+(defn update-settings! [user]
+  (if (updating-password? user)
+    (update-password! user)
+    (update-contact-info! user)))
+
 (defn authenticate [email password]
   (when (and email password)
     (when-let [user (db/get-user-by-email {:email email})]

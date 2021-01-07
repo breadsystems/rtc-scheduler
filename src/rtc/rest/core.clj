@@ -7,11 +7,12 @@
    [rtc.appointments.core :as appt]
    [rtc.users.core :as u])
   (:import
-    [java.io ByteArrayOutputStream]
-    [java.lang Throwable]
-    [java.sql Timestamp]
-    [java.util Date]
-    [java.text SimpleDateFormat]))
+   [clojure.lang ExceptionInfo]
+   [java.io ByteArrayOutputStream]
+   [java.lang Throwable]
+   [java.sql Timestamp]
+   [java.util Date]
+   [java.text SimpleDateFormat]))
 
 (defn- ->transit [body]
   (let [out (ByteArrayOutputStream.)
@@ -40,7 +41,7 @@
   (->json {:user/id 123}))
 
 (defn- rest-handler [f]
-  (fn [{:keys [params] :as req}]
+  (fn [{:keys [params session] :as req}]
     (let [;; The frontend always consumes application/transit+edn data,
           ;; but application/json is useful for debugging
           json? (boolean (:json params))
@@ -52,7 +53,8 @@
        :headers {"Content-Type" content-type}
        :body    (transform {:success (:success res)
                             :data    (:data res)
-                            :errors  (:errors res)})})))
+                            :errors  (:errors res)})
+       :session (or (:session res) session)})))
 
 (defn- transit-params [{:keys [body]}]
   (let [reader (transit/reader body :json)]
@@ -175,7 +177,20 @@
                                                 :pronouns
                                                 :phone
                                                 :state
-                                                :is_provider])}))}]]])
+                                                :is_provider])}))
+      :post (rest-handler (fn [req]
+                            (let [identity (:identity req)
+                                  ;; Make sure id does not come from user input.
+                                  user (assoc (transit-params req) :id (:id identity))]
+                              (try
+                                (u/update-settings! user)
+                                {:success true
+                                 :data user
+                                 :session {:identity user}}
+                                (catch ExceptionInfo e
+                                  {:success false
+                                   :errors [{:message (.getMessage e)
+                                             :reason (:reason (ex-data e))}]})))))}]]])
 
 (comment
 
