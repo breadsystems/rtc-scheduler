@@ -25,6 +25,7 @@
   "Return the set of public user fields we want to be viewable on the frontend."
   [user]
   (select-keys user [:id
+                     :authy_id
                      :email
                      :first_name
                      :last_name
