@@ -12,7 +12,13 @@
   (get users user-id))
 
 (defn update-setting [{:keys [user-id] :as db} [_ k v]]
-  (assoc-in db [:users user-id k] v))
+  (-> db
+      (assoc :contact/updated? false :password/updated? false)
+      (assoc-in [:users user-id k] v)))
+
+(defn can-update-contact? [db]
+  (let [{:keys [first_name last_name email phone]} (current-user db)]
+    (every? #(> (count %) 0) [first_name last_name email phone])))
 
 (defn can-reset-password? [db]
   (let [{:keys [pass pass-confirmation]} (current-user db)]
@@ -32,10 +38,15 @@
          {:keys [reason] :as error} (first errors)
          reason->error-key
          {:pass-confirmation-mismatch :error/password-reset
-          :contact-info-invalid :error/settings}]
+          :contact-info-invalid :error/settings}
+         updating-password? (-> db current-user :pass seq)
+         updating-contact? (not updating-password?)]
+     (prn (current-user db))
      (if error
        (assoc-in db [:errors (reason->error-key reason)] error)
        (-> db
+           (assoc :contact/updated? updating-contact?)
+           (assoc :password/updated? updating-password?)
            (assoc-in [:errors :error/contact-info] nil)
            (assoc-in [:errors :error/password-reset] nil)
            (assoc-in [:users user-id :pass] "")
@@ -48,6 +59,9 @@
    db))
 
 (rf/reg-sub ::current-user current-user)
+(rf/reg-sub ::contact-updated? :contact/updated?)
+(rf/reg-sub ::password-updated? :password/updated?)
+(rf/reg-sub ::can-update-contact? can-update-contact?)
 (rf/reg-sub ::can-reset-password? can-reset-password?)
 
 (rf/reg-fx
@@ -88,8 +102,12 @@
 (defn settings []
   (let [contact-error @(rf/subscribe [:error-message :error/contact-info])
         pass-error @(rf/subscribe [:error-message :error/password-reset])
+        contact-updated? @(rf/subscribe [::contact-updated?])
+        password-updated? @(rf/subscribe [::password-updated?])
+        can-update? @(rf/subscribe [::can-update-contact?])
         can-reset? @(rf/subscribe [::can-reset-password?])]
-    [:div.stack
+    [:form.stack {:on-submit (fn [e]
+                               (.preventDefault e))}
      [:div.stack.spacious
       [:h3 "Contact Info"]
       (when contact-error
@@ -107,8 +125,11 @@
                       :type :checkbox
                       :label "I am a provider"}]
       [:div
-       [:button {:on-click #(rf/dispatch [::update-settings])}
-        "Update Details"]]]
+       [:button {:on-click #(rf/dispatch [::update-settings])
+                 :disabled (not can-update?)}
+        (if contact-updated?
+          "Updated!"
+          "Update Contact Info")]]]
 
      [:div.stack.spacious
       [:h3 "Reset Password"]
@@ -122,4 +143,6 @@
                       :label "Confirm new password"}]
       [:button {:on-click #(rf/dispatch [::update-settings])
                 :disabled (not can-reset?)}
-       "Update Password"]]]))
+       (if password-updated?
+         "Updated!"
+         "Update Password")]]]))

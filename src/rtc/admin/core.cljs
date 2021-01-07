@@ -46,6 +46,9 @@
              :error/contact-info nil
              :error/password-reset nil}
 
+    :contact/updated? nil
+    :password/updated? nil
+
     :view :schedule
     :user-id nil
     :filters {:availabilities? true
