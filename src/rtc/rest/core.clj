@@ -100,8 +100,7 @@
      {:get (rest-handler (fn [req]
                            (try
                              {:success true
-                              :data    (merge {:user auth/default-user}
-                                              (schedule/schedule req))}
+                              :data    (schedule/schedule req)}
                              (catch Throwable e
                                {:success false
                                 :errors [{:message (.getMessage e)}]}))))}]

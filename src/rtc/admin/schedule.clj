@@ -3,7 +3,7 @@
    [clojure.set :refer [rename-keys]]
    [rtc.appointments.appointments :as appt]
    [rtc.appointments.availabilities :as avail]
-   [rtc.db :as d]
+   [rtc.users.core :as u]
    [rtc.util :refer [index-by]])
   (:import
    [java.util Date]))
@@ -38,7 +38,7 @@
        (index-by :id $))
      :user-id (:id identity)
      :users
-     (index-by :id (d/get-all-users))
+     (index-by :id (u/all))
      :params query-params}))
 
 

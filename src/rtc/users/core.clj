@@ -35,6 +35,9 @@
                      :is_admin
                      :is_provider]))
 
+(defn all []
+  (map publicize (db/get-all-users)))
+
 (defn invite! [{:keys [email invited_by]}]
   (let [invite-code (crypto/url-part 32)
         invitation {:email email
