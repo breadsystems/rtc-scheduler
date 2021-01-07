@@ -21,6 +21,19 @@
 (defn preferences [user]
   (:preferences user))
 
+(defn publicize
+  "Return the set of public user fields we want to be viewable on the frontend."
+  [user]
+  (select-keys user [:id
+                     :email
+                     :first_name
+                     :last_name
+                     :pronouns
+                     :phone
+                     :state
+                     :is_admin
+                     :is_provider]))
+
 (defn invite! [{:keys [email invited_by]}]
   (let [invite-code (crypto/url-part 32)
         invitation {:email email

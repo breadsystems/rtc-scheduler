@@ -169,15 +169,7 @@
     ["/settings"
      {:get (rest-handler (fn [req]
                            {:success true
-                            :data (select-keys (:identity req)
-                                               [:id
-                                                :email
-                                                :first_name
-                                                :last_name
-                                                :pronouns
-                                                :phone
-                                                :state
-                                                :is_provider])}))
+                            :data (u/publicize (:identity req))}))
       :post (rest-handler (fn [req]
                             (let [identity (:identity req)
                                   ;; Make sure id does not come from user input.
@@ -186,7 +178,7 @@
                                 (u/update-settings! user)
                                 {:success true
                                  :data user
-                                 :session {:identity user}}
+                                 :session {:identity (u/publicize user)}}
                                 (catch ExceptionInfo e
                                   {:success false
                                    :errors [{:message (.getMessage e)
