@@ -168,7 +168,7 @@
     ["/settings"
      {:get (rest-handler (fn [req]
                            {:success true
-                            :data (u/publicize (:identity req))}))
+                            :data    (-> req :identity :id u/id->user u/publicize)}))
       :post (rest-handler (fn [req]
                             (let [identity (:identity req)
                                   ;; Make sure id does not come from user input.

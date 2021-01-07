@@ -73,7 +73,7 @@
             ;; Recreate the session due to privilege escalation.
             (assoc :session (vary-meta (:session req) assoc :recreate true))
             ;; Persist our user identity in the session.
-            (assoc-in [:session :identity] (u/publicize user))))
+            (assoc-in [:session :identity] {:id (:id user)})))
       (layout/login-page {:req req
                           :error "Invalid email or password"}))
 
