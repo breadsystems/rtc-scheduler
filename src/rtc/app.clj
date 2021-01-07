@@ -79,12 +79,12 @@
       (get headers "x-csrf-token")))
 
 (defn- wrap-dev-identity
-  "Load default dev admin user into :identity when auth is explicitly disabled"
+  "Load default dev admin user into the session identity when auth is explicitly disabled.
+   Note that the wrap-identity middleware loads the actual :identity key into req."
   [handler]
   (if (:dev-disable-auth env)
-    (let [admin-user (u/email->user (:default-admin-email env))]
-      (fn [req]
-        (handler (assoc req :identity admin-user))))
+    (fn [req]
+      (handler (assoc-in req [:session :identity] auth/default-user)))
     handler))
 
 (defn- env-anti-forgery
@@ -104,8 +104,8 @@
     (reset! stop-http
             (http/run-server (-> app
                                  (env-anti-forgery)
-                                 (wrap-dev-identity)
                                  (auth/wrap-identity)
+                                 (wrap-dev-identity)
                                  (wrap-session)
                                  (wrap-keyword-params)
                                  (wrap-params)
