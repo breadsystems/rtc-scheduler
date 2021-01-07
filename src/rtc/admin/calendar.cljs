@@ -369,7 +369,7 @@
    (rest/post! "/api/v1/admin/availability"
                {:transit-params availability
                 :headers {"x-csrf-token" csrf-token}}
-               ::new-availability)))
+               ::availability-created)))
 
 (rf/reg-fx
  ::update-availability!
@@ -425,10 +425,14 @@
       ::render-calendar nil})))
 
 (rf/reg-event-fx
- ::new-availability
+ ::availability-created
  (fn [{:keys [db]} [_ {:keys [data]}]]
    (let [avail (:availability data)]
-     {:db (assoc-in db [:availabilities (:id avail)] avail)
+     {:db (-> db
+              (assoc-in [:availabilities (:id avail)] avail)
+              ;; Make the current user visible in the filters
+              ;; if they weren't previously.
+              (update-in [:filters :providers] conj (:user/id avail)))
       ::render-calendar nil})))
 
 (rf/reg-event-fx
