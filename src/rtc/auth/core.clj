@@ -90,7 +90,6 @@
     :logged-in
     (redirect (destination-uri req))))
 
-;; TODO do we still need this?
 (defn wrap-identity
   "Persist session identity directly into request"
   [handler]
