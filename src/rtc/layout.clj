@@ -138,16 +138,18 @@
          (when error
            [:div.error
             [:p error]])
-         [:div
+         [:div.flex-field
+          [:label.field-label {:for "email"} "Email"]
           [:input {:type :email
                    :name "email"
-                  ;; TODO
+                   :id "email"
                    :value (or email "")
                    :placeholder "me@example.com"}]]
-         [:div
+         [:div.flex-field
+          [:label.field-label {:for "password"} "Password"]
           [:input {:type :password
                    :name "password"
-                  ;; TODO
+                   :id "password"
                    :value (or password "")}]]
          [:div
           [:button {:type :submit} "Login"]]
