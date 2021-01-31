@@ -52,9 +52,10 @@
     :else
     :unauthenticated))
 
-(defn destination-uri [{:keys [query-params]}]
-  (let [dest (get query-params "next")]
-    (if (seq dest) dest "/comrades")))
+(defn destination-uri [{:keys [params]}]
+  (if (seq (:next params))
+    (:next params)
+    "/comrades"))
 
 (defn logout-handler [_req]
   (-> (redirect "/login")
@@ -67,13 +68,14 @@
 
     :authenticating
     (if-let [user (u/authenticate (:email params) (:password params))]
-      (do
+      (let [identity (select-keys user [:id :authy_id])
+            ;; Persist our user identity in a new session.
+            session (-> (:session req)
+                        (assoc :identity identity)
+                        (vary-meta assoc :recreate true))]
         (u/record-login! user)
         (-> (layout/two-factor-page req)
-            ;; Recreate the session due to privilege escalation.
-            (assoc :session (vary-meta (:session req) assoc :recreate true))
-            ;; Persist our user identity in the session.
-            (assoc-in [:session :identity] {:id (:id user)})))
+          (assoc :session session)))
       (layout/login-page {:req req
                           :error "Invalid email or password"}))
 
@@ -83,6 +85,7 @@
     :verifying
     (if (two-factor/verify-token (:token params) (:authy_id identity))
       (-> (redirect (destination-uri req))
+          ;; assoc-in doesn't work here because magic
           (assoc :session (assoc session :verified-2fa-token? true)))
       (layout/two-factor-page {:req req
                                :error "Invalid token"}))

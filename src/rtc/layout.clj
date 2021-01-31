@@ -181,6 +181,9 @@
                   :placeholder "12 345 678"}]]
         [:div
          [:button {:type :submit} "Confirm"]]
+        [:div
+         [:p
+          [:a.text-button {:href "/logout"} "Cancel"]]]
         [:input {:type :hidden
                  :name :__anti-forgery-token
                  :value *anti-forgery-token*}]]]})))
