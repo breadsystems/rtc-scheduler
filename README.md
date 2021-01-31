@@ -77,7 +77,7 @@ Configure the application by creating a `src/dev/config.edn` file:
 cp src/dev/example.config.edn src/dev/config.edn
 ```
 
-Edit the new `config.edn` file to set up 2FA. If you don't need to test backend authentication, you can disable authentication altogether by setting `:dev-disable-auth true`.
+Edit the new `config.edn` file to set up 2FA with your [Authy API key](https://www.twilio.com/docs/authy/api#authy-api-keys). If you want to skip this for development purposes, see the section below about *security settings in dev*.
 
 In most cases you can leave the `:database-url` value alone.
 
@@ -93,6 +93,12 @@ From there, you can...
 
 * Click **Get Care** to test out the intake process.
 * Visit `/comrades` to test out the admin
+
+##### Security settings in dev
+
+In a development environment, it's possible to disable backend authentication in case you are not actively testing that feature. You can disable authentication altogether by setting `:dev-disable-auth true`. You can also disable anti-XSRF protection with `:dev-disable-anti-forgery true`.
+
+Obviously you should never override the default values for these in production.
 
 #### Tests
 
