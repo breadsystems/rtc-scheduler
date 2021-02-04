@@ -64,8 +64,8 @@
       (db/query)))
 
 (defn invite-url [{:keys [scheme server-name server-port]} {:keys [email code]}]
-  (let [port (when (and server-port (not= 80 server-port))
-               (str ":" server-port))]
+  (let [port (str (when (and server-port (not= 80 server-port))
+                    (str ":" server-port)))]
     (format "%s://%s%s/register?email=%s&code=%s"
             (name scheme)
             server-name
