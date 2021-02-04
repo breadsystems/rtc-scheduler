@@ -561,6 +561,7 @@
       [:h4 "Filter by provider"]
       (doall (map (fn [{:keys [id] :as provider}]
                     (let [html-id (str "provider-filter-" id)]
+                      ^{:key id}
                       [:div.filter-field
                        [:input {:id html-id
                                 :type :checkbox
@@ -576,6 +577,7 @@
       [:h4 "Filter by access need"]
       (doall (map (fn [{:keys [id name]}]
                     (let [html-id (str "access-filter-" id)]
+                      ^{:key id}
                       [:div.filter-field
                        [:input {:id html-id
                                 :type :checkbox
