@@ -34,6 +34,11 @@
      ["/" {:get (fn [_req]
                   (layout/markdown-page
                    {:file "home.md"
+                    :before [:section.center.spacious
+                            ;; TODO get this from EDN
+                            [:a.call-to-action {:href "/get-care"}
+                             [:span {:data-lang "en"} "Get Care"]
+                             [:span {:data-lang "es" :style {:display :none}} "Recibe Atencion Médica"]]]
                     :after [:section.center.spacious
                             ;; TODO get this from EDN
                             [:a.call-to-action {:href "/get-care"}

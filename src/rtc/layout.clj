@@ -69,7 +69,7 @@
 
 (defn markdown-page
   "Render a markdown file as an HTML page. Calls (page) passing the rendered Markdown as :content."
-  [{:keys [title file after] :as opts}]
+  [{:keys [title file before after] :as opts}]
   (page
    (merge
     opts
@@ -78,6 +78,9 @@
                [:header
                 [:h1 (or title "Radical Telehealth Collective")]]
                [:main.prose
+                (when before
+                  [:div.before
+                   before])
                 [:section {:data-lang "en"}
                  (file->html (str "en/" file))]
                 [:section {:data-lang "es"
