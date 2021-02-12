@@ -247,15 +247,11 @@
   (let [{:keys [availabilities? appointments? providers access-needs]} filters
         ;; Only type and provider filters apply to Availabilities.
         visible-avails (-> (when availabilities?
-                             (do
-                               (map #(do
-                                       (prn '(editable-for? avail user-id) (editable-for? % user-id))
-                                       (prn %)
-                                       (assoc %
+                             (map #(assoc %
                                           :event/type :availability
                                           :deletable (editable-for? % user-id)
-                                          :editable (editable-for? % user-id)))
-                                  (vals availabilities))))
+                                          :editable (editable-for? % user-id))
+                                  (vals availabilities)))
                            (by-provider providers))
         ;; All filters apply to Appointments.
         visible-appts (-> (when appointments?
@@ -724,8 +720,16 @@
        {:header-toolbar #js {:left "prev,next today"
                              :center "title"
                              :right "timeGridWeek listWeek"}
-        :date-click (fn [info]
-                      (js/console.log info))
+        :event-did-mount (fn [info]
+                           (when (.. ^js info -event -_def -extendedProps -deletable)
+                             (let [id (.. info -event -id)
+                                   elem (.-el info)
+                                   delete-btn (js/document.createElement "i")
+                                   on-click #(rf/dispatch [::delete-availability id])]
+                               (.addEventListener delete-btn "click" on-click)
+                               (set! (.-innerText delete-btn) "×")
+                               (.add (.-classList delete-btn) "rtc-delete")
+                               (.appendChild elem delete-btn))))
         :selectable true
         :select (fn [event]
                   (rf/dispatch [::create-availability {:start (.-start event)
@@ -737,17 +741,6 @@
                             id (js/parseInt (.-id e))]
                         (when (appointment? e)
                           (rf/dispatch [::focus-appointment id]))))
-        :event-did-mount (fn [info]
-                           (js/console.log (.. info -event -_def -extendedProps))
-                           (when (.. info -event -_def -extendedProps -deletable)
-                             (let [id (.. info -event -id)
-                                   elem (.-el info)
-                                   delete-btn (js/document.createElement "i")
-                                   on-click #(rf/dispatch [::delete-availability id])]
-                               (.addEventListener delete-btn "click" on-click)
-                               (set! (.-innerText delete-btn) "×")
-                               (.add (.-classList delete-btn) "rtc-delete")
-                               (.appendChild elem delete-btn))))
         :event-change (fn [info]
                         (let [e (.-event info)
                               id (js/parseInt (.-id e))]
