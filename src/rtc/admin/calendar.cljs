@@ -623,14 +623,46 @@
 (comment
   @(rf/subscribe [::focused-appointment]))
 
+(defn- medical-needs [{:keys [reason]}]
+  (when @(rf/subscribe [::can-view-medical-needs?])
+    [:div.appointment-field-group
+     [:h3 "Medical Needs"]
+     [:p reason]]))
+
+(defn- appointment-notes [{:keys [notes]}]
+  (let [current-note @(rf/subscribe [::note])
+        confirm?! #(js/confirm (str "Confirm leaving this note? \""
+                                    current-note "\""))
+        can-create-note? (> (count current-note) 5)]
+    [:div.appointment-notes
+     [:h3 "Notes"]
+     [:div.create-note
+      [:textarea.create-note__text {:on-change #(rf/dispatch-sync
+                                                  [::update-note
+                                                   (.. % -target -value)])
+                                    :value current-note}]
+      [:p
+       [:button.secondary {:on-click
+                           #(when (confirm?!)
+                                  (rf/dispatch [::create-note]))
+                           :title (when-not can-create-note? "Note is too short.")
+                           :disabled (not can-create-note?)}
+        "Create a note"]]
+      [:p.help "Notes cannot be deleted."]]
+     (doall (map (fn [{:keys [note date_created] :as appt-note}]
+                   (let [user @(rf/subscribe [::user (:user/id appt-note)])]
+                     ^{:key date_created}
+                     [:aside.appt-note
+                      [:div.appt-note__time (.format (moment date_created) "M/D H:mm a")]
+                      [:div.appt-note__text note]
+                      [:div.appt-note__attribution (user->name user)]]))
+                 (vec notes)))]))
+
 (defn appointment-details []
   (let [appt @(rf/subscribe [::focused-appointment])
-        {:keys [pronouns email phone ok_to_text reason notes]} appt
+        {:keys [pronouns email phone ok_to_text notes]} appt
         access-needs @(rf/subscribe [::current-access-needs])
-        start (moment. (:start appt))
-        can-view-medical-needs? @(rf/subscribe [::can-view-medical-needs?])
-        current-note @(rf/subscribe [::note])
-        can-create-note? (> (count current-note) 5)]
+        start (moment. (:start appt))]
     [:article.appointment
      [:header
       [:h2.appointment-name
@@ -675,31 +707,8 @@
                   [:label {:for (str "fulfilled-" (name id))}
                    label ": " info]]))
              access-needs))]]
-     (when can-view-medical-needs?
-       [:div.appointment-field-group
-        [:h3 "Medical Needs"]
-        [:p reason]])
-     [:div.appointment-notes
-      [:h3 "Notes"]
-      [:div.create-note
-       [:textarea.create-note__text {:on-change #(rf/dispatch-sync [::update-note (.. % -target -value)])
-                                     :value current-note}]
-       [:p
-        [:button.secondary {:on-click #(when (js/confirm (str "Notes can't be deleted (for now)."
-                                                              " Confirm leaving this note? \""
-                                                              current-note "\""))
-                                         (rf/dispatch [::create-note]))
-                            :title (when-not can-create-note? "Note is too short.")
-                            :disabled (not can-create-note?)}
-         "Create a note"]]]
-      (doall (map (fn [{:keys [note date_created] :as appt-note}]
-                    (let [user @(rf/subscribe [::user (:user/id appt-note)])]
-                      ^{:key date_created}
-                      [:aside.appt-note
-                       [:div.appt-note__time (.format (moment date_created) "M/D H:mm a")]
-                       [:div.appt-note__text note]
-                       [:div.appt-note__attribution (user->name user)]]))
-                  (vec notes)))]]))
+     (medical-needs appt)
+     (appointment-notes appt)]))
 
 (defn calendar []
   (let [!ref (atom nil)]
