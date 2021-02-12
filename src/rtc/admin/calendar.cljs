@@ -535,8 +535,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;; PRC = Person Receiving Care
-(defn- prc-name [person]
+(defn- careseeker-name [person]
   (if (> (count (:name person)) 0)
     [:span (:name person)]
     [:i "Anonymous"]))
@@ -623,6 +622,52 @@
 (comment
   @(rf/subscribe [::focused-appointment]))
 
+(defn- appointment-contact
+  [{:keys [email phone ok_to_text preferred_communication_method]}]
+  [:div.appointment-field-group
+   [:h3 "Contact"]
+   [:dl
+    [:dt "Email"]
+    [:dd
+     (if (seq email)
+       [:a {:href (str "mailto:" email)} email]
+       [:span.help "not given"])]
+    [:dt "Phone"]
+    [:dd
+     (if (seq phone)
+       [:a {:href (str "tel:" phone)} phone]
+       [:span.help "not given"])]
+    [:dt "OK to text?"]
+    [:dd (if ok_to_text "yes" "no")]
+    [:dt "Preferred comm. method"]
+    [:dd preferred_communication_method]]])
+
+(defn- appointment-access-needs [{appt-id :id}]
+  (let [access-needs @(rf/subscribe [::current-access-needs])]
+    [:div.appointment-field-group
+     [:h3 "Access Needs"]
+     (if (seq (filter (complement :need/fulfilled?) access-needs))
+       [:div.access-needs-indicator.--unmet "Unmet access needs"]
+       [:div.access-needs-indicator.--met "Access needs met!"])
+     (doall
+      (map (fn [need]
+             (let [{:need/keys [id info fulfilled?] label :name}
+                   (merge @(rf/subscribe [::access-need (:need/id need)])
+                          need)]
+               ^{:key id}
+               [:p
+                [:input {:id (str "fulfilled-" (name id))
+                         :type :checkbox
+                         :on-change #(rf/dispatch
+                                      [::fulfill
+                                       {:need/id id
+                                        :appointment/id appt-id
+                                        :need/fulfilled? (not fulfilled?)}])
+                         :checked fulfilled?}]
+                [:label {:for (str "fulfilled-" (name id))}
+                 label ": " info]]))
+           access-needs))]))
+
 (defn- medical-needs [{:keys [reason]}]
   (when @(rf/subscribe [::can-view-medical-needs?])
     [:div.appointment-field-group
@@ -659,54 +704,22 @@
                  (vec notes)))]))
 
 (defn appointment-details []
-  (let [appt @(rf/subscribe [::focused-appointment])
-        {:keys [pronouns email phone ok_to_text notes]} appt
-        access-needs @(rf/subscribe [::current-access-needs])
+  (let [{:keys [pronouns] :as appt} @(rf/subscribe [::focused-appointment])
+        provider @(rf/subscribe [::user (:user/id appt)])
         start (moment. (:start appt))]
+    (prn (keys appt))
     [:article.appointment
      [:header
       [:h2.appointment-name
-       (prc-name appt)
+       (careseeker-name appt)
        (when (seq pronouns)
          (str " (" pronouns ")"))]
-      [:h3 (.format start "h:mma ddd, MMM D")]]
+      [:h3
+       (.format start "h:mma ddd, MMM D")
+       " with " (:first_name provider) " " (:last_name provider)]]
      [:div.appointment-details
-      [:div.appointment-field-group
-       [:h3 "Contact"]
-       [:dl
-        (when (seq email)
-          [:<>
-           [:dt "Email"]
-           [:dd [:a {:href (str "mailto:")} email]]])
-        (when (seq phone)
-          [:<>
-           [:dt "Phone"]
-           [:dd [:a {:href (str "tel:" phone)} phone]]])
-        [:dt "OK to text?"]
-        [:dd (if ok_to_text "yes" "no")]]]
-      [:div.appointment-field-group
-       [:h3 "Access Needs"]
-       (if (seq (filter (complement :need/fulfilled?) access-needs))
-         [:div.access-needs-indicator.--unmet "Unmet access needs"]
-         [:div.access-needs-indicator.--met "Access needs met!"])
-       (doall
-        (map (fn [need]
-               (let [{:need/keys [id info fulfilled?] label :name}
-                     (merge @(rf/subscribe [::access-need (:need/id need)])
-                            need)]
-                 ^{:key id}
-                 [:p
-                  [:input {:id (str "fulfilled-" (name id))
-                           :type :checkbox
-                           :on-change #(rf/dispatch
-                                        [::fulfill
-                                         {:need/id id
-                                          :appointment/id (:id appt)
-                                          :need/fulfilled? (not fulfilled?)}])
-                           :checked fulfilled?}]
-                  [:label {:for (str "fulfilled-" (name id))}
-                   label ": " info]]))
-             access-needs))]]
+      (appointment-contact appt)
+      (appointment-access-needs appt)]
      (medical-needs appt)
      (appointment-notes appt)]))
 
