@@ -57,6 +57,7 @@
                 start
                 end
                 email
+                phone
                 alias
                 text-ok
                 interpreter-lang
@@ -73,6 +74,7 @@
                            :start_time (c/to-sql-time start)
                            :end_time (c/to-sql-time end)
                            :email email
+                           :phone phone
                            :alias alias
                            :ok_to_text (= 1 text-ok)
                            :other_notes anything-else
