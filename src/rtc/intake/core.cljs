@@ -570,7 +570,63 @@
         [:button.next {:on-click #(rf/dispatch [::next-step])
                        :disabled (not @(rf/subscribe [::can-go-next?]))} (t :next)])]]))
 
-(defn- question [{:keys [key type help required? required-without-any? placeholder options] :as q}]
+(defn- errors-class [errors]
+  (when (seq errors) "has-errors"))
+
+(defmulti ^:private question-input :type)
+
+;; No default: force a compiler error.
+
+(defmethod question-input :text
+  [{:keys [key type errors placeholder required? on-blur]}]
+  [:input {:class (errors-class errors)
+           :id (name key)
+           :type :text
+           :value @(rf/subscribe [::answer key])
+           :placeholder (t placeholder)
+           :required required?
+           :on-change #(rf/dispatch [::answer! key (.. % -target -value)])
+           :on-blur on-blur}])
+
+(defmethod question-input :email
+  [{:keys [key errors placeholder required? on-blur]}]
+  [:input {:class (errors-class errors)
+           :type :email
+           :value @(rf/subscribe [::answer key])
+           :placeholder (t placeholder)
+           :required required?
+           :on-change #(rf/dispatch [::answer! key (.. % -target -value)])
+           :on-blur on-blur}])
+
+(defmethod question-input :radio
+  [{:keys [key errors required? on-blur options]}]
+  [:<>
+   (map (fn [{:keys [value label]}]
+          (let [id (str (name key) "-" value)]
+            ^{:key value}
+            [:span.radio-option {:class (errors-class errors)}
+             [:input {:id id
+                      :name (name key)
+                      :type :radio
+                      :on-blur on-blur
+                      :on-change #(rf/dispatch [::answer! key value])
+                      :checked (= answer value)}]
+             [:label {:for id} label]]))
+        (t options))])
+
+(defmethod question-input :select
+  [{:keys [key errors on-blur options]}]
+  [:select {:class (errors-class errors)
+                  :value @(rf/subscribe [::answer key])
+                  :on-change #(rf/dispatch [::answer! key (.. % -target -value)])
+                  :on-blur on-blur}
+         (map (fn [opt]
+                (let [{:keys [value label]} (->opt opt)]
+                  ^{:key value}
+                  [:option {:value value} label]))
+              (t options))])
+
+(defn- question [{:keys [key help required? required-without-any? placeholder options] :as q}]
   (let [errors @(rf/subscribe [::errors-for key])
         messages (->> errors (map (comp t* :message)) (join "; "))
         on-blur #(rf/dispatch [::touch! key])
@@ -581,53 +637,8 @@
       (when (or required? required-without-any?)
         [:span.required " *"])]
      [:div.field
-      (case type
-        :text
-        [:input {:class (when (seq errors) "has-errors")
-                 :id (name key)
-                 :type :text
-                 :value @(rf/subscribe [::answer key])
-                 :placeholder (t placeholder)
-                 :required required?
-                 :on-change #(rf/dispatch [::answer! key (.. % -target -value)])
-                 :on-blur on-blur}]
-
-        :email
-        [:input {:class (when (seq errors) "has-errors")
-                 :type :email
-                 :value @(rf/subscribe [::answer key])
-                 :placeholder (t placeholder)
-                 :required required?
-                 :on-change #(rf/dispatch [::answer! key (.. % -target -value)])
-                 :on-blur on-blur}]
-
-        :radio
-        [:<>
-         (map (fn [{:keys [value label]}]
-                (let [id (str (name key) "-" value)]
-                  ^{:key value}
-                  [:span.radio-option {:class (when (seq errors) "has-errors")}
-                   [:input {:id id
-                            :name (name key)
-                            :type :radio
-                            :on-blur on-blur
-                            :on-change #(rf/dispatch [::answer! key value])
-                            :checked (= answer value)}]
-                   [:label {:for id} label]]))
-              (t options))]
-
-        :select
-        [:select {:class (when (seq errors) "has-errors")
-                  :value @(rf/subscribe [::answer key])
-                  :on-change #(rf/dispatch [::answer! key (.. % -target -value)])
-                  :on-blur on-blur}
-         (map (fn [opt]
-                (let [{:keys [value label]} (->opt opt)]
-                  ^{:key value}
-                  [:option {:value value} label]))
-              (t options))]
-
-        [:span "TODO"])
+      (question-input (merge q {:errors errors
+                                :on-blur on-blur}))
       (when (seq errors) [:div.error-message messages])]
      (when help [:div.help (t help)])]))
 
