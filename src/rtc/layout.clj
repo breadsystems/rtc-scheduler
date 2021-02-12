@@ -118,6 +118,7 @@
                       [:link {:rel "stylesheet" :href (assets/style-href :admin)}]]
      :content        [:div#rtc-admin-app]
      :footer-content [:div
+                      #_
                       [:script {:src "https://cdn.jsdelivr.net/npm/fullcalendar@5.4.0/main.min.js" :type "text/javascript"}]
                       [:script {:src (assets/js-src :shared) :type "text/javascript"}]
                       [:script {:src (assets/js-src :admin) :type "text/javascript"}]]})))

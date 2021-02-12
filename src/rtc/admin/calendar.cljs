@@ -2,10 +2,10 @@
   (:require
    [clojure.set :refer [union]]
    [clojure.string :refer [join]]
-  ;;  ["@fullcalendar/interaction" :default interactionPlugin]
-  ;;  ["@fullcalendar/list" :default listPlugin]
-  ;;  ["@fullcalendar/react" :default FullCalendar]
-  ;;  ["@fullcalendar/timegrid" :default timeGridPlugin]
+   ["@fullcalendar/react" :default FullCalendar]
+   ["@fullcalendar/interaction" :default interactionPlugin]
+   ["@fullcalendar/list" :default listPlugin]
+   ["@fullcalendar/timegrid" :default timeGridPlugin]
    ["moment" :as moment]
    [reagent.core :as r]
    [re-frame.core :as rf]
@@ -387,22 +387,11 @@
                   :headers {"x-csrf-token" csrf-token}}
                  ::availability-deleted)))
 
+(rf/reg-event-db ::update-filter (fn [db dispatch]
+                                   (update-filter db dispatch)))
 
-;; Keep our FullCalendar instance around so we can re-render on demand.
-(def !calendar (r/atom nil))
-
-(defn render-calendar! [_]
-  (.refetchEvents @!calendar))
-
-(rf/reg-fx ::render-calendar render-calendar!)
-
-(rf/reg-event-fx ::update-filter (fn [{:keys [db]} dispatch]
-                                   {:db (update-filter db dispatch)
-                                    ::render-calendar nil}))
-
-(rf/reg-event-fx ::clear-filter (fn [{:keys [db]} filter-key]
-                                  {:db (clear-filter db filter-key)
-                                   ::render-calendar nil}))
+(rf/reg-event-fx ::clear-filter (fn [db filter-key]
+                                  (clear-filter db filter-key)))
 
 ;; Dispatched once the schedule data is ready
 (rf/reg-event-fx
@@ -421,8 +410,7 @@
               (assoc-in
                [:filters :providers]
                (union (set (map :user/id (vals (:availabilies data))))
-                      (set (map :user/id (vals (:appointments data)))))))
-      ::render-calendar nil})))
+                      (set (map :user/id (vals (:appointments data)))))))})))
 
 (rf/reg-event-fx
  ::availability-created
@@ -432,22 +420,19 @@
               (assoc-in [:availabilities (:id avail)] avail)
               ;; Make the current user visible in the filters
               ;; if they weren't previously.
-              (update-in [:filters :providers] conj (:user/id avail)))
-      ::render-calendar nil})))
+              (update-in [:filters :providers] conj (:user/id avail)))})))
 
-(rf/reg-event-fx
+(rf/reg-event-db
  ::availability-updated
- (fn [{:keys [db]} [_ {:keys [data]}]]
+ (fn [db [_ {:keys [data]}]]
    (let [avail (:availability data)]
-     {:db (update-availability db avail)
-      ::render-calendar nil})))
+     (update-availability db avail))))
 
-(rf/reg-event-fx
+(rf/reg-event-db
  ::availability-deleted
- (fn [{:keys [db]} [_ {:keys [data]}]]
+ (fn [db [_ {:keys [data]}]]
    (let [avail (:availability data)]
-     {:db (delete-availability db (:id avail))
-      ::render-calendar nil})))
+     (delete-availability db (:id avail)))))
 
 (rf/reg-event-db
  ::need-fulfilled
@@ -723,68 +708,7 @@
      (medical-needs appt)
      (appointment-notes appt)]))
 
-(defn calendar []
-  (let [!ref (atom nil)]
-    (r/create-class
-     {:display-name "FullCalendar"
-      :reagent-render
-      (fn []
-        [:div.full-calendar {:ref #(reset! !ref %)}])
-      :component-did-mount
-      (fn []
-        (let [events-fn (fn [_info on-success _on-error]
-                          (on-success (clj->js @(rf/subscribe [::events]))))
-              cal (js/FullCalendar.Calendar.
-                   @!ref
-                   #js {:selectable true
-                        :headerToolbar #js {:start "today prev next"
-                                            :center "title"
-                                            :end "dayGridMonth timeGridWeek listWeek"}
-                        :eventClick (fn [info]
-                                      (let [e (.-event info)
-                                            id (js/parseInt (.-id e))]
-                                        (when (appointment? e)
-                                          (rf/dispatch [::focus-appointment id]))))
-                        :eventDidMount (fn [info]
-                                         (when (.. info -event -_def -extendedProps -deletable)
-                                           (let [id (.. info -event -id)
-                                                 elem (.-el info)
-                                                 delete-btn (js/document.createElement "i")
-                                                 on-click #(rf/dispatch [::delete-availability id])]
-                                             (.addEventListener delete-btn "click" on-click)
-                                             (set! (.-innerText delete-btn) "×")
-                                             (.add (.-classList delete-btn) "rtc-delete")
-                                             (.appendChild elem delete-btn))))
-                        :eventChange (fn [info]
-                                       (let [e (.-event info)
-                                             id (js/parseInt (.-id e))]
-                                         (rf/dispatch [::update-availability {:id id
-                                                                              :start (.-start e)
-                                                                              :end (.-end e)}])))
-                        :select (fn [event]
-                                  (rf/dispatch [::create-availability {:start (.-start event)
-                                                                       :end   (.-end event)}]))
-                        :eventOverlap can-overlap?
-                        :events events-fn
-                        :initialView "timeGridWeek"})]
-          ;; Save our FullCalendar.Calendar instance in an atom
-          (reset! !calendar cal)
-          (.render cal)))})))
-
-
 (defn care-schedule []
-  ;; TODO when this issue gets resolved see if we can use FullCalendar component:
-  ;; https://github.com/fullcalendar/fullcalendar/issues/5393
-  #_[:> FullCalendar {;:header-toolbar #js {:left "prev,next today" :center "title" :right "dayGrid"}
-                      :selectable true
-                      :select (fn [info]
-                                (js/console.log info))
-                      :date-click (fn [info]
-                                    (js/console.log info))
-                      :default-view "timeGridWeek"
-                      :events (*generate-calendar-events 50)
-                    ;; TODO enable drag & click interaction
-                      :plugins [#_interactionPlugin listPlugin timeGridPlugin]}]
   (let [appt @(rf/subscribe [::focused-appointment])]
     [:div.schedule-container
      (when appt
@@ -792,4 +716,37 @@
         [appointment-details]])
      [:div.care-schedule
       [filter-controls]
-      [calendar]]]))
+      [:> FullCalendar
+       {:header-toolbar #js {:left "prev,next today"
+                             :center "title"
+                             :right "timeGridWeek listWeek"}
+        :date-click (fn [info]
+                      (js/console.log info))
+        :selectable true
+        :select (fn [event]
+                  (rf/dispatch [::create-availability {:start (.-start event)
+                                                       :end   (.-end event)}]))
+        :default-view "timeGridWeek"
+        :events @(rf/subscribe [::events])
+        :event-click (fn [info]
+                      (let [e (.-event info)
+                            id (js/parseInt (.-id e))]
+                        (when (appointment? e)
+                          (rf/dispatch [::focus-appointment id]))))
+        :event-did-mount (fn [info]
+                           (when (.. info -event -_def -extendedProps -deletable)
+                             (let [id (.. info -event -id)
+                                   elem (.-el info)
+                                   delete-btn (js/document.createElement "i")
+                                   on-click #(rf/dispatch [::delete-availability id])]
+                               (.addEventListener delete-btn "click" on-click)
+                               (set! (.-innerText delete-btn) "×")
+                               (.add (.-classList delete-btn) "rtc-delete")
+                               (.appendChild elem delete-btn))))
+        :event-change (fn [info]
+                        (let [e (.-event info)
+                              id (js/parseInt (.-id e))]
+                          (rf/dispatch [::update-availability {:id id
+                                                               :start (.-start e)
+                                                               :end (.-end e)}])))
+        :plugins [interactionPlugin listPlugin timeGridPlugin]}]]]))
