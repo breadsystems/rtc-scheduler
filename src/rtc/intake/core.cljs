@@ -600,19 +600,20 @@
 
 (defmethod question-input :radio
   [{:keys [key errors required? on-blur options]}]
-  [:<>
-   (map (fn [{:keys [value label]}]
-          (let [id (str (name key) "-" value)]
-            ^{:key value}
-            [:span.radio-option {:class (errors-class errors)}
-             [:input {:id id
-                      :name (name key)
-                      :type :radio
-                      :on-blur on-blur
-                      :on-change #(rf/dispatch [::answer! key value])
-                      :checked (= answer value)}]
-             [:label {:for id} label]]))
-        (t options))])
+  (let [answer @(rf/subscribe [::answer key])]
+    [:<>
+     (map (fn [{:keys [value label]}]
+            (let [id (str (name key) "-" value)]
+              ^{:key value}
+              [:span.radio-option {:class (errors-class errors)}
+               [:input {:id id
+                        :name (name key)
+                        :type :radio
+                        :on-blur on-blur
+                        :on-change #(rf/dispatch [::answer! key value])
+                        :checked (= answer value)}]
+               [:label {:for id} label]]))
+          (t options))]))
 
 (defmethod question-input :select
   [{:keys [key errors on-blur options]}]
@@ -629,8 +630,7 @@
 (defn- question [{:keys [key help required? required-without-any? placeholder options] :as q}]
   (let [errors @(rf/subscribe [::errors-for key])
         messages (->> errors (map (comp t* :message)) (join "; "))
-        on-blur #(rf/dispatch [::touch! key])
-        answer @(rf/subscribe [::answer key])]
+        on-blur #(rf/dispatch [::touch! key])]
     [:div.question
      [:label.field-label {:for (name key)}
       (t key)
