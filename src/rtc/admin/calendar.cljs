@@ -48,7 +48,7 @@
   (filter #(= id (:user/id %)) avails))
 
 (defn can-overlap? [a b]
-  (let [provider-id #(.. % -_def -extendedProps -provider_id)]
+  (let [provider-id #(.. ^js % -_def -extendedProps -provider_id)]
     (or (not (availability? a))
         (not (availability? b))
         (not= (provider-id a) (provider-id b)))))
@@ -720,8 +720,8 @@
        {:header-toolbar #js {:left "prev,next today"
                              :center "title"
                              :right "timeGridWeek listWeek"}
-        :event-did-mount (fn [info]
-                           (when (.. ^js info -event -_def -extendedProps -deletable)
+        :event-did-mount (fn [^js info]
+                           (when (.. info -event -_def -extendedProps -deletable)
                              (let [id (.. info -event -id)
                                    elem (.-el info)
                                    delete-btn (js/document.createElement "i")
