@@ -247,11 +247,15 @@
   (let [{:keys [availabilities? appointments? providers access-needs]} filters
         ;; Only type and provider filters apply to Availabilities.
         visible-avails (-> (when availabilities?
-                             (map #(assoc %
+                             (do
+                               (map #(do
+                                       (prn '(editable-for? avail user-id) (editable-for? % user-id))
+                                       (prn %)
+                                       (assoc %
                                           :event/type :availability
                                           :deletable (editable-for? % user-id)
-                                          :editable (editable-for? % user-id))
-                                  (vals availabilities)))
+                                          :editable (editable-for? % user-id)))
+                                  (vals availabilities))))
                            (by-provider providers))
         ;; All filters apply to Appointments.
         visible-appts (-> (when appointments?
@@ -734,6 +738,7 @@
                         (when (appointment? e)
                           (rf/dispatch [::focus-appointment id]))))
         :event-did-mount (fn [info]
+                           (js/console.log (.. info -event -_def -extendedProps))
                            (when (.. info -event -_def -extendedProps -deletable)
                              (let [id (.. info -event -id)
                                    elem (.-el info)
