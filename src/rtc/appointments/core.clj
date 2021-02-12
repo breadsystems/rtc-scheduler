@@ -68,7 +68,7 @@
         windows (get-available-windows {:state state})
         pid (first (available-provider-ids windows appt))]
     (if pid
-      (let [{:keys [id]}
+      (let [{:keys [id] :as booked-appt}
             (appt/create! {:name name
                            :pronouns pronouns
                            :start_time (c/to-sql-time start)
@@ -89,7 +89,8 @@
         (when (seq interpreter-lang)
           (d/create-appointment-need! {:appointment/id id
                                        :need/id "interpretation"
-                                       :info interpreter-lang})))
+                                       :info interpreter-lang}))
+        booked-appt)
       ;; TODO insert access needs
       (throw (ex-info "Appointment window is unavailable!" {:windows windows
                                                             :reason :window-unavailable})))))

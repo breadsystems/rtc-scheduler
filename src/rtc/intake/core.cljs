@@ -704,6 +704,10 @@
         [:button.call-to-action {:on-click #(rf/dispatch [::confirm!])}
          (t :book-appointment)]]]})))
 
+(comment
+  (deref (rf/subscribe [::appointment]))
+  (deref (rf/subscribe [::confirmed-info])))
+
 (defn- confirmed []
   (let [appt @(rf/subscribe [::appointment])
         {:keys [provider_first_name provider_last_name start_time end_time]} @(rf/subscribe [::confirmed-info])
