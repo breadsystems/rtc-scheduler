@@ -61,6 +61,17 @@
   (-> (redirect "/login")
       (assoc :session {})))
 
+(defn on-token-failure [{:keys [session] :as req}]
+  (let [token-attempts (or (:token-attempts session) 1)]
+    (if (>= token-attempts 3)
+      (-> (redirect "/login")
+          ;; Too many attempts. Wipe out login state.
+          (assoc :session {}))
+      (-> (layout/two-factor-page {:req req :error "Invalid token."})
+          ;; Record token failure count.
+          (assoc :session
+                 (assoc session :token-attempts (inc token-attempts)))))))
+
 (defn login-handler [{:keys [params session identity] :as req}]
   (condp = (login-step req)
     :unauthenticated
@@ -87,8 +98,7 @@
       (-> (redirect (destination-uri req))
           ;; assoc-in doesn't work here because magic
           (assoc :session (assoc session :verified-2fa-token? true)))
-      (layout/two-factor-page {:req req
-                               :error "Invalid token"}))
+      (on-token-failure req))
 
     :logged-in
     (redirect (destination-uri req))))
