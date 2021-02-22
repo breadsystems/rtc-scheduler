@@ -94,6 +94,24 @@
                                {:success false
                                 :errors [:message (.getMessage e)
                                          :reason :unknown]}))))}]
+   ["/reset-password"
+    {:post (rest-handler (fn [req]
+                           (try
+                             (let [user (transit-params req)]
+                               (prn user)
+                               (if (u/validate-invitation user)
+                                 (do
+                                   (prn 'valid)
+                                   (u/reset-pass! user)
+                                   {:success true
+                                    :data {:redirect-to "/comrades"}})
+                                 {:success false
+                                  :errors [{:message "Invalid or expired invite code."
+                                            :reason :invalid-invite}]}))
+                             (catch Throwable e
+                               {:success false
+                                :errors [:message (.getMessage e)
+                                         :reason :unknown]}))))}]
    ["/admin"
     {:middleware [auth/wrap-auth]}
     ["/schedule"
