@@ -83,15 +83,6 @@
   (or (:__anti-forgery-token params)
       (get headers "x-csrf-token")))
 
-(defn- wrap-https
-  "Redirect to HTTPS in production"
-  [handler]
-  (fn [req]
-    (if (and (:https-dest env) (= :http (:scheme req)))
-      {:status 302
-       :headers {"Location" (:https-dest env)}}
-      (handler req))))
-
 (defn- wrap-dev-identity
   "Load default dev admin user into the session identity when auth is explicitly disabled.
    Note that the wrap-identity middleware loads the actual :identity key into req."
@@ -123,7 +114,6 @@
                                  (wrap-session)
                                  (wrap-keyword-params)
                                  (wrap-params)
-                                 (wrap-https)
                                  (rtc.env/middleware))
                              {:port port})))
   nil)

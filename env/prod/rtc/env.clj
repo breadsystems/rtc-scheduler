@@ -3,6 +3,7 @@
    [config.core :as config]
    [garden.core :as garden]
    [mount.core :as mount :refer [defstate]]
+   [ring.middleware.ssl :refer [wrap-forwarded-scheme wrap-ssl-redirect]]
    [rtc.admin.style :as admin-style]
    [rtc.style.build :as build]
    [rtc.intake.style :as intake-style]))
@@ -15,7 +16,9 @@
 
 
 (defn middleware [handler]
-  handler)
+  (-> handler
+      (wrap-ssl-redirect)
+      (wrap-forwarded-scheme)))
 
 (defn- build-styles []
   (println "Compiling styles...")
