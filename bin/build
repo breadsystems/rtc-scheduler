@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # Build production styles
-clojure -A:prod -m rtc.env
+clojure -M:prod -m rtc.env
 
 # Build JS assets
 yarn
-clojure -A:cljs-build release app
+clojure -M:cljs-build release app
 
 # Bundle all assets in an uberjar
 cd "$( dirname "${BASH_SOURCE[0]}" )"
