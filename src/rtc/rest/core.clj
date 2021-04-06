@@ -42,6 +42,7 @@
 
 (defn- rest-handler [f]
   (fn [{:keys [params session] :as req}]
+    (prn 'REST 'REQUEST req)
     (let [;; The frontend always consumes application/transit+edn data,
           ;; but application/json is useful for debugging
           json? (boolean (:json params))

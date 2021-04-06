@@ -73,9 +73,16 @@
     (assets/wrap-asset-headers (ring/create-resource-handler {:path "/"}))
     (ring/redirect-trailing-slash-handler {:method :strip})
     (ring/create-default-handler
-     {:not-found (constantly {:status 404
-                              :headers {"Content-Type" "text/plain; charset=utf-8"}
-                              :body "Not Found"})}))))
+     {:not-found
+      (fn [req]
+        (prn req 'NOT 'FOUND)
+        {:status 404
+         :headers {"Content-Type" "text/plain; charset=utf-8"}
+         :body "Not Found"})
+      #_
+      (constantly {:status 404
+                   :headers {"Content-Type" "text/plain; charset=utf-8"}
+                   :body "Not Found"})}))))
 
 
 (defonce stop-http (atom nil))
@@ -90,6 +97,7 @@
   [handler]
   (if (:dev-disable-auth env)
     (fn [req]
+      (prn 'in 'wrap-dev-identity req)
       (handler (assoc-in req [:session :identity] auth/default-user)))
     handler))
 
