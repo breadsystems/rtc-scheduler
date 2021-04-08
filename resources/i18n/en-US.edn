@@ -66,5 +66,5 @@
  :states
  [{:value ""   :label "Choose a state"}
   {:value "WA" :label "Washington"}
-  {:value "NY" :label "New York"}
+  {:value "MA" :label "Massachusetts"}
   {:value "CA" :label "California"}]}
