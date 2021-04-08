@@ -102,7 +102,13 @@
    ["UPDATE users SET pass = ? WHERE id = ?" (hash/derive pass) id]))
 
 (defn update-contact-info! [user]
-  (let [user-keys [:first_name :last_name :email :phone :is_provider]]
+  (let [user-keys [:first_name
+                   :last_name
+                   :pronouns
+                   :email
+                   :phone
+                   :state
+                   :is_provider]]
     (-> (sqlh/update :users)
         (sqlh/sset (select-keys user user-keys))
         (sqlh/where [:= :id (:id user)])

@@ -76,7 +76,7 @@
   @(rf/subscribe [::current-user])
   @(rf/subscribe [:error-message :error/password-reset]))
 
-(defn- setting-field [{:keys [setting type label]}]
+(defn- setting-field [{:keys [setting type label placeholder maxlength]}]
   (let [type (or type :text)
         settings @(rf/subscribe [::current-user])]
     [:div.flex-field
@@ -89,7 +89,9 @@
                  :on-change
                  #(rf/dispatch
                    [::update-setting setting (.. % -target -value)])
-                 :value (get settings setting)}]
+                 :value (get settings setting)
+                 :maxlength maxlength
+                 :placeholder placeholder}]
         (= :checkbox type)
         [:input {:type :checkbox
                  :id (name setting)
@@ -116,6 +118,9 @@
                       :label "First Name"}]
       [setting-field {:setting :last_name
                       :label "Last Name"}]
+      [setting-field {:setting :pronouns
+                      :placeholder "they/them"
+                      :label "Pronouns"}]
       [setting-field {:setting :email
                       :type :email
                       :label "Email"}]
@@ -124,6 +129,11 @@
       [setting-field {:setting :is_provider
                       :type :checkbox
                       :label "I am a provider"}]
+      [setting-field {:setting :state
+                      :type :text
+                      :placeholder "WA"
+                      :maxlength 2
+                      :label "State (2 letters)"}]
       [:div
        [:button {:on-click #(rf/dispatch [::update-settings])
                  :disabled (not can-update?)}
