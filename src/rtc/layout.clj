@@ -127,8 +127,8 @@
 (defn login-page
   "Render the login page."
   [{:keys [error req]}]
-  (let [{:keys [form-params query-string]} req
-        {:keys [email password]} form-params]
+  (let [{:keys [params]} req
+        {:keys [email password] dest :next} params]
     (page
      {:title "Login"
       :req req
@@ -138,7 +138,7 @@
         [:h1 "Radical Telehealth Collective"]
         [:h2 "Login"]]
        [:main
-        [:form.stack {:action (str "/login?" query-string) :method "POST"}
+        [:form.stack {:action "/login" :method "POST"}
          (when error
            [:div.error
             [:p error]])
@@ -158,6 +158,9 @@
          [:div
           [:button {:type :submit} "Login"]]
          [:input {:type :hidden
+                  :name :next
+                  :value dest}]
+         [:input {:type :hidden
                   :name :__anti-forgery-token
                   :value *anti-forgery-token*}]]]]})))
 
@@ -165,7 +168,7 @@
 (defn two-factor-page
   "Render the second step of the login form, 2-Factor Authentication (2FA)."
   [{:keys [req error]}]
-  (let [dest (get-in req [:query-params "next"])]
+  (let [dest (:next (:params req))]
     (page
      {:title "Verify Token"
       :content
@@ -173,7 +176,7 @@
        [:header
         [:h1 "Radical Telehealth Collective"]
         [:h2 "Login"]]
-       [:form.stack {:action (str "/login?next=" dest) :method "POST"}
+       [:form.stack {:action "/login" :method "POST"}
         [:div "Please confirm the token shown in your authenticator app."]
         (when error
           [:div.error-message
@@ -188,6 +191,9 @@
         [:div
          [:p
           [:a.text-button {:href "/logout"} "Cancel"]]]
+        [:input {:type :hidden
+                 :name :next
+                 :value dest}]
         [:input {:type :hidden
                  :name :__anti-forgery-token
                  :value *anti-forgery-token*}]]]})))

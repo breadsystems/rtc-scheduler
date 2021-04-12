@@ -85,13 +85,13 @@
                         (assoc :identity identity)
                         (vary-meta assoc :recreate true))]
         (u/record-login! user)
-        (-> (layout/two-factor-page req)
+        (-> (layout/two-factor-page {:req req})
           (assoc :session session)))
       (layout/login-page {:req req
                           :error "Invalid email or password"}))
 
     :two-factor
-    (layout/two-factor-page req)
+    (layout/two-factor-page {:req req})
 
     :verifying
     (if (two-factor/verify-token (:token params) (:authy_id identity))
