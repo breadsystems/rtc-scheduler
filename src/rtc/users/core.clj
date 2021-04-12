@@ -63,21 +63,26 @@
       (sql/format)
       (db/query)))
 
-(defn invite-url [{:keys [scheme server-name server-port]} {:keys [email code]}]
-  (let [port (str (when (and server-port (not= 80 server-port))
-                    (str ":" server-port)))]
-    (format "%s://%s%s/register?email=%s&code=%s"
-            (name scheme)
-            server-name
-            port
-            email
-            code)))
-
 (defn id->user [id]
   (dissoc (db/get-user {:id id}) :pass))
 
 (defn email->user [email]
   (dissoc (db/get-user-by-email {:email email}) :pass))
+
+(defn invite-url
+  [{:keys [scheme server-name server-port]} {:keys [email code]}]
+  (let [port (str (when (and server-port (not= 80 server-port))
+                    (str ":" server-port)))
+        register-or-reset-pw (if (email->user email)
+                               "reset-password"
+                               "register")]
+    (format "%s://%s%s/%s?email=%s&code=%s"
+            (name scheme)
+            server-name
+            port
+            register-or-reset-pw
+            email
+            code)))
 
 (defn register! [{:keys [email phone] :as user}]
   (let [authy-payload {:email email
@@ -100,6 +105,14 @@
                     {:reason :pass-confirmation-mismatch})))
   (db/execute!
    ["UPDATE users SET pass = ? WHERE id = ?" (hash/derive pass) id]))
+
+(defn reset-pass! [{:keys [email] :as user}]
+  ;; We don't have the user's ID yet, so get them by their email.
+  (update-password! (merge (email->user email) user))
+  ;; This invitation is no longer valid!
+  (db/redeem-invitation! user)
+  ;; Get the fresh user data.
+  (email->user email))
 
 (defn update-contact-info! [user]
   (let [user-keys [:first_name
@@ -156,6 +169,13 @@
 
   user
   (register! user)
+
+  (def reset-invite (invite! {:email "coby@tamayo.email"
+                              :invited_by (:id admin)}))
+  (validate-invitation reset-invite)
+
+  (invite-url {:scheme :http :server-name "localhost" :server-port "8080"}
+              reset-invite)
 
   (email->user "rtc@example.com")
   (admin? (email->user "rtc@example.com"))

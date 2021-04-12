@@ -1,4 +1,4 @@
-(ns rtc.register.core
+(ns rtc.reset-pass.core
   (:require
    [clojure.string :refer [join]]
    [reagent.core :as r]
@@ -9,11 +9,6 @@
 
 (defonce app (r/atom {:user {:code ""
                              :email ""
-                             :first_name ""
-                             :last_name ""
-                             :pronouns ""
-                             :phone ""
-                             :state ""
                              :pass ""
                              :pass-confirmation ""}}
                      :errors {}))
@@ -55,17 +50,17 @@
   (fn [event]
     ((apply partial f args) (.. event -target -value))))
 
-(defn registered [{:keys [data errors]}]
+(defn on-reset-success [{:keys [data errors]}]
   (if (seq errors)
     (set-field-errors! {:global errors})
     (set! js/document.location (:redirect-to data))))
 
-(defn register!
-  "The main event. Register the user and redirect on success."
+(defn reset-pass!
+  "The main event. Reset the password and redirect on success."
   []
-  (rest/post! "/api/v1/register"
+  (rest/post! "/api/v1/reset-password"
               {:transit-params @user}
-              registered
+              on-reset-success
               (fn [{:keys [errors]}]
                 (set-field-errors! {:global errors}))))
 
@@ -77,16 +72,13 @@
 
   ;; Populate all fields
   (do
-    (update-user-field! :first_name "Coby")
-    (update-user-field! :last_name "Tamayo")
-    (update-user-field! :phone "2532229139")
     (update-user-field! :pass "password")
     (update-user-field! :pass-confirmation "password"))
 
   ;; Test with an invalid invite
   (swap! app assoc-in [:user :email] "")
 
-  (register!)
+  (reset-pass!)
 
   (field->errors :pass))
 
@@ -101,49 +93,18 @@
   (let [update-pass! (emitter update-user-field! :pass)
         update-confirmation! (emitter update-user-field! :pass-confirmation)]
     [:main
-     [:h2 "Register"]
+     [:h2 "Reset Password"]
      [:form.stack {:on-submit (fn [e]
                                 (.preventDefault e)
-                                (register!))}
+                                (reset-pass!))}
       (when (seq @global-errors)
         (doall (for [err @global-errors]
                  ^{:key (:message err)}
                  [:p.error-message (:message err)])))
       [:div
-       [:span [:strong "Email: "] (:email @user)]
-       [:p.help "You can change your email once you finish setting up your account."]]
+       [:span [:strong "Email: "] (:email @user)]]
       [:div.flex-field
-       [:label.field-label {:for "first_name"} "First Name"]
-       [:div.field
-        [:input {:type :text
-                 :id "first_name"
-                 :class (field->class :first_name)
-                 :on-change (emitter update-user-field! :first_name)
-                 :on-blur (emitter check-required! :first_name "Please enter your first name")
-                 :value (:first_name @user)}]
-        [errors-for :first_name]]]
-      [:div.flex-field
-       [:label.field-label {:for "last_name"} "Last Name"]
-       [:div.field
-        [:input {:type :text
-                 :id "last_name"
-                 :class (field->class :last_name)
-                 :on-change (emitter update-user-field! :last_name)
-                 :on-blur (emitter check-required! :last_name "Please enter your last name")
-                 :value (:last_name @user)}]
-        [errors-for :last_name]]]
-      [:div.flex-field
-       [:label.field-label {:for "phone"} "Phone"]
-       ;; TODO phone input
-       [:div.field
-        [:input {:type :text
-                 :id "phone"
-                 :class (field->class :phone)
-                 :on-change (emitter update-user-field! :phone)
-                 :value (:phone @user)}]
-        [errors-for :phone]]]
-      [:div.flex-field
-       [:label.field-label {:for "password"} "Password"]
+       [:label.field-label {:for "password"} "New Password"]
        [:div.field
         [:input {:type :password
                  :id "password"
@@ -167,7 +128,7 @@
       [:div
        [:button.btn {:type :submit
                      :disabled (not @(r/track valid?))}
-        "Register"]]]]))
+        "Reset!"]]]]))
 
 
 (defn ^:dev/after-load mount! []

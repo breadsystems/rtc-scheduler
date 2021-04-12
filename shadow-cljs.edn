@@ -1,13 +1,15 @@
 {:deps true
  :builds {:app {:output-dir "resources/public/js"
                 :target :browser
-                :modules {:shared   {:entries []}
-                          :admin    {:depends-on #{:shared}
-                                     :init-fn rtc.admin.core/init!}
-                          :register {:depends-on #{:shared}
-                                     :init-fn rtc.register.core/init!}
-                          :intake   {:depends-on #{:shared}
-                                     :init-fn rtc.intake.core/init!}}
+                :modules {:shared     {:entries []}
+                          :admin      {:depends-on #{:shared}
+                                       :init-fn rtc.admin.core/init!}
+                          :register   {:depends-on #{:shared}
+                                       :init-fn rtc.register.core/init!}
+                          :reset-pass {:depends-on #{:shared}
+                                       :init-fn rtc.reset-pass.core/init!}
+                          :intake     {:depends-on #{:shared}
+                                       :init-fn rtc.intake.core/init!}}
                 :devtools {:http-root "public"
                            :http-port 3001
                            :watch-dir "resources/public"}

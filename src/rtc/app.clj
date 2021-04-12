@@ -54,6 +54,7 @@
      ["/register" user/register-handler]
      ["/login" auth/login-handler]
      ["/logout" auth/logout-handler]
+     ["/reset-password" user/reset-pass-handler]
 
      ;; Make sure any route matching /comrades/* serves the admin center.
      ;; From here on down, routing is done client-side.
