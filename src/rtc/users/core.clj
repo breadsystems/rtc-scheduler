@@ -106,10 +106,13 @@
   (db/execute!
    ["UPDATE users SET pass = ? WHERE id = ?" (hash/derive pass) id]))
 
-(defn reset-pass! [user]
-  (update-password! user)
+(defn reset-pass! [{:keys [email] :as user}]
+  ;; We don't have the user's ID yet, so get them by their email.
+  (update-password! (merge (email->user email) user))
+  ;; This invitation is no longer valid!
   (db/redeem-invitation! user)
-  (email->user (:email user)))
+  ;; Get the fresh user data.
+  (email->user email))
 
 (defn update-contact-info! [user]
   (let [user-keys [:first_name
