@@ -58,7 +58,7 @@
 (defn reset-pass!
   "The main event. Reset the password and redirect on success."
   []
-  (rest/post! "/api/v1/reset-pass"
+  (rest/post! "/api/v1/reset-password"
               {:transit-params @user}
               on-reset-success
               (fn [{:keys [errors]}]
