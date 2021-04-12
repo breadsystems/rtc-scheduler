@@ -101,6 +101,8 @@
         (doall (for [err @global-errors]
                  ^{:key (:message err)}
                  [:p.error-message (:message err)])))
+      [:div
+       [:span [:strong "Email: "] (:email @user)]]
       [:div.flex-field
        [:label.field-label {:for "password"} "New Password"]
        [:div.field
