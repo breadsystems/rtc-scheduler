@@ -37,7 +37,6 @@
 
 (defn field->class [field]
   (when (seq (field->errors field)) "has-errors"))
-    
 
 (defn check-required! [field message value]
   (let [field-errors (if (seq value) [] [{:message message}])]

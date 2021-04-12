@@ -75,7 +75,6 @@
     (ring/create-default-handler
      {:not-found
       (fn [req]
-        (prn req 'NOT 'FOUND)
         {:status 404
          :headers {"Content-Type" "text/plain; charset=utf-8"}
          :body "Not Found"})
@@ -97,7 +96,6 @@
   [handler]
   (if (:dev-disable-auth env)
     (fn [req]
-      (prn 'in 'wrap-dev-identity req)
       (handler (assoc-in req [:session :identity] auth/default-user)))
     handler))
 
