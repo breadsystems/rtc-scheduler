@@ -625,7 +625,9 @@
     [:dt "OK to text?"]
     [:dd (if ok_to_text "yes" "no")]
     [:dt "Preferred comm. method"]
-    [:dd preferred_communication_method]]])
+    [:dd (if (seq preferred_communication_method)
+           preferred_communication_method
+           [:span.help "not given"])]]])
 
 (defn- appointment-access-needs [{appt-id :id}]
   (let [access-needs @(rf/subscribe [::current-access-needs])]
