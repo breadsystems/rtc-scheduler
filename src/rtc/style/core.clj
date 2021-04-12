@@ -101,6 +101,7 @@
                 :font-style :italic}]
 
    ;; Alignments
+   [:.left {:text-align :left}]
    [:.center {:text-align :center}]
    [:.right {:text-align :right}]])
 

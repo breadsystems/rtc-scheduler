@@ -702,8 +702,9 @@
        (when (seq pronouns)
          (str " (" pronouns ")"))]
       [:h3
-       (.format start "h:mma ddd, MMM D")
-       " with " (:first_name provider) " " (:last_name provider)]]
+       (.format start "h:mma* ddd, MMM D")
+       " with " (:first_name provider) " " (:last_name provider)]
+      [:p.help.left "*All times are local."]]
      [:div.appointment-details
       (appointment-contact appt)
       (appointment-access-needs appt)]
@@ -718,35 +719,37 @@
         [appointment-details]])
      [:div.care-schedule
       [filter-controls]
-      [:> FullCalendar
-       {:header-toolbar #js {:left "prev,next today"
-                             :center "title"
-                             :right "timeGridWeek listWeek"}
-        :event-did-mount (fn [^js info]
-                           (when (.. info -event -_def -extendedProps -deletable)
-                             (let [id (.. info -event -id)
-                                   elem (.-el info)
-                                   delete-btn (js/document.createElement "i")
-                                   on-click #(rf/dispatch [::delete-availability id])]
-                               (.addEventListener delete-btn "click" on-click)
-                               (set! (.-innerText delete-btn) "×")
-                               (.add (.-classList delete-btn) "rtc-delete")
-                               (.appendChild elem delete-btn))))
-        :selectable true
-        :select (fn [event]
-                  (rf/dispatch [::create-availability {:start (.-start event)
-                                                       :end   (.-end event)}]))
-        :default-view "timeGridWeek"
-        :events @(rf/subscribe [::events])
-        :event-click (fn [info]
-                      (let [e (.-event info)
-                            id (js/parseInt (.-id e))]
-                        (when (appointment? e)
-                          (rf/dispatch [::focus-appointment id]))))
-        :event-change (fn [info]
-                        (let [e (.-event info)
-                              id (js/parseInt (.-id e))]
-                          (rf/dispatch [::update-availability {:id id
-                                                               :start (.-start e)
-                                                               :end (.-end e)}])))
-        :plugins [interactionPlugin listPlugin timeGridPlugin]}]]]))
+      [:div
+       [:p.help.left "All times are local."]
+       [:> FullCalendar
+        {:header-toolbar #js {:left "prev,next today"
+                              :center "title"
+                              :right "timeGridWeek listWeek"}
+         :event-did-mount (fn [^js info]
+                            (when (.. info -event -_def -extendedProps -deletable)
+                              (let [id (.. info -event -id)
+                                    elem (.-el info)
+                                    delete-btn (js/document.createElement "i")
+                                    on-click #(rf/dispatch [::delete-availability id])]
+                                (.addEventListener delete-btn "click" on-click)
+                                (set! (.-innerText delete-btn) "×")
+                                (.add (.-classList delete-btn) "rtc-delete")
+                                (.appendChild elem delete-btn))))
+         :selectable true
+         :select (fn [event]
+                   (rf/dispatch [::create-availability {:start (.-start event)
+                                                        :end   (.-end event)}]))
+         :default-view "timeGridWeek"
+         :events @(rf/subscribe [::events])
+         :event-click (fn [info]
+                       (let [e (.-event info)
+                             id (js/parseInt (.-id e))]
+                         (when (appointment? e)
+                           (rf/dispatch [::focus-appointment id]))))
+         :event-change (fn [info]
+                         (let [e (.-event info)
+                               id (js/parseInt (.-id e))]
+                           (rf/dispatch [::update-availability {:id id
+                                                                :start (.-start e)
+                                                                :end (.-end e)}])))
+         :plugins [interactionPlugin listPlugin timeGridPlugin]}]]]]))
