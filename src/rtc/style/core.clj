@@ -9,7 +9,6 @@
 (defselector *)
 
 (defcssfn url)
-(defpseudoclass last-child [x] x)
 
 (def pink (rgb 255 26 79))
 (def light-pink (rgb 255 220 225))
