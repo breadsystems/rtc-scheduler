@@ -80,10 +80,9 @@
 
     :authenticating
     (if-let [user (u/authenticate (:email params) (:password params))]
-      (let [identity (select-keys user [:id :authy_id])
-            ;; Persist our user identity in a new session.
+      (let [;; Persist our user identity in a new session.
             session (-> (:session req)
-                        (assoc :identity identity)
+                        (assoc :identity (select-keys user [:id :authy_id]))
                         (vary-meta assoc :recreate true))]
         (u/record-login! user)
         (-> (layout/two-factor-page {:req req})

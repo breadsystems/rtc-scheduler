@@ -165,32 +165,31 @@
                                                :reason (:reason (ex-data e) :unexpected-error)}]
                                      :data (ex-data e)})))))}]
     ["/invites"
-     {:get (rest-handler (fn [{:keys [identity] :as req}]
+     {:get (rest-handler (fn [{{id :id} :identity :as req}]
                            {:success true
                             :data {:invitations
                                    (map (fn [invite]
                                           (assoc invite
                                                  :url (u/invite-url req invite)
                                                  :expired? (u/expired? invite)))
-                                        (u/get-invitations {:invited_by (:id identity)}))}}))}]
+                                        (u/get-invitations {:invited_by id}))}}))}]
 
     ["/invite"
-     {:post (rest-handler (fn [{:keys [identity] :as req}]
+     {:post (rest-handler (fn [{{id :id} :identity :as req}]
                             (let [{:keys [email]} (transit-params req)
                                   invitation (u/invite!
                                               {:email email
-                                               :invited_by (:id identity)})
+                                               :invited_by id})
                                   url (u/invite-url req invitation)]
                               {:success true
                                :data (assoc invitation :url url)})))}]
     ["/settings"
-     {:get (rest-handler (fn [req]
+     {:get (rest-handler (fn [{{id :id} :identity :as req}]
                            {:success true
-                            :data    (-> req :identity :id u/id->user u/publicize)}))
-      :post (rest-handler (fn [req]
-                            (let [identity (:identity req)
-                                  ;; Make sure id does not come from user input.
-                                  user (assoc (transit-params req) :id (:id identity))]
+                            :data    (u/publicize (u/id->user id))}))
+      :post (rest-handler (fn [{{id :id} :identity :as req}]
+                            (let [;; Make sure id does not come from user input.
+                                  user (assoc (transit-params req) :id id)]
                               (try
                                 (u/update-settings! user)
                                 {:success true
