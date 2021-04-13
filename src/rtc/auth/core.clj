@@ -17,7 +17,8 @@
   :start (util/create-first-admin-user!))
 
 (defstate default-user
-  :start (u/email->user (:default-admin-email env)))
+  :start (-> env :default-admin-email u/email->user
+             (select-keys [:id :authy_id])))
 
 
 (defn- auth-disabled? []
