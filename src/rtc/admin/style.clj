@@ -6,10 +6,7 @@
    [garden.color :refer [rgba]]))
 
 (def calendar
-  [[:.care-schedule {:display :grid
-                     :grid-template-columns "1fr 4fr"
-                     :grid-gap "1em"}]
-   [:.rtc-appointment {:cursor :pointer}]
+  [[:.rtc-appointment {:cursor :pointer}]
    [:.fc-event.rtc-availability {:cursor :default}
     [:&.rtc-draggable {:cursor :grab}]]
    [:.rtc-delete {:position :absolute
@@ -98,6 +95,7 @@
   core/typography
   core/forms
   core/states
+  core/sidebar
   calendar
   modal
   appointment

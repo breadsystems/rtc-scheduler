@@ -3,13 +3,13 @@
   (:require
    [garden.color :refer [rgb as-hex]]
    [garden.def :refer [defcssfn]]
-   [garden.selectors :refer [attr defselector > &]]))
+   [garden.selectors :refer [attr defselector defpseudoclass > &]]))
 
 
 (defselector *)
 
 (defcssfn url)
-(defcssfn calc)
+(defpseudoclass last-child [x] x)
 
 (def pink (rgb 255 26 79))
 (def light-pink (rgb 255 220 225))
@@ -126,6 +126,20 @@
                  :text-decoration :underline
                  :text-decoration-skip-ink :auto
                  :text-decoration-thickness "2px"}]]])
+
+(def sidebar
+  [[:.with-sidebar {:overflow :hidden}]
+   [(> :.with-sidebar *) {:display :flex
+                          :flex-direction :row-reverse
+                          :flex-wrap :wrap
+                          :margin "calc(1em / 2 * -1)"}]
+   [(> :.with-sidebar * *) {:margin "0.5em"
+                            :flex-basis "20ch"
+                            :flex-grow 1}]
+   [".with-sidebar > * > :first-child"
+    {:flex-basis 0
+     :flex-grow 999
+     :min-width "calc(75% - 1em)"}]])
 
 (def i18n
   [[:.lang-selector {:position :absolute
