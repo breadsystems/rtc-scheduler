@@ -41,7 +41,7 @@
   (->json {:user/id 123}))
 
 (defn- rest-handler [f]
-  (fn [{:keys [params session] :as req}]
+  (fn [{:keys [params] :as req}]
     (let [;; The frontend always consumes application/transit+edn data,
           ;; but application/json is useful for debugging
           json? (boolean (:json params))
@@ -53,8 +53,7 @@
        :headers {"Content-Type" content-type}
        :body    (transform {:success (:success res)
                             :data    (:data res)
-                            :errors  (:errors res)})
-       :session (or (:session res) session)})))
+                            :errors  (:errors res)})})))
 
 (defn- transit-params [{:keys [body]}]
   (let [reader (transit/reader body :json)]
@@ -193,8 +192,7 @@
                               (try
                                 (u/update-settings! user)
                                 {:success true
-                                 :data user
-                                 :session {:identity (u/publicize user)}}
+                                 :data user}
                                 (catch ExceptionInfo e
                                   {:success false
                                    :errors [{:message (.getMessage e)
