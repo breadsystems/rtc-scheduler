@@ -66,8 +66,7 @@
                 (take (count users) (cycle colors)))))
 
 (defn providers [db]
-  ;; TODO filter by role?
-  (vals (users-by-id db)))
+  (filter :is_provider (vals (users-by-id db))))
 
 (defn current-user [{:keys [users user-id]}]
   (get users user-id))

@@ -322,19 +322,29 @@
                  (cal/clear-filter [:_ :access-needs])
                  (get-in [:filters :access-needs])))))))
 
-(deftest test-users-by-id
-  (testing "it cycles through available colors"
-    (let [db {:users {1 {:id 1}
-                      2 {:id 2}
-                      3 {:id 3}
-                      4 {:id 4}
-                      5 {:id 5}}
+(deftest test-providers
+  (testing "it filters down to providers only"
+    (let [db {:users {1 {:id 1 :is_provider true}
+                      2 {:id 2 :is_provider true}
+                      3 {:id 3 :is_provider false}
+                      4 {:id 4 :is_provider true}
+                      5 {:id 5 :is_provider false}}
               :colors ["red" "blue" "green"]}] ;; RGB FTW
-      (is (= [{:id 1 :color "red"}
-              {:id 2 :color "blue"}
-              {:id 3 :color "green"}
-              {:id 4 :color "red"}
-              {:id 5 :color "blue"}]
+      (is (= [1 2 4]
+             (map :id (cal/providers db))))))
+
+  (testing "it cycles through available colors"
+    (let [db {:users {1 {:id 1 :is_provider true}
+                      2 {:id 2 :is_provider true}
+                      3 {:id 3 :is_provider true}
+                      4 {:id 4 :is_provider true}
+                      5 {:id 5 :is_provider true}}
+              :colors ["red" "blue" "green"]}] ;; RGB FTW
+      (is (= [{:id 1 :is_provider true :color "red"}
+              {:id 2 :is_provider true :color "blue"}
+              {:id 3 :is_provider true :color "green"}
+              {:id 4 :is_provider true :color "red"}
+              {:id 5 :is_provider true :color "blue"}]
              (cal/providers db))))))
 
 (deftest test-access-needs-filter-summary
