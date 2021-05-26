@@ -36,7 +36,7 @@
 
  :aliases {:dev {:extra-paths ["env/dev" "test"]
                  :extra-deps {nrepl/nrepl          {:mvn/version "0.7.0"}
-                              thheller/shadow-cljs {:mvn/version "2.9.6"}}}
+                              thheller/shadow-cljs {:mvn/version "2.14.0"}}}
            :repl
            {:extra-deps {nrepl/nrepl {:mvn/version "0.8.3"}
                          cider/cider-nrepl {:mvn/version "0.25.6"}
