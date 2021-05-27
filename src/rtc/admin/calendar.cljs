@@ -746,14 +746,12 @@
         {:keys [view initial-date]} ui-state
         view-mounted (fn [info]
                        (let [view (.. info -view -type)
-                             state (merge ui-state {:view view
-                                                    :from 'view-mounted})]
+                             state (merge ui-state {:view view})]
                          (rf/dispatch [::save-ui-state state])))
         events @(rf/subscribe [::events])
         events-fn (fn [info done _]
                     (let [start (.-start info)
-                          state (merge ui-state {:initial-date start
-                                                 :from 'events-fn})]
+                          state (merge ui-state {:initial-date start})]
                       (rf/dispatch [::save-ui-state state]))
                     (done (clj->js events)))]
     [:div.schedule-container
@@ -784,7 +782,7 @@
                                                          :end   (.-end event)}]))
           :initial-date initial-date
           :events events-fn
-          :default-view view
+          :initial-view view
           :view-did-mount view-mounted
           :event-click (fn [info]
                         (let [e (.-event info)
