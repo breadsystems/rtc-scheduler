@@ -693,7 +693,6 @@
   (let [{:keys [pronouns] :as appt} @(rf/subscribe [::focused-appointment])
         provider @(rf/subscribe [::user (:user/id appt)])
         start (moment. (:start appt))]
-    (prn (keys appt))
     [:article.appointment
      [:header
       [:h2.appointment-name
