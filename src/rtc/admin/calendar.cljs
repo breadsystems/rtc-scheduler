@@ -1,5 +1,6 @@
 (ns rtc.admin.calendar
   (:require
+   [clojure.edn :as edn]
    [clojure.set :refer [union]]
    [clojure.string :refer [join]]
    ["@fullcalendar/react" :default FullCalendar]
@@ -290,6 +291,9 @@
 (rf/reg-sub ::can-view-medical-needs? (fn [db]
                                         (:is_provider (current-user db))))
 
+;; Persistent Calendar UI state - saved transparently to Local Storage.
+(rf/reg-sub ::ui-state :calendar/ui-state)
+
 ;; Sometimes it's nice to just get the whole db.
 ;; For debugging only; not used in production code.
 (rf/reg-sub ::db identity)
@@ -336,6 +340,15 @@
 
 (defn clear-filter [db [_ k]]
   (assoc-in db [:filters k] #{}))
+
+(rf/reg-cofx
+  :ui-state
+  (fn [cofx]
+    (let [stored (.getItem js/localStorage "calendar/ui-state")
+          view (or (some-> stored (edn/read-string))
+                   {:initial-date (js/Date.)
+                    :view "timeGridWeek"})]
+      (assoc cofx :ui-state view))))
 
 (rf/reg-event-fx
  ::create-availability
@@ -395,7 +408,8 @@
 ;; Dispatched once the schedule data is ready
 (rf/reg-event-fx
  :calendar/load
- (fn [{:keys [db]} [_ {:keys [data errors]}]]
+ [(rf/inject-cofx :ui-state)]
+ (fn [{:keys [db ui-state]} [_ {:keys [data errors]}]]
    (if (seq errors)
      ;; TODO some kind of real error handling
      (do (prn errors) {:db db})
@@ -405,7 +419,9 @@
                :users          (:users data)
                :my-invitations (:invitations data)
                :availabilities (:availabilities data)
-               :appointments   (:appointments data))
+               :appointments   (:appointments data)
+
+               :calendar/ui-state ui-state)
               (assoc-in
                [:filters :providers]
                (union (set (map :user/id (vals (:availabilies data))))
@@ -500,6 +516,15 @@
        (update-in [:appointments (:appointment/id data) :notes] #(concat [data] %))
        ;; reset the current note
        (assoc :note ""))))
+
+(rf/reg-event-fx ::save-ui-state (fn [{:keys [db]} [_ ui-state]]
+                                   {:db (assoc db :calendar/ui-state ui-state)
+                                    ::save-ui-state! ui-state}))
+
+(rf/reg-fx
+ ::save-ui-state!
+ (fn [state]
+   (.setItem js/localStorage "calendar/ui-state" (prn-str state))))
 
 (comment
   @(rf/subscribe [::filters])
@@ -709,8 +734,24 @@
      (medical-needs appt)
      (appointment-notes appt)]))
 
+
+
 (defn care-schedule []
-  (let [appt @(rf/subscribe [::focused-appointment])]
+  (let [appt @(rf/subscribe [::focused-appointment])
+        ui-state @(rf/subscribe [::ui-state])
+        {:keys [view initial-date]} ui-state
+        view-mounted (fn [info]
+                       (let [view (.. info -view -type)
+                             state (merge ui-state {:view view
+                                                    :from 'view-mounted})]
+                         (rf/dispatch [::save-ui-state state])))
+        events @(rf/subscribe [::events])
+        events-fn (fn [info done _]
+                    (let [start (.-start info)
+                          state (merge ui-state {:initial-date start
+                                                 :from 'events-fn})]
+                      (rf/dispatch [::save-ui-state state]))
+                    (done (clj->js events)))]
     [:div.schedule-container
      (when appt
        [modal
@@ -737,8 +778,10 @@
           :select (fn [event]
                     (rf/dispatch [::create-availability {:start (.-start event)
                                                          :end   (.-end event)}]))
-          :default-view "timeGridWeek"
-          :events @(rf/subscribe [::events])
+          :initial-date initial-date
+          :events events-fn
+          :default-view view
+          :view-did-mount view-mounted
           :event-click (fn [info]
                         (let [e (.-event info)
                               id (js/parseInt (.-id e))]

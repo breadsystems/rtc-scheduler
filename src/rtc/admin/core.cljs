@@ -68,7 +68,10 @@
     :my-invitations []
     :focused-appointment nil
     :note ""
-    :colors colors/availability-colors}))
+    :colors colors/availability-colors
+
+    ;; Persist UI state across FullCalendar instantiations.
+    :calendar/ui-state {}}))
 
 ;;
 ;; Client-side routing, via Reitit.
