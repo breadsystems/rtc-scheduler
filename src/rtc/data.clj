@@ -190,6 +190,34 @@
       :other_access_needs ""
       :reason "Other"
       :state "CA"})
+    (appt/create!
+     {:provider_id (:id lauren)
+      ;; in one week
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-hour))
+      :alias "Anon"
+      :email "prc.1983@example.com"
+      :pronouns "she/her"
+      :phone ""
+      :ok_to_text true
+      :date_created (c/to-sql-time today-8am)
+      :other_access_needs ""
+      :reason "Other"
+      :state "CA"})
+    (appt/create!
+     {:provider_id (:id lauren)
+      ;; in eight days
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-day))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-day one-hour))
+      :alias "Anon"
+      :email "prc.1983@example.com"
+      :pronouns "she/her"
+      :phone ""
+      :ok_to_text true
+      :date_created (c/to-sql-time today-8am)
+      :other_access_needs ""
+      :reason "Other"
+      :state "CA"})
     ;; TODO MOAR APPOINZ
     ))
 
