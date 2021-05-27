@@ -205,10 +205,6 @@
     (filter #(needs-any? % (set needs)) appts)
     appts))
 
-(defn- full-name [person]
-  (or (:name person)
-      (join " " (filter some? ((juxt :first_name :last_name) person)))))
-
 (defn- editable-for? [avail user-id]
   (= user-id (:user/id avail)))
 
@@ -222,13 +218,21 @@
     colors/appointment-unfulfilled-bg
     colors/appointment-fulfilled-bg))
 
+(defmulti event-name :event/type)
+
+(defmethod event-name :default [provider]
+  (join " " (filter some? ((juxt :first_name :last_name) provider))))
+
+(defmethod event-name :appointment [appt]
+  (or (:name appt) "Anon."))
+
 (defmulti ->fc-event :event/type)
 
 (defmethod ->fc-event :default [e] e)
 
 (defmethod ->fc-event :availability [{:keys [event/provider] :as event}]
   (assoc event
-         :title (full-name provider)
+         :title (event-name provider)
          :provider_id (:id provider)
          :backgroundColor (:color provider)
          :borderColor (:color provider)
@@ -236,7 +240,7 @@
 
 (defmethod ->fc-event :appointment [{:keys [event/provider] :as appt}]
   (assoc appt
-         :title (full-name appt)
+         :title (event-name appt)
          :provider_id (:id provider)
          :editable false
          :borderColor (appointment->border-color appt)
@@ -579,7 +583,7 @@
                        [:label.filter-label.filter-label--provider
                         {:for html-id
                          :style {:border-color (:color provider)}}
-                        (full-name provider)]]))
+                        (event-name provider)]]))
                   providers))]
      [:div.filter-group
       [:h4 "Filter by access need"]

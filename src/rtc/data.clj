@@ -195,7 +195,7 @@
       ;; in one week
       :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week))
       :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-hour))
-      :alias "Anon"
+      :name "Takver"
       :email "prc.1983@example.com"
       :pronouns "she/her"
       :phone ""
@@ -209,7 +209,7 @@
       ;; in eight days
       :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-day))
       :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-day one-hour))
-      :alias "Anon"
+      :name "Lilith"
       :email "prc.1983@example.com"
       :pronouns "she/her"
       :phone ""

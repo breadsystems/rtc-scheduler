@@ -83,6 +83,7 @@
             :appointments {;; Octavia needs CC, so should show up
                            ;; when filtering by access need/CC.
                            1 {:id 1 :user/id 3 :name "Octavia"
+                              :event/type :appointment
                               :access-needs {:closed_captioning
                                              #:need{:id :closed_captioning
                                                     :info "Misc. etc."
@@ -90,13 +91,15 @@
                            ;; Usula needs Spanish interpretation, so should show up
                            ;; when filtering by access need/interpreter.
                            2 {:id 2 :user/id 2 :name "Ursula"
+                              :event/type :appointment
                               :access-needs {:interpretation
                                              #:need{:id :interpretation
                                                     :info "Khmer"
                                                     :fulfilled? false}}}
                            ;; Anon needs Spanish interpretation, so should show up
                            ;; when filtering by access need/interpreter.
-                           3 {:id 3 :user/id 4 :name "Anonymous"
+                           3 {:id 3 :user/id 4 :name nil
+                              :event/type :appointment
                               :access-needs {:interpretation
                                              #:need{:id :interpretation
                                                     :info "Español"
@@ -104,10 +107,12 @@
                            ;; Kim has no access needs to accommodate, so should not show up
                            ;; when filtering by access need.
                            4 {:id 4 :user/id 2 :name "Kim"
+                              :event/type :appointment
                               :access-needs #{}}
                            ;; Janelle needs a Somali interpreter, but that has been fulfilled,
                            ;; so this should not show up when filtering by access need.
                            5 {:id 5 :user/id 2 :name "Janelle"
+                              :event/type :appointment
                               :access-needs {:interpretation
                                              #:need{:id :interpretation
                                                     :info "Somali"
@@ -239,7 +244,7 @@
               ;; Appointments display the careseeker's name
               "Octavia"
               "Ursula"
-              "Anonymous"
+              "Anon."
               "Kim"
               "Janelle"]
              (map :title (cal/visible-events db)))))
