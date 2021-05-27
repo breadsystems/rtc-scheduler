@@ -349,10 +349,10 @@
   :ui-state
   (fn [cofx]
     (let [stored (.getItem js/localStorage "calendar/ui-state")
-          view (or (some-> stored (edn/read-string))
-                   {:initial-date (js/Date.)
-                    :view "timeGridWeek"})]
-      (assoc cofx :ui-state view))))
+          state (or (some-> stored (edn/read-string))
+                    {:initial-date (js/Date.)
+                     :view "timeGridWeek"})]
+      (assoc cofx :ui-state state))))
 
 (rf/reg-event-fx
  ::create-availability
@@ -782,7 +782,7 @@
                                                          :end   (.-end event)}]))
           :initial-date initial-date
           :events events-fn
-          :initial-view view
+          :initial-view (or view "timeGridWeek")
           :view-did-mount view-mounted
           :event-click (fn [info]
                         (let [e (.-event info)
