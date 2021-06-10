@@ -153,6 +153,8 @@
   (:default-authy-user-id env)
   (:authy-api-key env)
 
+  (-> env :default-admin-email u/email->user)
+
   auth/default-user
 
   ;; Recreate the test admin user.

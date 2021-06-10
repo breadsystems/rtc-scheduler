@@ -43,6 +43,15 @@
                      :state "WA"
                      :is_admin true
                      :is_provider true}
+                    {:email "bedap@tamayo.email"
+                     :pass (hash/derive "RTCPassword!")
+                     :first_name "Bedap"
+                     :last_name ""
+                     :pronouns "he/him"
+                     :phone "1234567890"
+                     :state "DC"
+                     :is_admin true
+                     :is_provider true}
                     {:email "lauren@tamayo.email"
                      :pass (hash/derive "RTCPassword!")
                      :first_name "Lauren"
@@ -97,6 +106,7 @@
       :other_access_needs "Things"
       :reason "Personal reasons"
       :state "WA"})
+    ;; Create an appt with access needs
     (let [{id :id} (appt/create!
                     {:provider_id (:id shevek)
                      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-day one-day))
@@ -225,7 +235,8 @@
   (let [today-8am (doto (Date.) (.setHours 8) (.setMinutes 0))
         lauren (p/email->provider "lauren@tamayo.email")
         ursula (p/email->provider "ursula@tamayo.email")
-        shevek (p/email->provider "shevek@tamayo.email")]
+        shevek (p/email->provider "shevek@tamayo.email")
+        bedap  (p/email->provider "bedap@tamayo.email")]
     (prn "creating test availabilities starting" today-8am)
     (avail/create!
      {:provider_id (:id lauren)
@@ -238,25 +249,42 @@
       :start_time (c/to-sql-time (+ (inst-ms today-8am) (* 2 one-day)))
       :end_time (c/to-sql-time (+ (inst-ms today-8am) (* 2 one-day) (* 8 one-hour)))})
     (avail/create!
+     {:provider_id (:id bedap)
+      ;; in six days, for 5 hours
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) (* 6 one-day)))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) (* 6 one-day) (* 5 one-hour)))})
+    (avail/create!
      {:provider_id (:id shevek)
       ;; in one week, for 8 hours
       :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week))
       :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week (* 8 one-hour)))})
     (avail/create!
      {:provider_id (:id ursula)
-      ;; in one week, for 8 hours
+      ;; in eight days, for 6 hours
       :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-day))
       :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-day (* 8 one-hour)))})
+    (avail/create!
+     {:provider_id (:id bedap)
+      ;; in nine days, for 5 hours
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week (* 2 one-day) (* 3 one-hour)))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week (* 2 one-day) (* 5 one-hour)))})
+    (avail/create!
+     {:provider_id (:id bedap)
+      ;; in ten days, for 4 hours
+      :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week (* 3 one-day)))
+      :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week (* 3 one-day) (* 4 one-hour)))})
     ;; TODO MOAR AVAILZ
     ))
 
-(comment
+(defn reset-db!! []
   (do
     (d/bind!)
     (tear-it-all-down!!)
     (create-test-users!)
     (create-test-appointments!)
     (create-test-availabilities!)
-    (prn "Test data created."))
+    (prn "Test data created.")))
 
-  (u/email->user "coby01@tamayo.email"))
+(comment
+  (u/email->user "coby01@tamayo.email")
+  (reset-db!!))

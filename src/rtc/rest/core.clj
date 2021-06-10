@@ -62,9 +62,11 @@
 (defn endpoints [{:keys [mount]}]
   [mount
    ["/windows"
-    {:get (rest-handler (fn [{:keys [params]}]
-                          {:success true
-                           :data (appt/get-available-windows params)}))}]
+    {:get (rest-handler (fn [{:keys [params identity]}]
+                          (let [params {:state (:state params)
+                                        :user identity}]
+                            {:success true
+                             :data (appt/get-available-windows params)})))}]
    ["/appointment"
     {:post (rest-handler (fn [req]
                            (try

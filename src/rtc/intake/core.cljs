@@ -448,7 +448,7 @@
  ::fetch-appointment-windows
  (fn [[answers]]
    (rest/get! "/api/v1/windows"
-              {:form-params {:state (:state answers)}}
+              {:query-params {:state (:state answers)}}
               ::load-appointment-windows
               #(rf/dispatch [::global-error :unexpected-error]))))
 
