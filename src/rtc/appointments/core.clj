@@ -27,17 +27,19 @@
         to (+ from (* 28 ONE-DAY-MS))]
     [from to]))
 
-(defn params->windows [{:keys [from to state]}]
-  (let [states (get st/state-mappings state)
-        avails (avail/get-availabilities {:from from :to to :states states})
+(defn params->windows [{:keys [from to states]}]
+  (let [avails (avail/get-availabilities {:from from :to to :states states})
         appts (appt/get-appointments {:from from :to to :states states})]
     (map w/format-window
          (w/->windows (map w/coerce avails) (map w/coerce appts) from to WINDOW-MS))))
 
 (defn get-available-windows [params]
   (let [[from to] (window-range)
-        state (get params "state")]
-    (params->windows {:from from :to to :state state})))
+        state (get params :state)
+        states (get st/state-mappings state #{})]
+    (if (empty? states)
+      [] ;; No providers can legally treat this person :(
+      (params->windows {:from from :to to :states states}))))
 
 (def ^:private fmt (SimpleDateFormat. "yyyy-MM-dd HH:mm:ss"))
 
