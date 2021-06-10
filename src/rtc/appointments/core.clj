@@ -20,10 +20,19 @@
 ;; Define our window length to be half an hour
 (defonce WINDOW-MS (* 30 60 1000))
 
-(defn- window-range []
+;; To give schedulers time to do their thing, we give five days buffer time.
+;; If an availability is within this # days of the current date/time, we don't
+;; let Careseekers book appointments in that window.
+(defonce OFFSET-CARESEEKER (* 5 ONE-DAY-MS))
+;; Admins have no such limitation.
+(defonce OFFSET-COMRADE 0)
+
+(defn- window-range [{:keys [admin?]}]
   (let [;; TODO tighten up this logic for more accurate availability
-        ;; Look for availabilities starting this time five days from now
-        from (+ (inst-ms (util/midnight-this-morning)) (* 5 ONE-DAY-MS))
+        ;; Look for availabilities starting this time X days from now
+        ;; depending on whether the current user is an admin or not.
+        offset (if admin? OFFSET-COMRADE OFFSET-CARESEEKER)
+        from (+ (inst-ms (util/midnight-this-morning)) offset)
         to (+ from (* 28 ONE-DAY-MS))]
     [from to]))
 
@@ -33,9 +42,8 @@
     (map w/format-window
          (w/->windows (map w/coerce avails) (map w/coerce appts) from to WINDOW-MS))))
 
-(defn get-available-windows [params]
-  (let [[from to] (window-range)
-        state (get params :state)
+(defn get-available-windows [{:keys [state user]}]
+  (let [[from to] (window-range user)
         states (get st/state-mappings state #{})]
     (if (empty? states)
       [] ;; No providers can legally treat this person :(
