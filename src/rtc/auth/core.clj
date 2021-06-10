@@ -109,7 +109,13 @@
   "Persist session identity directly into request"
   [handler]
   (fn [req]
-    (handler (assoc req :identity (get-in req [:session :identity])))))
+    (let [user (some-> (get-in req [:session :identity]))
+          {:keys [is_admin is_provider]} (some-> user :id u/id->user)
+          user (some->
+                 user
+                 (assoc :admin? (boolean is_admin)
+                        :provider? (boolean is_provider)))]
+      (handler (assoc req :identity user)))))
 
 (defn wrap-require-auth [handler]
   (fn [req]
