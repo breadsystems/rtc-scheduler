@@ -276,13 +276,15 @@
     ;; TODO MOAR AVAILZ
     ))
 
-(comment
+(defn reset-db!! []
   (do
     (d/bind!)
     (tear-it-all-down!!)
     (create-test-users!)
     (create-test-appointments!)
     (create-test-availabilities!)
-    (prn "Test data created."))
+    (prn "Test data created.")))
 
-  (u/email->user "coby01@tamayo.email"))
+(comment
+  (u/email->user "coby01@tamayo.email")
+  (reset-db!!))
