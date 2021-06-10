@@ -42,12 +42,9 @@
     (map w/format-window
          (w/->windows (map w/coerce avails) (map w/coerce appts) from to WINDOW-MS))))
 
-(defn get-available-windows [params]
-  (let [[from to] (window-range (:user params))
-        _ (prn params)
-        state (get params "state")
+(defn get-available-windows [{:keys [state user]}]
+  (let [[from to] (window-range user)
         states (get st/state-mappings state #{})]
-    (prn state '-> states)
     (if (empty? states)
       [] ;; No providers can legally treat this person :(
       (params->windows {:from from :to to :states states}))))
