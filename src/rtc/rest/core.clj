@@ -59,10 +59,14 @@
   (let [reader (transit/reader body :json)]
     (transit/read reader)))
 
+(comment
+  $req)
+
 (defn endpoints [{:keys [mount]}]
   [mount
    ["/windows"
-    {:get (rest-handler (fn [{:keys [params identity]}]
+    {:get (rest-handler (fn [{:keys [params identity] :as req}]
+                          (def $req req)
                           (let [params {:state (:state params)
                                         :user identity}]
                             {:success true
