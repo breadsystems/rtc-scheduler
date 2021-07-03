@@ -10,7 +10,7 @@
 (defstate authy-api-key
   :start (let [api-key (:authy-api-key env)]
            (when (empty? api-key)
-             (println "WARNING: No API Key detected!"))
+             (println "WARNING: No Authy API Key detected!"))
            api-key))
 
 
