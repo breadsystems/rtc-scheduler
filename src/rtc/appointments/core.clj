@@ -101,7 +101,7 @@
                                        :need/id "interpretation"
                                        :info interpreter-lang}))
         booked-appt)
-      ;; TODO insert access needs
+      ;; TODO publish! booked-appointment
       (throw (ex-info "Appointment window is unavailable!" {:windows windows
                                                             :reason :window-unavailable})))))
 

@@ -13,7 +13,7 @@
            sid))
 
 (defstate auth-token
-  :start (let [token (:twilio-api-key env)]
+  :start (let [token (:twilio-auth-token env)]
            (when (empty? token)
              (println "WARNING: No Twilio Auth Token detected!"))
            token))
@@ -26,9 +26,6 @@
 
 (defn- api-call
   ([method endpoint opts]
-   #_
-   [method (str "https://api.twilio.com/2010-04-01" endpoint)
-    (conj {:basic-auth [account-sid auth-token]} opts)]
    (-> (try
          (method (str "https://api.twilio.com/2010-04-01" endpoint)
                  ;; -u $TWILIO_ACCOUNT_SID:$TWILIO_AUTH_TOKEN
