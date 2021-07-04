@@ -104,7 +104,9 @@
                                        :need/id "interpretation"
                                        :info interpreter-lang}))
         (e/publish! {:event/type :booked-appointment
-                     :event/appointment (merge appt booked-appt)})
+                     :event/appointment (merge appt
+                                               booked-appt
+                                               {:provider_id pid})})
         booked-appt)
       (throw (ex-info "Appointment window is unavailable!" {:windows windows
                                                             :reason :window-unavailable})))))
@@ -168,6 +170,7 @@
 (defn details [id]
   (let [id (Integer. id)
         appt (-> (sqlh/select :id :email :phone :name :pronouns :alias :state
+                              :provider_id
                               [:start_time :start] [:end_time :end] :reason
                               :other_access_needs :other_access_needs_met
                               :other_notes :ok_to_text)
