@@ -2,6 +2,7 @@
   (:require
     [clj-http.client :as http]
     [clojure.data.json :as json]
+    [clojure.string :as string]
     [clojure.walk :as walk]
     [config.core :as config :refer [env]]
     [mount.core :as mount :refer [defstate]]))
@@ -37,14 +38,25 @@
   ([method endpoint]
    (api-call method endpoint {})))
 
+(defn us-phone [phone]
+  (let [phone (.replaceAll phone "[^0-9]" "")]
+    (cond
+      (string/starts-with? phone "1") (str "+" phone)
+      :else (str "+1" phone))))
+
 (defn send-sms! [{:keys [message to]}]
   (api-call http/post
             (str "/Accounts/" account-sid "/Messages.json")
             {:form-params {:Body message
-                           :To to
+                           :To (us-phone to)
                            :From twilio-number}}))
 
 (comment
+
+  (and (= "+12535551234" (us-phone "2535551234"))
+       (= "+12535551234" (us-phone "253 555 1234"))
+       (= "+12535551234" (us-phone "1 253 555 1234"))
+       (= "+12535551234" (us-phone "+1 253 555 1234")))
 
   ;; Basic test hitting the API directly.
   (http/post
