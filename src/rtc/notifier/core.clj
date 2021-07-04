@@ -6,19 +6,23 @@
     [rtc.providers.core :as provider]
     [rtc.util :refer [->zoned format-zoned]]))
 
+(defn- coast-times [dt]
+  (let [pacific (->zoned dt "America/Los_Angeles")
+        eastern (->zoned dt "America/New_York")]
+    (format "%s / %s"
+            (format-zoned pacific "h:mma z")
+            (format-zoned eastern "h:mma z EEE, MMM d"))))
+
 (defn appointment->sms [{:keys [phone
                                 provider_first_name
                                 provider_last_name
                                 start_time]}]
-  (let [pacific (->zoned start_time "America/Los_Angeles")
-        eastern (->zoned start_time "America/New_York")]
-    {:to (twilio/us-phone phone)
-     :message (format
-                ;; TODO i18n
-                "Your appointment at %s / %s with %s is confirmed."
-                (format-zoned pacific "h:mma z")
-                (format-zoned eastern "h:mma z EEE, MMM d")
-                (str provider_first_name " " provider_last_name))}))
+  {:to (twilio/us-phone phone)
+   :message (format
+              ;; TODO i18n
+              "Your appointment at %s with %s is confirmed."
+              (coast-times start_time)
+              (str provider_first_name " " provider_last_name))})
 
 (defn send-sms? [appt]
   (boolean (and (= 1 (:text-ok appt)) (seq (:phone appt)))))
@@ -29,14 +33,11 @@
   empty OR the start_time is not an inst."
   [{:keys [provider start_time]}]
   (when (and (:phone provider) (inst? start_time))
-    (let [pacific (->zoned start_time "America/Los_Angeles")
-          eastern (->zoned start_time "America/New_York")]
-      {:to (twilio/us-phone (:phone provider))
-       :message (format
-                  ;; TODO i18n
-                  "Someone booked an appointment with you at %s / %s."
-                  (format-zoned pacific "h:mma z")
-                  (format-zoned eastern "h:mma z EEE, MMM d"))})))
+    {:to (twilio/us-phone (:phone provider))
+     :message (format
+                ;; TODO i18n
+                "Someone booked an appointment with you at %s."
+                (coast-times start_time))}))
 
 (defn- appt->provider [{:keys [provider_id]}]
   (provider/id->provider provider_id))
