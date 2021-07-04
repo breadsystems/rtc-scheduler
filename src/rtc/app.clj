@@ -18,6 +18,7 @@
    [rtc.env :refer [env]]
    [rtc.intake.core :as intake]
    [rtc.layout :as layout]
+   [rtc.notifier.core]
    [rtc.users.core :as u]
    [rtc.users.handlers :as user]))
 
