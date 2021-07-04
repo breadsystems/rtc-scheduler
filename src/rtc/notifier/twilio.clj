@@ -45,11 +45,13 @@
       :else (str "+1" phone))))
 
 (defn send-sms! [{:keys [message to]}]
-  (api-call http/post
-            (str "/Accounts/" account-sid "/Messages.json")
-            {:form-params {:Body message
-                           :To (us-phone to)
-                           :From twilio-number}}))
+  (when (and message to)
+    (api-call
+      http/post
+      (str "/Accounts/" account-sid "/Messages.json")
+      {:form-params {:Body message
+                     :To (us-phone to)
+                     :From twilio-number}})))
 
 (comment
 
