@@ -13,6 +13,10 @@
             (format-zoned pacific "h:mma z")
             (format-zoned eastern "h:mma z EEE, MMM d"))))
 
+;;
+;; SMS NOTIFICATIONS
+;;
+
 (defn appointment->sms [{:keys [phone
                                 provider_first_name
                                 provider_last_name
@@ -38,6 +42,58 @@
                 ;; TODO i18n
                 "Someone booked an appointment with you at %s."
                 (coast-times start_time))}))
+
+;;
+;; EMAIL NOTIFICATIONS
+;;
+
+(defn send-email? [appt]
+  (boolean (seq (:email appt))))
+
+(defn appointment->email
+  "Returns an email map of the form {:to ... :to-name ... :message ...}
+  given an email, provider first/last name, and a start_time inst. Returns nil
+  if email, provider_first_name, provider_last_name, start_time are empty
+  OR the start_time is not an inst."
+  [{:keys [email
+           name
+           provider_first_name
+           provider_last_name
+           start_time]}]
+  (when (and email
+             provider_first_name
+             provider_last_name
+             (inst? start_time))
+    {:to email
+     :to-name name
+     :message  (format
+                 ;; TODO i18n
+                 (str "Your appointment at %s with %s is confirmed."
+                      " Thank you for booking your appointment with the"
+                      " Radical Telehealth Collective.")
+                 (coast-times start_time)
+                 (str provider_first_name " " provider_last_name))
+     }))
+
+(defn appointment->provider-email
+  "Returns an email map of the form {:to ... :to-name ... :message ...}
+  given an email, recipient name, and a start_time inst. Returns nil if
+  either the email is empty OR the start_time is not an inst."
+  [{:keys [provider start_time]}]
+  (when (and (:email provider) (inst? start_time))
+    {:to (:email provider)
+     :message (format
+                ;; TODO i18n
+                (str "Someone booked an appointment with you at %s."
+                     " Go to %s for details.")
+                (coast-times start_time)
+                ;; TODO env config?
+                "https://www.radicaltelehealthcollective.org/comrades"
+                )}))
+
+;;
+;; EVENT HANDLERS AND HELPERS
+;;
 
 (defn- appt->provider [{:keys [provider_id]}]
   (provider/id->provider provider_id))
