@@ -29,28 +29,44 @@
                   :content-type :json
                   :form-params (:form-params opts)}))))
 
-(defn- mail-send-form-params [{:keys [to to-name from body]}]
+(defn- mail-send-form-params [{:keys [to to-name from message]}]
   {:personalizations [{:to [{:email to
                              :name to-name}]}]
    :from {:email from
           :name "Radical Telehealth Collective"}
    :subject "Your appointment with the Radical Telehealth Collective"
    :content [{:type "text/plain"
-              :value body}]})
+              :value message}]})
+
+(defn send-email! [{:keys [message to to-name]}]
+  (when (and message to)
+    (api-call http/post "/v3/mail/send"
+              {:form-params
+               (mail-send-form-params
+                 {:to to
+                  :to-name to-name
+                  ;; TODO
+                  :from "info@radicaltelehealthcollective.org"
+                  :message message})})))
 
 (comment
   (api-call http/post "/v3/mail/send" {})
   (mail-send-form-params {:to "coby@tamayo.email"
                           :to-name "Coby Test"
                           :from "info@radicaltelehealthcollective.org"
-                          :body "hello this is a test."})
+                          :message "hello this is a test."})
 
+  ;; These are equivalent:
   (api-call http/post "/v3/mail/send"
             {:form-params
              (mail-send-form-params
                {:to "coby@tamayo.email"
                 :to-name "Coby Test"
                 :from "info@radicaltelehealthcollective.org"
-                :body "hello this is a test."})})
+                :message "hello this is a test."})})
+  (send-email! {:to "coby@tamayo.email"
+                :to-name "Coby Test"
+                :from "info@radicaltelehealthcollective.org"
+                :message "hello this is a test."})
 
   sendgrid-api-key)
