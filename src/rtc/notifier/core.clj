@@ -46,7 +46,10 @@
   (twilio/send-sms! (appointment->provider-sms
                       (assoc appt :provider (appt->provider appt))))
   (when (send-sms? appt)
-    (twilio/send-sms! (appointment->sms appt))))
+    (twilio/send-sms! (appointment->sms appt)))
+  ;; TODO sendgrid/send-email!
+  ;; TODO sendgrid/send-provider-email!
+  )
 
 (defonce unsub-notifiers (atom nil))
 
@@ -61,20 +64,21 @@
 
 (comment
   (def $appt
-    {:provider_first_name "Doctor",
-     :phone "253 222 9139",
-     :provider_last_name "Someone",
-     :name "Coby",
-     :start_time #inst "2021-07-10T01:30:00.000000000-00:00",
-     :pronouns nil,
-     :start #inst "2021-07-10T01:30:00.000-00:00",
-     :description-of-needs "asdf",
-     :state "WA",
-     :end_time #inst "2021-07-10T02:00:00.000000000-00:00",
-     :id 25,
+    {:name "Coby Test"
+     :email "coby@tamayo.email"
+     :phone "253 222 9139"
      :provider_id 6
-     :end #inst "2021-07-10T02:00:00.000-00:00",
-     :text-ok 1,
+     :provider_first_name "Doctor"
+     :provider_last_name "Someone"
+     :start_time #inst "2021-07-10T01:30:00.000000000-00:00"
+     :pronouns nil
+     :start #inst "2021-07-10T01:30:00.000-00:00"
+     :description-of-needs "asdf"
+     :state "WA"
+     :end_time #inst "2021-07-10T02:00:00.000000000-00:00"
+     :id 25
+     :end #inst "2021-07-10T02:00:00.000-00:00"
+     :text-ok 1
      :preferred-communication-method "phone"})
 
   (:phone (appt->provider $appt))
@@ -87,5 +91,8 @@
   (booked-appointment! $appt)
   (booked-appointment! (assoc $appt :text-ok nil))
 
+  ;; Send an appointment through the generic pub/sub stream. This is what
+  ;; actually sends notifications (and whatever any other subscribers are
+  ;; doing, which at time of writing is nothing :D).
   (e/publish! {:event/type :booked-appointment
-               :event/appointment {:my :appt}}))
+               :event/appointment $appt}))

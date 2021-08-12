@@ -103,6 +103,9 @@
           (d/create-appointment-need! {:appointment/id id
                                        :need/id "interpretation"
                                        :info interpreter-lang}))
+        ;; Announce this booking on the generic event stream.
+        ;; Event stream subscribers take care of notifications for us.
+        ;; See rtc.event.core, rtc.notifier.core
         (e/publish! {:event/type :booked-appointment
                      :event/appointment (merge appt
                                                booked-appt
