@@ -64,6 +64,7 @@
 
 (comment
   (:dev-disable-auth env)
+  (:database-url env)
 
   ;; connect/disconnect/reconnect database
   (mount/stop #'*db*)

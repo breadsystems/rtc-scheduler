@@ -21,9 +21,15 @@
 
 (defstate twilio-number
   :start (let [number (:twilio-number env)]
+           (prn number (type number))
            (when (empty? number)
              (println "WARNING: No Twilio Number detected!"))
            number))
+
+(comment
+  account-sid
+  auth-token
+  twilio-number)
 
 (defn- api-call
   ([method endpoint opts]
