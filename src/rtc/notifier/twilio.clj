@@ -19,8 +19,11 @@
              (println "WARNING: No Twilio Auth Token detected!"))
            token))
 
+;; Heroku (or yogthos/config?) helpfully formats +12345... as a Long.
+;; Coerce it to a string explicitly.
+(declare us-phone)
 (defstate twilio-number
-  :start (let [number (:twilio-number env)]
+  :start (let [number (us-phone (:twilio-number env))]
            (prn number (type number))
            (when (empty? number)
              (println "WARNING: No Twilio Number detected!"))
