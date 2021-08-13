@@ -97,6 +97,7 @@
 
     {:to "careseeker@example.com"
      :to-name nil
+     :subject "Your appointment with the Radical Telehealth Collective"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed. Thank you for booking your appointment with the Radical Telehealth Collective."}
     {:email "careseeker@example.com"
      :provider_first_name "Ursula"
@@ -106,6 +107,7 @@
     ;; With careseeker name
     {:to "careseeker@example.com"
      :to-name "Shevek"
+     :subject "Your appointment with the Radical Telehealth Collective"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed. Thank you for booking your appointment with the Radical Telehealth Collective."}
     {:email "careseeker@example.com"
      :name "Shevek"
@@ -166,16 +168,19 @@
          :provider {:email "rtc@example.org"}}
 
     {:to "rtc@example.org"
+     :subject "New RTC Appointment"
      :message "Someone booked an appointment with you at 4:33PM PST / 7:33PM EST Tue, Mar 9. Go to https://www.radicaltelehealthcollective.org/comrades for details."}
     {:provider {:email "rtc@example.org"}
      :start_time #inst "2021-03-10T00:33:00.000000000-00:00"}
 
     {:to "rtc@example.org"
+     :subject "New RTC Appointment"
      :message "Someone booked an appointment with you at 4:30PM PST / 7:30PM EST Tue, Mar 9. Go to https://www.radicaltelehealthcollective.org/comrades for details."}
     {:provider {:email "rtc@example.org"}
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}
 
     {:to "rtc@example.org"
+     :subject "New RTC Appointment"
      :message "Someone booked an appointment with you at 4:30PM PST / 7:30PM EST Tue, Mar 9. Go to https://www.radicaltelehealthcollective.org/comrades for details."}
     {:provider {:email "rtc@example.org"}
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}

@@ -29,7 +29,7 @@
                   :content-type :json
                   :form-params (:form-params opts)}))))
 
-(defn- mail-send-form-params [{:keys [to to-name from message]}]
+(defn- mail-send-form-params [{:keys [to to-name from subject message]}]
   {:personalizations [{:to [{:email to
                              :name to-name}]}]
    :from {:email from

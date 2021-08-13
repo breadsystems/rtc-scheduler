@@ -67,6 +67,7 @@
              (inst? start_time))
     {:to email
      :to-name name
+     :subject "Your appointment with the Radical Telehealth Collective"
      :message  (format
                  ;; TODO i18n
                  (str "Your appointment at %s with %s is confirmed."
@@ -83,6 +84,7 @@
   [{:keys [provider start_time]}]
   (when (and (:email provider) (inst? start_time))
     {:to (:email provider)
+     :subject "New RTC Appointment"
      :message (format
                 ;; TODO i18n
                 (str "Someone booked an appointment with you at %s."
