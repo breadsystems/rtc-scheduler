@@ -9,8 +9,14 @@
 (defstate sendgrid-api-key
   :start (let [api-key (:sendgrid-api-key env)]
            (when (empty? api-key)
-             (println "No SendGrid API Key detected!"))
+             (println "WARNING: No SendGrid API Key detected!"))
            api-key))
+
+(defstate sendgrid-from-email
+  :start (let [from (:sendgrid-from-email env)]
+           (when (empty? from)
+             (printf "WARNING: No SendGrid FROM address detected!"))
+           from))
 
 ;; curl --request POST \
 ;;   --url https://api.sendgrid.com/v3/mail/send \
@@ -41,13 +47,11 @@
 (defn send-email! [{:keys [message to to-name]}]
   (when (and message to)
     (api-call http/post "/v3/mail/send"
-              {:form-params
-               (mail-send-form-params
-                 {:to to
-                  :to-name to-name
-                  ;; TODO
-                  :from "info@radicaltelehealthcollective.org"
-                  :message message})})))
+              {:form-params (mail-send-form-params
+                              {:to to
+                               :to-name to-name
+                               :from sendgrid-from-email
+                               :message message})})))
 
 (comment
   (api-call http/post "/v3/mail/send" {})
@@ -69,4 +73,6 @@
                 :from "info@radicaltelehealthcollective.org"
                 :message "hello this is a test."})
 
-  sendgrid-api-key)
+  sendgrid-api-key
+  sendgrid-from-email
+  )
