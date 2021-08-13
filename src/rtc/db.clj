@@ -98,7 +98,7 @@
   (reset-everything!!)
 
   ;; create a migration
-  (migratus/create (migration-config) "migration-name-here")
+  (migratus/create (migration-config) "increase-email-length")
 
   ;; list all schema migrations
   (get-migrations))
