@@ -80,8 +80,11 @@
   :start (do
            (println "Performing database migrations...")
            (migratus/init (migration-config))
-           (migratus/migrate (migration-config))
-           (println "Done.")))
+           (if-let [status (migratus/migrate (migration-config))]
+             ;; Returns nil on success; if we're here it means there
+             ;; was some kind of error.
+             (printf "Migratus reported status %s\n" status)
+             (println "Done."))))
 
 (defn reset-everything!! []
   (try
