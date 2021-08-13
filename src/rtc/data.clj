@@ -16,6 +16,15 @@
 (defn create-test-users! []
   (-> (sqlh/insert-into :users)
       (sqlh/values [;; Mix of kin and rad docs
+                    {:email "ctamayo+test@protonmail.com"
+                     :pass (hash/derive "RTCPassword!")
+                     :first_name "Test"
+                     :last_name "Provider"
+                     :pronouns "they/them"
+                     :phone "2532229139"
+                     :state "WA"
+                     :is_admin false
+                     :is_provider true}
                     {:email "octavia@tamayo.email"
                      :pass (hash/derive "RTCPassword!")
                      :first_name "Octavia"
@@ -286,5 +295,7 @@
     (prn "Test data created.")))
 
 (comment
+  (p/emails)
+  (p/email->provider "ctamayo+test@protonmail.com")
   (u/email->user "coby01@tamayo.email")
   (reset-db!!))

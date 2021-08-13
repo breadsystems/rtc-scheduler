@@ -2,6 +2,7 @@
   (:require
     [mount.core :refer [defstate]]
     [rtc.notifier.twilio :as twilio]
+    [rtc.notifier.sendgrid :as sendgrid]
     [rtc.event :as e]
     [rtc.providers.core :as provider]
     [rtc.util :refer [->zoned format-zoned]]))
@@ -99,13 +100,16 @@
   (provider/id->provider provider_id))
 
 (defn- booked-appointment! [appt]
-  (twilio/send-sms! (appointment->provider-sms
-                      (assoc appt :provider (appt->provider appt))))
+  ;; Notify the careseeker, honoring their consent.
   (when (send-sms? appt)
     (twilio/send-sms! (appointment->sms appt)))
-  ;; TODO sendgrid/send-email!
-  ;; TODO sendgrid/send-provider-email!
-  )
+  (sendgrid/send-email! appt)
+
+  ;; Notify the provider.
+  (let [appt (assoc appt :provider (appt->provider appt))]
+    ;; TODO text notification preferences
+    (twilio/send-sms! (appointment->provider-sms appt))
+    (sendgrid/send-email! (appointment->provider-email appt))))
 
 (defonce unsub-notifiers (atom nil))
 
@@ -119,11 +123,13 @@
           (unsub!)))
 
 (comment
+  (def $provider (provider/email->provider "ctamayo+test@protonmail.com"))
+
   (def $appt
     {:name "Coby Test"
      :email "coby@tamayo.email"
      :phone "253 222 9139"
-     :provider_id 6
+     :provider_id (:id $provider)
      :provider_first_name "Doctor"
      :provider_last_name "Someone"
      :start_time #inst "2021-07-10T01:30:00.000000000-00:00"
@@ -139,16 +145,23 @@
 
   (:phone (appt->provider $appt))
 
+  ;; No :provider yet; need an extra assoc.
   (nil? (appointment->provider-sms $appt))
+  (nil? (appointment->provider-email $appt))
 
-  (appointment->provider-sms
-    (assoc $appt :provider (appt->provider $appt)))
+  ;; Full valid appt we can send to our various notifier fns.
+  (def $with-provider (assoc $appt :provider (appt->provider $appt)))
 
-  (booked-appointment! $appt)
-  (booked-appointment! (assoc $appt :text-ok nil))
+  (twilio/send-sms! (appointment->sms $with-provider))
+  (twilio/send-sms! (appointment->provider-sms $with-provider))
+  (sendgrid/send-email! (appointment->email $with-provider))
+  (sendgrid/send-email! (appointment->provider-email $with-provider))
+
+  (booked-appointment! $with-provider)
+  (booked-appointment! (assoc $with-provider :text-ok nil))
 
   ;; Send an appointment through the generic pub/sub stream. This is what
   ;; actually sends notifications (and whatever any other subscribers are
   ;; doing, which at time of writing is nothing :D).
   (e/publish! {:event/type :booked-appointment
-               :event/appointment $appt}))
+               :event/appointment $with-provider}))

@@ -32,8 +32,13 @@
   (when-let [provider (first (db/query ["SELECT * FROM users WHERE is_provider = true AND email = ?" email]))]
     (dissoc provider :pass)))
 
+(defn emails []
+  (db/query ["SELECT email FROM users WHERE is_provider = true"]))
+
 
 (comment
+
+  (emails)
 
   (create! {:email "rtc10@example.com" :pass (hash/derive "eyyy") :is_admin true :state "OR"})
 
