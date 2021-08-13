@@ -1,8 +1,34 @@
 (ns rtc.util
-  (:import
    #?(:clj
+    (:import
+      [java.time ZonedDateTime ZoneId]
+      [java.time.format DateTimeFormatter]
       [java.util Date])))
 
+
+(defn ->zoned
+  "Takes a java.util.Date object and converts to a java.time.ZonedDateTime
+  with the timezone named by the given string."
+  [date zone-str]
+  #?(:clj
+      (ZonedDateTime/ofInstant (.toInstant date) (ZoneId/of zone-str))))
+
+(defn format-zoned [dt pattern]
+  #?(:clj
+     (let [fmt (DateTimeFormatter/ofPattern pattern)]
+       (.format fmt dt))))
+
+(comment
+
+  (->zoned #inst "2021-07-10T01:00:00.000000000-00:00" "America/New_York")
+  (->zoned #inst "2021-07-10T01:00:00.000000000-00:00" "America/Los_Angeles")
+
+  (format-zoned
+    (->zoned #inst "2021-07-10T01:00:00.000000000-00:00" "America/Los_Angeles")
+    "h:mma z")
+
+  ;;
+  )
 
 ;; Date/time helpers
 (def thirty-minutes (* 30 60 1000))

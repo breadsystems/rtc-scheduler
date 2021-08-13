@@ -9,6 +9,7 @@
    [rtc.appointments.states :as st]
    [rtc.appointments.windows :as w]
    [rtc.db :as d]
+   [rtc.event :as e]
    [rtc.util :as util])
   (:import
    [java.text SimpleDateFormat]
@@ -78,20 +79,22 @@
         windows (get-available-windows {:state state})
         pid (first (available-provider-ids windows appt))]
     (if pid
-      (let [{:keys [id] :as booked-appt}
-            (appt/create! {:name name
-                           :pronouns pronouns
-                           :start_time (c/to-sql-time start)
-                           :end_time (c/to-sql-time end)
-                           :email email
-                           :phone phone
-                           :alias alias
-                           :ok_to_text (= 1 text-ok)
-                           :other_notes anything-else
-                           :preferred_communication_method preferred-communication-method
-                           :provider_id pid
-                           :reason description-of-needs
-                           :state state})]
+      (let [appt-info
+            {:name name
+             :pronouns pronouns
+             :start_time (c/to-sql-time start)
+             :end_time (c/to-sql-time end)
+             :email email
+             :phone phone
+             :alias alias
+             :ok_to_text (= 1 text-ok)
+             :other_notes anything-else
+             :preferred_communication_method preferred-communication-method
+             :provider_id pid
+             :reason description-of-needs
+             :state state}
+            {:keys [id] :as booked-appt}
+            (appt/create! appt-info)]
         (when (seq other-access-needs)
           (d/create-appointment-need! {:appointment/id id
                                        :need/id "other"
@@ -100,8 +103,14 @@
           (d/create-appointment-need! {:appointment/id id
                                        :need/id "interpretation"
                                        :info interpreter-lang}))
+        ;; Announce this booking on the generic event stream.
+        ;; Event stream subscribers take care of notifications for us.
+        ;; See rtc.event.core, rtc.notifier.core
+        (e/publish! {:event/type :booked-appointment
+                     :event/appointment (merge appt
+                                               booked-appt
+                                               {:provider_id pid})})
         booked-appt)
-      ;; TODO insert access needs
       (throw (ex-info "Appointment window is unavailable!" {:windows windows
                                                             :reason :window-unavailable})))))
 
@@ -164,6 +173,7 @@
 (defn details [id]
   (let [id (Integer. id)
         appt (-> (sqlh/select :id :email :phone :name :pronouns :alias :state
+                              :provider_id
                               [:start_time :start] [:end_time :end] :reason
                               :other_access_needs :other_access_needs_met
                               :other_notes :ok_to_text)
