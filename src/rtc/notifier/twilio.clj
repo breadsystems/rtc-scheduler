@@ -24,7 +24,6 @@
 (declare us-phone)
 (defstate twilio-number
   :start (let [number (us-phone (:twilio-number env))]
-           (prn number (type number))
            (when (empty? number)
              (println "WARNING: No Twilio Number detected!"))
            number))

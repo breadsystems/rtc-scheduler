@@ -15,7 +15,7 @@
 (defstate sendgrid-from-email
   :start (let [from (:sendgrid-from-email env)]
            (when (empty? from)
-             (printf "WARNING: No SendGrid FROM address detected!"))
+             (println "WARNING: No SendGrid FROM address detected!"))
            from))
 
 ;; curl --request POST \
