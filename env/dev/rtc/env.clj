@@ -16,8 +16,18 @@
    (mount/stop #'env)
    (mount/start #'env)))
 
+(defn wrap-prn [handler]
+  (fn [req]
+    (when (:dev-prn-requests env)
+      (prn 'REQUEST req))
+    (let [res (handler req)]
+      (when (:dev-prn-responses env)
+        (prn 'RESPONSE res))
+      res)))
+
 (defn middleware [app]
   (-> app
+      (wrap-prn)
       (wrap-reload)))
 
 
