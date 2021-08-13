@@ -48,7 +48,7 @@
    (api-call method endpoint {})))
 
 (defn us-phone [phone]
-  (let [phone (.replaceAll phone "[^0-9]" "")]
+  (let [phone (.replaceAll (str phone) "[^0-9]" "")]
     (cond
       (string/starts-with? phone "1") (str "+" phone)
       :else (str "+1" phone))))
