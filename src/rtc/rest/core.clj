@@ -62,16 +62,16 @@
 (defn endpoints [{:keys [mount]}]
   [mount
    ["/windows"
-    {:get (rest-handler (fn [{:keys [params identity]}]
-                          (let [params {:state (:state params)
-                                        :user identity}]
-                            {:success true
-                             :data (appt/get-available-windows params)})))}]
+    {:get (rest-handler (fn [{params :params user :identity}]
+                          {:success true
+                           :data (appt/get-available-windows params user)}))}]
    ["/appointment"
-    {:post (rest-handler (fn [req]
+    {:post (rest-handler (fn [{user :identity :as req}]
                            (try
-                             {:success true
-                              :data {:appointment (appt/book-appointment! (transit-params req))}}
+                             (let [params (transit-params req)]
+                               {:success true
+                                :data {:appointment
+                                       (appt/book-appointment! params user)}})
                              (catch clojure.lang.ExceptionInfo e
                                {:success false
                                 :errors [{:message (.getMessage e)
@@ -99,10 +99,8 @@
     {:post (rest-handler (fn [req]
                            (try
                              (let [user (transit-params req)]
-                               (prn user)
                                (if (u/validate-invitation user)
                                  (do
-                                   (prn 'valid)
                                    (u/reset-pass! user)
                                    {:success true
                                     :data {:redirect-to "/comrades"}})

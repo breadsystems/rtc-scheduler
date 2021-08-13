@@ -29,10 +29,7 @@
 (defonce OFFSET-COMRADE 0)
 
 (defn- window-range [{:keys [admin?]}]
-  (let [;; TODO tighten up this logic for more accurate availability
-        ;; Look for availabilities starting this time X days from now
-        ;; depending on whether the current user is an admin or not.
-        offset (if admin? OFFSET-COMRADE OFFSET-CARESEEKER)
+  (let [offset (if admin? OFFSET-COMRADE OFFSET-CARESEEKER)
         from (+ (inst-ms (util/midnight-this-morning)) offset)
         to (+ from (* 28 ONE-DAY-MS))]
     [from to]))
@@ -43,7 +40,7 @@
     (map w/format-window
          (w/->windows (map w/coerce avails) (map w/coerce appts) from to WINDOW-MS))))
 
-(defn get-available-windows [{:keys [state user]}]
+(defn get-available-windows [{:keys [state]} user]
   (let [[from to] (window-range user)
         states (get st/state-mappings state #{})]
     (if (empty? states)
@@ -61,7 +58,7 @@
                      windows))
        (flatten-formatted appt)))
 
-(defn book-appointment! [appt]
+(defn book-appointment! [appt user]
   (let [{:keys [name
                 pronouns
                 state
@@ -76,7 +73,7 @@
                 description-of-needs
                 preferred-communication-method
                 anything-else]} appt
-        windows (get-available-windows {:state state})
+        windows (get-available-windows {:state state} user)
         pid (first (available-provider-ids windows appt))]
     (if pid
       (let [appt-info
