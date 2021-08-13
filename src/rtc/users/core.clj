@@ -131,6 +131,7 @@
 (defn update-settings! [user]
   (if (updating-password? user)
     (update-password! user)
+    ;; TODO update authy_id if phone changed
     (update-contact-info! user)))
 
 (defn authenticate [email password]
