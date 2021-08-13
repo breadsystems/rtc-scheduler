@@ -86,9 +86,6 @@
 ;; EMAIL NOTIFICATIONS
 ;;
 
-(comment
-  (k/run))
-
 (deftest test-appointment->email
 
   (are
@@ -192,3 +189,6 @@
   (is (false? (notify/send-email? {})))
   (is (false? (notify/send-email? nil)))
   (is (false? (notify/send-email? {:email ""}))))
+
+(comment
+  (k/run))

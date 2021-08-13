@@ -105,7 +105,7 @@
   ;; Notify the careseeker, honoring their consent.
   (when (send-sms? appt)
     (twilio/send-sms! (appointment->sms appt)))
-  (sendgrid/send-email! appt)
+  (sendgrid/send-email! (appointment->email appt))
 
   ;; Notify the provider.
   (let [appt (assoc appt :provider (appt->provider appt))]

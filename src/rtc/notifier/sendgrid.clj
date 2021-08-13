@@ -40,17 +40,18 @@
                              :name to-name}]}]
    :from {:email from
           :name "Radical Telehealth Collective"}
-   :subject "Your appointment with the Radical Telehealth Collective"
+   :subject subject
    :content [{:type "text/plain"
               :value message}]})
 
-(defn send-email! [{:keys [message to to-name]}]
+(defn send-email! [{:keys [subject message to to-name]}]
   (when (and message to)
     (api-call http/post "/v3/mail/send"
               {:form-params (mail-send-form-params
                               {:to to
                                :to-name to-name
                                :from sendgrid-from-email
+                               :subject subject
                                :message message})})))
 
 (comment
@@ -58,6 +59,7 @@
   (mail-send-form-params {:to "coby@tamayo.email"
                           :to-name "Coby Test"
                           :from "info@radicaltelehealthcollective.org"
+                          :subject "Hi"
                           :message "hello this is a test."})
 
   ;; These are equivalent:
@@ -67,12 +69,16 @@
                {:to "coby@tamayo.email"
                 :to-name "Coby Test"
                 :from "info@radicaltelehealthcollective.org"
+                :subject "Hi"
                 :message "hello this is a test."})})
   (send-email! {:to "coby@tamayo.email"
                 :to-name "Coby Test"
                 :from "info@radicaltelehealthcollective.org"
+                :subject "Hi"
                 :message "hello this is a test."})
 
   sendgrid-api-key
   sendgrid-from-email
+
+  ;;
   )
