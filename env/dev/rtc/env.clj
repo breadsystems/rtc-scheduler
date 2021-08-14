@@ -2,6 +2,7 @@
   (:require
    [config.core :as config]
    [mount.core :as mount :refer [defstate]]
+   [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
    [ring.middleware.reload :refer [wrap-reload]]
    [rtc.style.build :as style]))
 
@@ -16,7 +17,7 @@
    (mount/stop #'env)
    (mount/start #'env)))
 
-(defn wrap-prn [handler]
+(defn- wrap-prn [handler]
   (fn [req]
     (when (:dev-prn-requests env)
       (prn 'REQUEST req))
@@ -25,8 +26,19 @@
         (prn 'RESPONSE res))
       res)))
 
-(defn middleware [app]
+(defn- env-anti-forgery
+  "Wrap handler in anti-forgery middleware unless explicitly disabled."
+  [handler opts]
+  (if (:dev-disable-anti-forgery env)
+    (do
+      (println "NOTICE: Anti-forgery protection is disabled!")
+      handler)
+    (wrap-anti-forgery handler {:read-token
+                                (:anti-forgery/read-token opts)})))
+
+(defn middleware [app opts]
   (-> app
+      (env-anti-forgery opts)
       (wrap-prn)
       (wrap-reload)))
 

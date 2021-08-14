@@ -6,7 +6,6 @@
    [mount.core :as mount :refer [defstate]]
    [org.httpkit.server :as http]
    [reitit.ring :as ring]
-   [ring.middleware.anti-forgery :as anti-forgery :refer [wrap-anti-forgery]]
    [ring.middleware.params :refer [wrap-params]]
    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
    [ring.middleware.session :refer [wrap-session]]
@@ -18,6 +17,7 @@
    [rtc.env :refer [env]]
    [rtc.intake.core :as intake]
    [rtc.layout :as layout]
+   [rtc.middleware :as middleware]
    [rtc.notifier.core]
    [rtc.users.core :as u]
    [rtc.users.handlers :as user]))
@@ -81,10 +81,6 @@
 
 (defonce stop-http (atom nil))
 
-(defn- read-token [{:keys [params headers]}]
-  (or (:__anti-forgery-token params)
-      (get headers "x-csrf-token")))
-
 (defn- wrap-dev-identity
   "Load default dev admin user into the session identity when auth is explicitly disabled.
    Note that the wrap-identity middleware loads the actual :identity key into req."
@@ -94,15 +90,6 @@
       (handler (assoc-in req [:session :identity] auth/default-user)))
     handler))
 
-(defn- env-anti-forgery
-  "Wrap handler in anti-forgery middleware unless explicitly disabled."
-  [handler]
-  (when (:dev-disable-anti-forgery env)
-    (println "NOTICE: Anti-forgery protection is disabled!"))
-  (if-not (:dev-disable-anti-forgery env)
-    (wrap-anti-forgery handler {:read-token read-token})
-    handler))
-
 (defn start! []
   (let [port (Integer. (:port env 80))]
     (println (str "Running HTTP server at localhost:" port))
@@ -110,13 +97,14 @@
       (println "NOTICE: Authentication is disabled!"))
     (reset! stop-http
             (http/run-server (-> app
-                                 (env-anti-forgery)
                                  (auth/wrap-identity)
                                  (wrap-dev-identity)
                                  (wrap-session)
                                  (wrap-keyword-params)
                                  (wrap-params)
-                                 (rtc.env/middleware))
+                                 (rtc.env/middleware
+                                   {:anti-forgery/read-token
+                                    middleware/read-token}))
                              {:port port})))
   nil)
 
