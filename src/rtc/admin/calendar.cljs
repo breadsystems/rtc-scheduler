@@ -689,6 +689,14 @@
      [:h3 "Medical Needs"]
      [:p reason]]))
 
+(defn- other-notes [{:keys [other_notes]}]
+  (when @(rf/subscribe [::can-view-medical-needs?])
+    [:div.appointment-field-group
+     [:h3 "Anything Else?"]
+     (if other_notes
+       [:p other_notes]
+       [:p.help "No additional information given"])]))
+
 (defn- appointment-notes [{:keys [notes]}]
   (let [current-note @(rf/subscribe [::note])
         confirm?! #(js/confirm (str "Confirm leaving this note? \""
@@ -736,6 +744,7 @@
       (appointment-contact appt)
       (appointment-access-needs appt)]
      (medical-needs appt)
+     (other-notes appt)
      (appointment-notes appt)]))
 
 

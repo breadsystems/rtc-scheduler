@@ -100,6 +100,7 @@
       :date_created (c/to-sql-time today-8am)
       :other_access_needs "Popsicles"
       :reason "Personal reasons"
+      :other_notes "Some other notes here"
       :state "WA"})
     (appt/create!
      {:provider_id (:id lauren)
@@ -114,6 +115,7 @@
       :date_created (c/to-sql-time today-8am)
       :other_access_needs "Things"
       :reason "Personal reasons"
+      :other_notes "Some other notes here"
       :state "WA"})
     ;; Create an appt with access needs
     (let [{id :id} (appt/create!
