@@ -81,15 +81,6 @@
 
 (defonce stop-http (atom nil))
 
-(defn- wrap-dev-identity
-  "Load default dev admin user into the session identity when auth is explicitly disabled.
-   Note that the wrap-identity middleware loads the actual :identity key into req."
-  [handler]
-  (if (:dev-disable-auth env)
-    (fn [req]
-      (handler (assoc-in req [:session :identity] auth/default-user)))
-    handler))
-
 (defn start! []
   (let [port (Integer. (:port env 80))]
     (println (str "Running HTTP server at localhost:" port))
@@ -98,13 +89,14 @@
     (reset! stop-http
             (http/run-server (-> app
                                  (auth/wrap-identity)
-                                 (wrap-dev-identity)
-                                 (wrap-session)
                                  (wrap-keyword-params)
                                  (wrap-params)
                                  (rtc.env/middleware
                                    {:anti-forgery/read-token
-                                    middleware/read-token}))
+                                    middleware/read-token
+                                    :auth/default-user
+                                    auth/default-user})
+                                 (wrap-session))
                              {:port port})))
   nil)
 

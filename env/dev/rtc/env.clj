@@ -36,11 +36,22 @@
     (wrap-anti-forgery handler {:read-token
                                 (:anti-forgery/read-token opts)})))
 
+(defn- wrap-dev-identity
+  "Load default dev admin user into the session identity when auth is
+  explicitly disabled. Note that the wrap-identity middleware loads the actual
+  :identity key into req."
+  [handler opts]
+  (if (:dev-disable-auth env)
+    (fn [req]
+      (handler (assoc-in req [:session :identity] (:auth/default-user opts))))
+    handler))
+
 (defn middleware [app opts]
   (-> app
-      (env-anti-forgery opts)
+      (wrap-reload)
       (wrap-prn)
-      (wrap-reload)))
+      (wrap-dev-identity opts)
+      (env-anti-forgery opts)))
 
 
 ;; TODO use Thread.interrupt() or similar to :stop watch
