@@ -1,5 +1,3 @@
-# Provider Instructions
-
 Welcome to the Radical Telehealth Collective. This step-by-step guide is for new **providers and schedulers**. It will go over how to get set up in the RTC website and begin booking appointments.
 
 We're going to first go over creating your account and logging in the first time. Then we'll enter some basic account information. Finally, for providers, we'll enter availability on the calendar so that People Requiring Care can schedule appointments with you.

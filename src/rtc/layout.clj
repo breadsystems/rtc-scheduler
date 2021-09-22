@@ -54,9 +54,15 @@
 (defn- file->html [file]
   (-> (str "markdown/" file) io/resource slurp md/md-to-html-string))
 
+(defn- file->html-with-meta [file]
+  (-> (str "markdown/" file) io/resource slurp md/md-to-html-string-with-meta))
+
 (comment
   (io/resource "markdown/home.md")
-  (file->html "home.md"))
+  (file->html "home.md")
+
+  ;; docs
+  (io/resource "markdown/home.md"))
 
 (defn static-lang-selector []
   [:aside.lang-selector
@@ -90,6 +96,31 @@
                   [:div.after
                    after])]]
      :footer-content (assets/inline-js "lang.js")})))
+
+(defn help-page
+  "Render a markdown file as an HTML page.
+  Calls (page) passing the rendered Markdown as :content.
+  Use this for rendering help pages in /docs."
+  [{:keys [file before after] :as opts}]
+  (page
+   (merge
+    opts
+    (let [{html :html
+           {[md-title] :title} :metadata}
+          (file->html-with-meta file)]
+      {:title md-title
+       :content [:div.container.page-container
+                 [:header
+                  [:h1 md-title]]
+                 [:main.prose
+                  (when before
+                    [:div.before
+                     before])
+                  [:section
+                   html]
+                  (when after
+                    [:div.after
+                     after])]]}))))
 
 
 (defn intake-page

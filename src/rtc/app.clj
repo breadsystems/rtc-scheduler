@@ -68,7 +68,11 @@
                    (if (string/ends-with? uri "/")
                      {:headers {"Location" (string/replace uri #"/$" "")}
                       :status 302}
-                     (layout/admin-page {:title "Comrades"})))}]]])
+                     (layout/admin-page {:title "Comrades"})))}]]
+
+     ["/help/:slug"
+      {:get (fn [{{slug :slug} :path-params}]
+              (layout/help-page {:file (str slug ".md")}))}]])
 
    (ring/routes
     (assets/wrap-asset-headers (ring/create-resource-handler {:path "/"}))
