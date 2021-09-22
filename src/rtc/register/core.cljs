@@ -141,7 +141,8 @@
                  :class (field->class :phone)
                  :on-change (emitter update-user-field! :phone)
                  :value (:phone @user)}]
-        [errors-for :phone]]]
+        [errors-for :phone]
+        [:div.instruct "Use the number for the phone where you have Authy installed."]]]
       [:div.flex-field
        [:label.field-label {:for "password"} "Password"]
        [:div.field
