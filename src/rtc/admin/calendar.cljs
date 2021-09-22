@@ -622,7 +622,12 @@
      [:fieldset.access-needs-legend
       [:legend "Appointment colors"]
       [:div.access-needs-indicator.--unmet "Unmet access needs"]
-      [:div.access-needs-indicator.--met "Access needs met"]]]))
+      [:div.access-needs-indicator.--met "Access needs met"]]
+     [:div.filter-group
+      [:div.filter-field
+       [:h4 "Schedule an appointment"]
+       [:a {:href "/get-care"}
+        "Go to Get Care to schedule on someone's behalf..."]]]]))
 
 (defmulti access-need (fn [{:keys [need/type]}] type))
 
