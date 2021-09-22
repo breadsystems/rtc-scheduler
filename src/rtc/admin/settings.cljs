@@ -143,7 +143,8 @@
                       :type :text
                       :placeholder "WA"
                       :maxlength 2
-                      :label "State (2 letters)"}]
+                      :label "State"
+                      :help "Use the two-letter abbreviation for the state you are licensed in."}]
       [:div
        [:button {:on-click #(rf/dispatch [::update-settings])
                  :disabled (not can-update?)}
