@@ -1,6 +1,7 @@
 (ns rtc.users.invites
   (:require
    ["moment" :as moment]
+   [reagent.core :as r]
    [re-frame.core :as rf]
    [rtc.rest.core :as rest]))
 
@@ -89,26 +90,33 @@
 
 
 (defn invites []
-  (let [current-invite @(rf/subscribe [::current-invite])
-        my-invitations @(rf/subscribe [::my-invitations])]
-    [:<>
-     [:section
-      [:h3 "Invite a comrade"]
-      [:div.field
-       [:form {:on-submit #(do (.preventDefault %)
-                             (rf/dispatch [::invite current-invite]))}
-        [:label.field-label {:for "invite-email"} "Email"]
-        [:div.field
-         [:input#invite-email {:type :email
-                               :placeholder "comrade@riseup.net"
-                               :value (:email current-invite)
-                               :on-change #(rf/dispatch [::update-invite-email (.. % -target -value)])}]]
-        [:button {:disabled (empty? (:email current-invite))} "Invite!"]]]]
-     [:section
-      [:h3 "Your invites"]
-      [:p.help "To send an open invitation, copy and paste the URL in an email."]
-      (map
-       (fn [invite]
-         ^{:key (:code invite)}
-         [invitation invite])
-       my-invitations)]]))
+  (let [local-state (r/atom {:viewing-all? false})]
+    (fn []
+      (let [current-invite @(rf/subscribe [::current-invite])
+            my-invitations @(rf/subscribe [::my-invitations])
+            viewing-all? (:viewing-all? @local-state)
+            display-count (if viewing-all? (count my-invitations) 3)]
+        [:<>
+         [:section
+          [:h3 "Invite a comrade"]
+          [:div.field
+           [:form {:on-submit #(do (.preventDefault %)
+                                 (rf/dispatch [::invite current-invite]))}
+            [:label.field-label {:for "invite-email"} "Email"]
+            [:div.field
+             [:input#invite-email {:type :email
+                                   :placeholder "comrade@riseup.net"
+                                   :value (:email current-invite)
+                                   :on-change #(rf/dispatch [::update-invite-email (.. % -target -value)])}]]
+            [:button {:disabled (empty? (:email current-invite))} "Invite!"]]]]
+         [:section
+          [:h3 "Your invites"]
+          [:p.help "To send an open invitation, copy and paste the URL in an email."]
+          (map
+           (fn [invite]
+             ^{:key (:code invite)}
+             [invitation invite])
+           (take display-count my-invitations))
+          [:button.secondary {:on-click
+                              #(swap! local-state update :viewing-all? not)}
+           (if viewing-all? "View fewer invites" "View all invites")]]]))))
