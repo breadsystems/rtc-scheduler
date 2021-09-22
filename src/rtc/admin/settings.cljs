@@ -76,29 +76,37 @@
   @(rf/subscribe [::current-user])
   @(rf/subscribe [:error-message :error/password-reset]))
 
-(defn- setting-field [{:keys [setting type label placeholder maxlength]}]
+(defn- setting-field [{:keys [setting
+                              type
+                              label
+                              placeholder
+                              maxlength
+                              help]}]
   (let [type (or type :text)
         settings @(rf/subscribe [::current-user])]
     [:div.flex-field
      [:label.field-label {:for (name setting)} label]
      [:div.field
-      (cond
-        (contains? #{:text :email :password} type)
-        [:input {:type type
-                 :id (name setting)
-                 :on-change
-                 #(rf/dispatch
-                   [::update-setting setting (.. % -target -value)])
-                 :value (get settings setting)
-                 :maxlength maxlength
-                 :placeholder placeholder}]
-        (= :checkbox type)
-        [:input {:type :checkbox
-                 :id (name setting)
-                 :on-change
-                 #(rf/dispatch
-                   [::update-setting setting (.. % -target -checked)])
-                 :checked (boolean (get settings setting))}])]]))
+      [:<>
+       (cond
+         (contains? #{:text :email :password} type)
+         [:input {:type type
+                  :id (name setting)
+                  :on-change
+                  #(rf/dispatch
+                    [::update-setting setting (.. % -target -value)])
+                  :value (get settings setting)
+                  :maxlength maxlength
+                  :placeholder placeholder}]
+         (= :checkbox type)
+         [:input {:type :checkbox
+                  :id (name setting)
+                  :on-change
+                  #(rf/dispatch
+                    [::update-setting setting (.. % -target -checked)])
+                  :checked (boolean (get settings setting))}])
+       (when help
+         [:div.instruct help])]]]))
 
 
 (defn settings []
@@ -126,6 +134,7 @@
                       :label "Email"}]
       [setting-field {:setting :phone
                       :label "Phone"}]
+      [:h3 "Provider fields"]
       [setting-field {:setting :is_provider
                       :type :checkbox
                       :label "I am a provider"}]
