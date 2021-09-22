@@ -137,7 +137,8 @@
       [:h3 "Provider fields"]
       [setting-field {:setting :is_provider
                       :type :checkbox
-                      :label "I am a provider"}]
+                      :label "I am a provider"
+                      :help "All providers should check this box."}]
       [setting-field {:setting :state
                       :type :text
                       :placeholder "WA"
