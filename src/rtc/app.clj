@@ -89,13 +89,13 @@
     (reset! stop-http
             (http/run-server (-> app
                                  (auth/wrap-identity)
-                                 (wrap-keyword-params)
-                                 (wrap-params)
                                  (rtc.env/middleware
                                    {:anti-forgery/read-token
                                     middleware/read-token
                                     :auth/default-user
                                     auth/default-user})
+                                 (wrap-keyword-params)
+                                 (wrap-params)
                                  (wrap-session))
                              {:port port})))
   nil)
