@@ -104,7 +104,7 @@
                                  (rf/dispatch [::invite current-invite]))}
             [:label.field-label {:for "invite-email"} "Email"]
             [:div.field
-             [:input#invite-email {:type :email
+             [:input#invite-email {:type :text
                                    :placeholder "comrade@riseup.net"
                                    :value (:email current-invite)
                                    :on-change #(rf/dispatch [::update-invite-email (.. % -target -value)])}]]

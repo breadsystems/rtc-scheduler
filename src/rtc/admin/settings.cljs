@@ -82,15 +82,15 @@
                               placeholder
                               maxlength
                               help]}]
-  (let [type (or type :text)
+  (let [field-type (or type :text)
         settings @(rf/subscribe [::current-user])]
     [:div.flex-field
      [:label.field-label {:for (name setting)} label]
      [:div.field
       [:<>
        (cond
-         (contains? #{:text :email :password} type)
-         [:input {:type type
+         (contains? #{:text :password} field-type)
+         [:input {:type field-type
                   :id (name setting)
                   :on-change
                   #(rf/dispatch
@@ -98,7 +98,7 @@
                   :value (get settings setting)
                   :maxlength maxlength
                   :placeholder placeholder}]
-         (= :checkbox type)
+         (= :checkbox field-type)
          [:input {:type :checkbox
                   :id (name setting)
                   :on-change
@@ -130,7 +130,7 @@
                       :placeholder "they/them"
                       :label "Pronouns"}]
       [setting-field {:setting :email
-                      :type :email
+                      :type :text
                       :label "Email"}]
       [setting-field {:setting :phone
                       :label "Phone"}]
