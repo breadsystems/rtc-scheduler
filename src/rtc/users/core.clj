@@ -7,6 +7,7 @@
    [rtc.auth.util :as auth-util]
    [rtc.auth.two-factor :as two-factor]
    [rtc.db :as db]
+   [rtc.event :as e]
    [rtc.util :refer [one-hour]])
   (:import
    [java.util Date]))
@@ -46,7 +47,8 @@
                     :redeemed false
                     :date_invited (Date.)}]
     (db/create-invitation! invitation)
-    ;; TODO send email
+    (e/publish! {:event/type :invited
+                 :event/invitation invitation})
     invitation))
 
 (defn validate-invitation [invitation]

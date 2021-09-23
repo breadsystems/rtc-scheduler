@@ -2,7 +2,12 @@
   (:require
     [mount.core :refer [defstate]]
     [rtc.event :as e]
+    [rtc.notifier.invites :as invt]
     [rtc.notifier.appointments :as appt]))
+
+;;
+;; APPOINTMENT NOTIFICATIONS
+;;
 
 (defonce unsub-appointments (atom nil))
 
@@ -13,6 +18,21 @@
                           (appt/booked-appointment! appt)))]
            (reset! unsub-appointments unsub!))
   :stop (when-let [unsub! @unsub-appointments]
+          (unsub!)))
+
+;;
+;; INVITE NOTIFICATIONS
+;;
+
+(defonce unsub-invites (atom nil))
+
+(defstate appointment-notifiers
+  :start (let [unsub! (e/subscribe!
+                        :invited
+                        (fn [{invite :event/invitation}]
+                          (invt/invited! invite)))]
+           (reset! unsub-invites unsub!))
+  :stop (when-let [unsub! @unsub-invites]
           (unsub!)))
 
 (comment
