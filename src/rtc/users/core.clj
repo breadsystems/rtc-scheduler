@@ -8,7 +8,7 @@
    [rtc.auth.two-factor :as two-factor]
    [rtc.db :as db]
    [rtc.event :as e]
-   [rtc.util :refer [one-hour]])
+   [rtc.util :refer [one-hour url-encode]])
   (:import
    [java.util Date]))
 
@@ -83,7 +83,7 @@
             server-name
             port
             register-or-reset-pw
-            email
+            (url-encode email)
             code)))
 
 (defn register! [{:keys [email phone] :as user}]
