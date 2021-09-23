@@ -3,7 +3,8 @@
     (:import
       [java.time ZonedDateTime ZoneId]
       [java.time.format DateTimeFormatter]
-      [java.util Date])))
+      [java.util Date]
+      [java.net URLEncoder])))
 
 
 (defn ->zoned
@@ -54,3 +55,11 @@
 
 (defn index-by [f xs]
   (into {} (map #(vector (f %) %) xs)))
+
+#?(:clj
+   (defn url-encode [s]
+    (URLEncoder/encode s "UTF-8")))
+
+
+(comment
+  (url-encode "coby+test@tamayo.email"))
