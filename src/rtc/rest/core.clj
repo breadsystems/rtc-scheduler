@@ -5,6 +5,7 @@
    [rtc.admin.schedule :as schedule]
    [rtc.auth.core :as auth]
    [rtc.appointments.core :as appt]
+   [rtc.event :as e]
    [rtc.users.core :as u])
   (:import
    [clojure.lang ExceptionInfo]
@@ -179,9 +180,12 @@
                                   invitation (u/invite!
                                               {:email email
                                                :invited_by id})
-                                  url (u/invite-url req invitation)]
+                                  url (u/invite-url req invitation)
+                                  invitation (assoc invitation :url url)]
+                              (e/publish! {:event/type :invited
+                                           :event/invitation invitation})
                               {:success true
-                               :data (assoc invitation :url url)})))}]
+                               :data invitation})))}]
     ["/settings"
      {:get (rest-handler (fn [{{id :id} :identity :as req}]
                            {:success true

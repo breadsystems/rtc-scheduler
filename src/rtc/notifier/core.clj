@@ -26,7 +26,7 @@
 
 (defonce unsub-invites (atom nil))
 
-(defstate appointment-notifiers
+(defstate invite-notifiers
   :start (let [unsub! (e/subscribe!
                         :invited
                         (fn [{invite :event/invitation}]
