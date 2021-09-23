@@ -1,4 +1,4 @@
-(ns rtc.notifier-core-test
+(ns rtc.appointment-notifier-test
   (:require
     [clojure.test :refer [are deftest is]]
     [kaocha.repl :as k]
