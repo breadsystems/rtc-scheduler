@@ -74,19 +74,28 @@
 
 
 (defn- invitation [{:keys [email date_invited expired? redeemed url]}]
-  [:div.invite
-   [:div.invite__email
-    [:span email]]
-   [:div.invite__timing
-    [:span (.fromNow (moment date_invited))]]
-   ;; TODO copy code and/or send email
-   (cond
-     redeemed
-     [:span "Redeemed"]
-     expired?
-     [:span "Expired"]
-     :else
-     [:span.invite-url url])])
+  (let [local-state (r/atom {:copied? false})]
+    (fn []
+      [:div.invite
+       [:div.invite__email
+        [:span email]]
+       [:div.invite__timing
+        [:span (.fromNow (moment date_invited))]]
+       (cond
+         redeemed
+         [:span "Redeemed"]
+         expired?
+         [:span "Expired"]
+         :else
+         [:div
+          [:div "Pending"]
+          [:a.text-button
+           {:on-click #(do
+                         (.writeText js/navigator.clipboard url)
+                         (swap! local-state update :copied? not))}
+           (if (:copied? @local-state)
+             "copied!"
+             "copy invite link")]])])))
 
 
 (defn invites []
@@ -111,7 +120,7 @@
             [:button {:disabled (empty? (:email current-invite))} "Invite!"]]]]
          [:section
           [:h3 "Your invites"]
-          [:p.help "To send an open invitation, copy and paste the URL in an email."]
+          [:p.help "Invite links are emailed automatically. To send one again, copy and paste the URL into an email."]
           (map
            (fn [invite]
              ^{:key (:code invite)}
