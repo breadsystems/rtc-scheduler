@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [are deftest is]]
     [kaocha.repl :as k]
-    [rtc.notifier.core :as notify]))
+    [rtc.notifier.appointments :as appt]))
 
 ;;
 ;; SMS NOTIFICATIONS
@@ -12,7 +12,7 @@
 
   (are
     [sms appt]
-    (= sms (notify/appointment->sms appt))
+    (= sms (appt/appointment->sms appt))
 
     {:to "+12535551234"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
@@ -46,7 +46,7 @@
 
   (are
     [sms appt]
-    (= sms (notify/appointment->provider-sms appt))
+    (= sms (appt/appointment->provider-sms appt))
 
     nil {}
     nil {:provider nil}
@@ -74,13 +74,13 @@
 
 (deftest test-send-sms?
 
-  (is (true? (notify/send-sms? {:text-ok 1 :phone "1234567890"})))
-  (is (false? (notify/send-sms? {:text-ok nil :phone "1234567890"})))
-  (is (false? (notify/send-sms? {:phone "1234567890"})))
-  (is (false? (notify/send-sms? {:phone ""})))
-  (is (false? (notify/send-sms? {:text-ok 1})))
-  (is (false? (notify/send-sms? {:text-ok 321})))
-  (is (false? (notify/send-sms? {:text-ok false :phone "123467890"}))))
+  (is (true? (appt/send-sms? {:text-ok 1 :phone "1234567890"})))
+  (is (false? (appt/send-sms? {:text-ok nil :phone "1234567890"})))
+  (is (false? (appt/send-sms? {:phone "1234567890"})))
+  (is (false? (appt/send-sms? {:phone ""})))
+  (is (false? (appt/send-sms? {:text-ok 1})))
+  (is (false? (appt/send-sms? {:text-ok 321})))
+  (is (false? (appt/send-sms? {:text-ok false :phone "123467890"}))))
 
 ;;
 ;; EMAIL NOTIFICATIONS
@@ -90,7 +90,7 @@
 
   (are
     [email appt]
-    (= email (notify/appointment->email appt))
+    (= email (appt/appointment->email appt))
 
     {:to "careseeker@example.com"
      :to-name nil
@@ -154,7 +154,7 @@
 
   (are
     [email appt]
-    (= email (notify/appointment->provider-email appt))
+    (= email (appt/appointment->provider-email appt))
 
     nil {}
     nil {:provider nil}
@@ -185,10 +185,10 @@
 
 (deftest test-send-email?
 
-  (is (true? (notify/send-email? {:email "rtc@example.com"})))
-  (is (false? (notify/send-email? {})))
-  (is (false? (notify/send-email? nil)))
-  (is (false? (notify/send-email? {:email ""}))))
+  (is (true? (appt/send-email? {:email "rtc@example.com"})))
+  (is (false? (appt/send-email? {})))
+  (is (false? (appt/send-email? nil)))
+  (is (false? (appt/send-email? {:email ""}))))
 
 (comment
   (k/run))
