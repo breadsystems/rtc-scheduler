@@ -84,10 +84,7 @@
             code)))
 
 (defn register! [{:keys [email phone] :as user}]
-  (let [authy-payload {:email email
-                       :cellphone phone
-                       :country_code "1"}
-        {authy-user :user} (two-factor/create-authy-user! authy-payload)]
+  (let [{authy-user :user} (two-factor/create-authy-user! user)]
     (-> user
         (update :pass hash/derive)
         (assoc :authy_id (:id authy-user))

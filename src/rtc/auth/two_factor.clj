@@ -26,11 +26,16 @@
   ([method endpoint]
    (api-call method endpoint {})))
 
+(defn user-payload [{:keys [email phone]}]
+  {:email email
+   :cellphone phone
+   :country_code "1"})
+
 (defn app-details []
   (api-call http/get "/app/details"))
 
 (defn create-authy-user! [data]
-  (api-call http/post "/users/new" {:form-params {:user data}
+  (api-call http/post "/users/new" {:form-params {:user (user-payload data)}
                                     :flatten-nested-form-params true}))
 
 (defn get-token [id]
