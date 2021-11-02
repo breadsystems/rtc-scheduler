@@ -1,3 +1,5 @@
+;; Authy integration.
+;; For testing, see https://www.twilio.com/docs/iam/test-credentials#magic-input
 (ns rtc.auth.two-factor
   (:require
    [clj-http.client :as http]
