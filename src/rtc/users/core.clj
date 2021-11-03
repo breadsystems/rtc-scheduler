@@ -84,10 +84,7 @@
             code)))
 
 (defn register! [{:keys [email phone] :as user}]
-  (let [authy-payload {:email email
-                       :cellphone phone
-                       :country_code "1"}
-        {authy-user :user} (two-factor/create-authy-user! authy-payload)]
+  (let [{authy-user :user} (two-factor/create-authy-user! user)]
     (-> user
         (update :pass hash/derive)
         (assoc :authy_id (:id authy-user))
@@ -127,11 +124,23 @@
         (sql/format)
         (db/execute!))))
 
+(defn update-authy-id! [{:keys [id authy_id]}]
+  (-> (sqlh/update :users)
+      (sqlh/sset {:authy_id authy_id})
+      (sqlh/where [:= :id id])
+      (sql/format)
+      (db/execute!)))
+
 (defn update-settings! [user]
   (if (updating-password? user)
     (update-password! user)
-    ;; TODO update authy_id if phone changed
-    (update-contact-info! user)))
+    (let [old-user (id->user (:id user))
+          updating-phone? (not= (:phone old-user) (:phone user))]
+      (when updating-phone?
+        (let [authy-user (:user (two-factor/create-authy-user! user))]
+          (update-authy-id! {:id (:id user)
+                             :authy_id (:id authy-user)})))
+      (update-contact-info! user))))
 
 (defn authenticate [email password]
   (when (and email password)
@@ -145,6 +154,18 @@
   (db/execute! ["UPDATE users SET last_login = NOW() WHERE id = ?" id]))
 
 (comment
+  (def shevek (assoc (email->user "shevek@tamayo.email")
+                     :phone "1234567890"))
+
+  (update-authy-id! {:id (:id shevek)
+                     :authy_id nil})
+
+  (update-settings! shevek)
+  (update-settings! (assoc shevek :phone "5005550006"))
+  (select-keys (email->user "shevek@tamayo.email") [:id :phone :authy_id])
+
+  ;;
+
   (def admin (email->user "rtc@tamayo.email"))
 
   (def invitation (invite! {:email (str (crypto/url-part 6) "@example.com")
