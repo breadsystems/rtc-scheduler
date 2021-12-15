@@ -5,7 +5,7 @@
     [rtc.providers.core :as provider]
     [rtc.util :refer [->zoned format-zoned]]))
 
-(defn- coast-times [dt]
+(defn coast-times [dt]
   (let [pacific (->zoned dt "America/Los_Angeles")
         eastern (->zoned dt "America/New_York")]
     (format "%s / %s"
