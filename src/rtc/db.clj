@@ -102,7 +102,7 @@
   (reset-everything!!)
 
   ;; create a migration
-  (migratus/create (migration-config) "increase-email-length")
+  (migratus/create (migration-config) "appointment-reminders")
 
   ;; list all schema migrations
   (get-migrations))
