@@ -5,6 +5,9 @@
     [rtc.providers.core :as provider]
     [rtc.util :refer [->zoned format-zoned]]))
 
+(def ^:private support-email "info@radicaltelehealthcollective.org")
+(def ^:private support-phone "TODO")
+
 (defn coast-times [dt]
   (let [pacific (->zoned dt "America/Los_Angeles")
         eastern (->zoned dt "America/New_York")]
@@ -15,6 +18,9 @@
 ;;
 ;; SMS NOTIFICATIONS
 ;;
+
+(defn send-sms? [appt]
+  (boolean (and (= 1 (:text-ok appt)) (seq (:phone appt)))))
 
 (defn appointment->sms [{:keys [phone
                                 provider_first_name
@@ -27,8 +33,22 @@
               (coast-times start_time)
               (str provider_first_name " " provider_last_name))})
 
-(defn send-sms? [appt]
-  (boolean (and (= 1 (:text-ok appt)) (seq (:phone appt)))))
+(defn appointment->reminder-sms [{:keys [phone
+                                         provider_first_name
+                                         provider_last_name
+                                         start_time]}]
+  {:to (twilio/us-phone phone)
+   :message (format
+              ;; TODO i18n
+              (str
+                "This is a reminder that you have an appointment"
+                " at %s with %s. To cancel or reschedule,"
+                " please email %s or call %s.")
+              (coast-times start_time)
+              (str provider_first_name " " provider_last_name)
+              support-email
+              support-phone
+              )})
 
 (defn appointment->provider-sms
   "Returns an SMS map of the form {:to ... :message ...} given a provider with
@@ -40,6 +60,15 @@
      :message (format
                 ;; TODO i18n
                 "Someone booked an appointment with you at %s."
+                (coast-times start_time))}))
+
+(defn appointment->provider-reminder-sms
+  [{:keys [provider_phone start_time]}]
+  (when (and provider_phone) (inst? start_time)
+    {:to (twilio/us-phone provider_phone)
+     :message (format
+                ;; TODO i18n
+                "This is a reminder that you have an appointment at %s."
                 (coast-times start_time))}))
 
 ;;

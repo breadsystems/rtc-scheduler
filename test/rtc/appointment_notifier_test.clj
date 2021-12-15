@@ -8,6 +8,16 @@
 ;; SMS NOTIFICATIONS
 ;;
 
+(deftest test-send-sms?
+
+  (is (true? (appt/send-sms? {:text-ok 1 :phone "1234567890"})))
+  (is (false? (appt/send-sms? {:text-ok nil :phone "1234567890"})))
+  (is (false? (appt/send-sms? {:phone "1234567890"})))
+  (is (false? (appt/send-sms? {:phone ""})))
+  (is (false? (appt/send-sms? {:text-ok 1})))
+  (is (false? (appt/send-sms? {:text-ok 321})))
+  (is (false? (appt/send-sms? {:text-ok false :phone "123467890"}))))
+
 (deftest test-appointment->sms
 
   (are
@@ -72,19 +82,101 @@
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}
     ))
 
-(deftest test-send-sms?
+;; Careseeker appointment reminders
+(deftest test-appointment->reminder-sms
 
-  (is (true? (appt/send-sms? {:text-ok 1 :phone "1234567890"})))
-  (is (false? (appt/send-sms? {:text-ok nil :phone "1234567890"})))
-  (is (false? (appt/send-sms? {:phone "1234567890"})))
-  (is (false? (appt/send-sms? {:phone ""})))
-  (is (false? (appt/send-sms? {:text-ok 1})))
-  (is (false? (appt/send-sms? {:text-ok 321})))
-  (is (false? (appt/send-sms? {:text-ok false :phone "123467890"}))))
+  (are
+    [sms appt]
+    (= sms (appt/appointment->reminder-sms appt))
+
+    {:to "+12535551234"
+     :message (str
+                "This is a reminder that you have an appointment"
+                " at 5:30PM PDT / 8:30PM EDT Fri, Jul 9"
+                " with Ursula Le Guin. To cancel or reschedule,"
+                " please email info@radicaltelehealthcollective.org"
+                " or call TODO.")}
+    {:phone "253 555 1234"
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
+    {:to "+12535551234"
+     :message (str
+                "This is a reminder that you have an appointment"
+                " at 5:33PM PDT / 8:33PM EDT Fri, Jul 9"
+                " with Ursula Le Guin. To cancel or reschedule,"
+                " please email info@radicaltelehealthcollective.org"
+                " or call TODO.")}
+    {:phone "1 253 555 1234"
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:33:00.000000000-00:00"}
+
+    {:to "+12535551234"
+     :message (str
+                "This is a reminder that you have an appointment"
+                " at 5:30PM PDT / 8:30PM EDT Fri, Jul 9"
+                " with Ursula Le Guin. To cancel or reschedule,"
+                " please email info@radicaltelehealthcollective.org"
+                " or call TODO.")}
+    {:phone "+1 253 555 1234"
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
+    {:to "+12535551234"
+     :message (str
+                "This is a reminder that you have an appointment"
+                " at 4:30PM PST / 7:30PM EST Tue, Mar 9"
+                " with Ursula Le Guin. To cancel or reschedule,"
+                " please email info@radicaltelehealthcollective.org"
+                " or call TODO.")}
+    {:phone "+12535551234"
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}))
+
+(deftest test-appointment->provider-reminder-sms
+
+  (are
+    [sms appt]
+    (= sms (appt/appointment->provider-reminder-sms appt))
+
+    nil {}
+    nil {:provider nil}
+    nil {:provider {}} ;; no phone
+    nil {:start_time nil :provider {:phone "1234567890"}}
+    nil {:start_time "xyz" :provider {:phone "1234567890"}}
+    nil {:start_time "2021-03-10T00:33:00.000000000-00:00" ;; not an inst
+         :provider {:phone "1234567890"}}
+
+    {:to "+12535551234"
+     :message "This is a reminder that you have an appointment at 4:33PM PST / 7:33PM EST Tue, Mar 9."}
+    {:provider_phone "+12535551234"
+     :start_time #inst "2021-03-10T00:33:00.000000000-00:00"}
+
+    {:to "+12535551234"
+     :message "This is a reminder that you have an appointment at 4:30PM PST / 7:30PM EST Tue, Mar 9."}
+    {:provider_phone "+12535551234"
+     :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}
+
+    {:to "+12535550987"
+     :message "This is a reminder that you have an appointment at 4:30PM PST / 7:30PM EST Tue, Mar 9."}
+    {:provider_phone "+1 253 555 0987"
+     :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}
+    ))
 
 ;;
 ;; EMAIL NOTIFICATIONS
 ;;
+
+(deftest test-send-email?
+
+  (is (true? (appt/send-email? {:email "rtc@example.com"})))
+  (is (false? (appt/send-email? {})))
+  (is (false? (appt/send-email? nil)))
+  (is (false? (appt/send-email? {:email ""}))))
 
 (deftest test-appointment->email
 
@@ -182,13 +274,6 @@
     {:provider {:email "rtc@example.org"}
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}
     ))
-
-(deftest test-send-email?
-
-  (is (true? (appt/send-email? {:email "rtc@example.com"})))
-  (is (false? (appt/send-email? {})))
-  (is (false? (appt/send-email? nil)))
-  (is (false? (appt/send-email? {:email ""}))))
 
 (comment
   (k/run))
