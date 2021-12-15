@@ -13,7 +13,9 @@
         crypto-random/crypto-random         {:mvn/version "1.2.0"}
         garden/garden                       {:mvn/version "1.3.10"}
         hiccup/hiccup                       {:mvn/version "1.0.5"}
+        ;; https://github.com/seancorfield/honeysql/blob/develop/doc/differences-from-1-x.md
         honeysql/honeysql                   {:mvn/version "1.0.444"}
+        com.github.seancorfield/honeysql    {:mvn/version "2.1.833"}
         http-kit/http-kit                   {:mvn/version "2.3.0"}
         markdown-clj/markdown-clj           {:mvn/version "1.10.5"}
         metosin/reitit-frontend             {:mvn/version "0.5.2"}
