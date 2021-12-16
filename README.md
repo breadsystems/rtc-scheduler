@@ -1,17 +1,6 @@
 # RTC Care Schedule
 
-> Unbuilding the Medical Industrial Complex one appointment at a time
-
 Calendar and scheduling system for the Radical Telehealth Collective
-
-## About the RTC
-
-When the COVID-19 pandemic began, crip, disabled, and chronically ill communities, especially those of us who are queer, trans, non-binary, BIPOC, immigrants, and/or low-income knew we’d be among those most impacted and that our essential healthcare needs — which the Medical Industrial Complex was already epically failing to meet pre-pandemic — would be even harder to access.
-
-[Health Justice Commons](https://www.healthjusticecommons.org/) took immediate action to ensure our communities’ survival and united to create the Radical Telehealth Collective. The RTC is a collective of rad frontline healthcare providers, rad crips/ disability justice organizers, and Health Justice Commons members uniting to create free, accessible, and multilingual urgent and essential care and access to COVID-19 testing. 
-
-Our virtual clinics are real-world liberated zones. We don’t have “patients” — a term which reinforces the oppressive power structures of the Medical Industrial Complex. Instead, RTC healthcare providers deliver care in the ways they’ve dreamed of but have been prevented by the Medical Industrial Complex: with respect, compassion, humility; honoring the autonomy, wisdom, and dignity of the person with whom they are working. The RTC model is grounded in disability justice and intersectional health justice principles and practices. We center access and offer multilingual interpretation and translation, live closed captioning, and ASL. By providing these services through teleconference, we aim to be able to help connect those members of our communities most impacted by social oppression, environmental racism, healthcare exclusions, or most vulnerable and unable to access care in the traditional models of the Medical Industrial Complex. We’ll learn as we go, allowing the communities we center to lead.
-
 
 ### Features
 
@@ -19,7 +8,7 @@ Our virtual clinics are real-world liberated zones. We don’t have “patients�
 * Backend calendar for medical providers to schedule their availability
 * Scheduling application for volunteers to communicate with careseekers and coordinate access needs such as interpreters, captioners, etc.
 
-## Running the means of production
+## Running in production
 
 This application ships an "uberjar," which is the recommended method of running in production. The build script outputs the uberjar to `target/rtc.jar`, which can then be run just like any other .jar file:
 
@@ -28,7 +17,7 @@ DATABASE_URL=your-db-url AUTHY_API_KEY=your-api-key \
   java -cp target/rtc.jar clojure.main -m rtc.app # run the jar
 ```
 
-## Building the means of production
+## Building
 
 The build script contains everything you need to build the production uberjar. Just run it:
 
@@ -44,11 +33,9 @@ heroku deploy:jar target/rtc.jar --app radical-telehealth-collective
 
 You will need to be logged in to the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) to do this.
 
-## Building the movement
+## Development
 
-### Manual installation (recommended)
-
-#### Local install prerequisites
+### Local install prerequisites
 
 * [PostgreSQL](https://www.postgresql.org/docs/9.4/tutorial-install.html) (`psql`)
 * [Clojure](https://clojure.org/guides/getting_started)
@@ -56,7 +43,7 @@ You will need to be logged in to the [Heroku CLI](https://devcenter.heroku.com/a
 
 Additionally, if you want to test out the 2-factor authentication, you'll need an API key from [Authy](https://www.twilio.com/docs/authy/api).
 
-#### Setup
+### Setup
 
 Get the RTC source code:
 
@@ -81,7 +68,7 @@ Edit the new `config.edn` file to set up 2FA with your [Authy API key](https://w
 
 In most cases you can leave the `:database-url` value alone.
 
-#### Running the dev environment
+### Running the dev environment
 
 Start a REPL from your editor and load the file `src/rtc/app.clj`. This is the main entrypoint for the application.
 
@@ -94,13 +81,13 @@ From there, you can...
 * Click **Get Care** to test out the intake process.
 * Visit `/comrades` to test out the admin
 
-##### Security settings in dev
+### Security settings in dev
 
 In a development environment, it's possible to disable backend authentication in case you are not actively testing that feature. You can disable authentication altogether by setting `:dev-disable-auth true`. You can also disable anti-XSRF protection with `:dev-disable-anti-forgery true`.
 
 Obviously you should never override the default values for these in production.
 
-#### Tests
+### Tests
 
 ```sh
 clojure -A:test
@@ -108,7 +95,7 @@ clojure -A:test
 
 Add the `--watch` option to rerun tests when CLJ files change (Ctrl+C to exit).
 
-#### The Shadow CLJS environment
+### The Shadow CLJS environment
 
 This application uses a pretty standard shadow-cljs setup. To start the Shadow dev server:
 
@@ -118,11 +105,11 @@ shadow-cljs -A:dev server start
 
 Go to `localhost:9630` to start watching the `app` and `test` builds. Once it's watching `test` you can go to `localhost:3002` to see CLJS test results, and even enable desktop notifications as test results come in.
 
-### TODO
+## TODO
 
 * Link to Clojure guides
 * Document basic app architecture
 
-### License
+## License
 
 Released under the [Anti-Capitalist Software License](https://anticapitalist.software/), v1.4
