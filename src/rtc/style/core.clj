@@ -93,6 +93,16 @@
    [:.help {:color grey
             :font-style :italic}]
    [:.highlight {:color pink}]
+   [:.notice {:max-width "65ch"
+              :margin-left :auto
+              :margin-right :auto
+              :padding "1em"
+              :text-align :left
+              :color dark-purple
+              :background off-white
+              :border-width "3px"
+              :border-style :dashed
+              :border-color pink}]
    [:.spacious {:margin-top "3em"
                 :margin-bottom "3em"}]
    [:.instruct {:font-size "0.9em"
