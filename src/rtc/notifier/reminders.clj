@@ -11,7 +11,8 @@
 (defn- get-imminent-appointments []
   (db/query
      (sql/format
-      {:select [:appt.start_time :appt.email :appt.phone :appt.ok_to_text
+      {:select [:appt.id :appt.start_time
+                :appt.email :appt.phone :appt.ok_to_text
                 :appt.reminded_careseeker :appt.reminded_provider
                 [:p.first_name :provider_first_name]
                 [:p.last_name :provider_last_name]
@@ -26,6 +27,13 @@
                 [:= :appt.reminded_careseeker false]
                 [:= :appt.reminded_provider false]]]})))
 
+(defn- record-reminder! [{:keys [id]}]
+  (db/execute!
+    ["UPDATE appointments
+     SET reminded_careseeker = true,
+         reminded_provider = true
+     WHERE id = ?" id]))
+
 (defmulti send! identity)
 
 (defmethod send! :appointments [_]
@@ -37,20 +45,41 @@
                       appt/appointment->reminder-email
                       appt/appointment->provider-reminder-email)
                 imminent)]
-    reminders #_
     (doseq [reminder reminders]
-      (api/notify! reminder))))
+      (api/notify! reminder))
+    (doseq [appt imminent]
+      (record-reminder! appt))))
 
 (defn -main [task & _]
   (send! (keyword task)))
 
 
 (comment
-  (map (juxt :phone :provider_phone) (get-imminent-appointments))
+  (map #(select-keys % [:id :email
+                        :reminded_careseeker
+                        :reminded_provider])
+       (get-imminent-appointments))
+
+  ;; reset all reminders
+  (db/execute!
+    ["UPDATE appointments
+     SET reminded_careseeker = false,
+         reminded_provider = false"])
+
+  (doseq [appt (butlast (get-imminent-appointments))]
+    (record-reminder! appt))
+
+  (db/execute!
+    ["UPDATE appointments
+     SET reminded_careseeker = true,
+         reminded_provider = true
+     WHERE id = ?"
+     60])
 
   (db/query
      (sql/format
-      {:select [:appt.start_time :appt.email :appt.phone :appt.ok_to_text
+      {:select [:appt.id :appt.start_time
+                :appt.email :appt.phone :appt.ok_to_text
                 :appt.reminded_careseeker :appt.reminded_provider
                 [:p.email :provider_email] [:p.phone :provider_phone]]
        :from [[:appointments :appt]]
