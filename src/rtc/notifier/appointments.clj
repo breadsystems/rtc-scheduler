@@ -139,6 +139,8 @@
   (provider/id->provider provider_id))
 
 (defn booked-appointment! [appt]
+  ;; TODO refactor this with juxt/mapcat/notify!
+
   ;; Notify the careseeker, honoring their consent.
   (when (send-sms? appt)
     (twilio/send-sms! (appointment->sms appt)))

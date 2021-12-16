@@ -2,10 +2,11 @@
   (:require
     ;; HoneySQL 2.x
     [honey.sql :as sql]
+    [mount.core :refer [defstate]]
     [rtc.db :as db]
     [rtc.env :refer [env]]
-    [rtc.notifier.appointments :as appt]
-    [mount.core :refer [defstate]]))
+    [rtc.notifier.api :as api]
+    [rtc.notifier.appointments :as appt]))
 
 (defn- get-imminent-appointments []
   (db/query
@@ -27,20 +28,18 @@
 
 (defmulti send! identity)
 
-
-
 (defmethod send! :appointments [_]
   (let [imminent (get-imminent-appointments)
-        sms-reminders
+        reminders
         (mapcat (juxt appt/appointment->reminder-sms
-                      appt/appointment->provider-reminder-sms)
-                imminent)
-        #_#_
-        email-reminders
-        (mapcat (juxt appt/appointment->reminder-email
+                      appt/appointment->provider-reminder-sms
+                      #_#_ ;; TODO
+                      appt/appointment->reminder-email
                       appt/appointment->provider-reminder-email)
                 imminent)]
-    sms-reminders))
+    reminders #_
+    (doseq [reminder reminders]
+      (api/notify! reminder))))
 
 (defn -main [task & _]
   (send! (keyword task)))
