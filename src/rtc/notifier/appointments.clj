@@ -23,32 +23,36 @@
   (boolean (and (= 1 (:text-ok appt)) (seq (:phone appt)))))
 
 (defn appointment->sms [{:keys [phone
+                                ;; either one of these should work
+                                text-ok ok_to_text
                                 provider_first_name
                                 provider_last_name
                                 start_time]}]
-  {:to (twilio/us-phone phone)
-   :message (format
-              ;; TODO i18n
-              "Your appointment at %s with %s is confirmed."
-              (coast-times start_time)
-              (str provider_first_name " " provider_last_name))})
+  (when (some #{true 1} [text-ok ok_to_text])
+    {:to (twilio/us-phone phone)
+     :message (format
+                ;; TODO i18n
+                "Your appointment at %s with %s is confirmed."
+                (coast-times start_time)
+                (str provider_first_name " " provider_last_name))}))
 
 (defn appointment->reminder-sms [{:keys [phone
+                                         ok_to_text
                                          provider_first_name
                                          provider_last_name
                                          start_time]}]
-  {:to (twilio/us-phone phone)
-   :message (format
-              ;; TODO i18n
-              (str
-                "This is a reminder that you have an appointment"
-                " at %s with %s. To cancel or reschedule,"
-                " please email %s or call %s.")
-              (coast-times start_time)
-              (str provider_first_name " " provider_last_name)
-              support-email
-              support-phone
-              )})
+  (when ok_to_text
+    {:to (twilio/us-phone phone)
+     :message (format
+                ;; TODO i18n
+                (str
+                  "This is a reminder that you have an appointment"
+                  " at %s with %s. To cancel or reschedule,"
+                  " please email %s or call %s.")
+                (coast-times start_time)
+                (str provider_first_name " " provider_last_name)
+                support-email
+                support-phone)}))
 
 (defn appointment->provider-sms
   "Returns an SMS map of the form {:to ... :message ...} given a provider with

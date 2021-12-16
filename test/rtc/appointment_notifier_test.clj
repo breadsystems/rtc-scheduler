@@ -24,9 +24,74 @@
     [sms appt]
     (= sms (appt/appointment->sms appt))
 
+    nil nil
+    nil {}
+    nil "nonsense"
+
+    ;;
+    ;; NOT OK TO TEXT
+    ;;
+
+    nil
+    {:phone "253 555 1234"
+     :text-ok nil
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
+    nil
+    {:phone "253 555 1234"
+     :text-ok false
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
+    nil
+    {:phone "253 555 1234"
+     :text-ok ""
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
+    nil
+    {:phone "253 555 1234"
+     :text-ok 0
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
+    ;;
+    ;; OK TO TEXT
+    ;;
+
     {:to "+12535551234"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
     {:phone "253 555 1234"
+     :text-ok 1
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
+    {:to "+12535551234"
+     :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
+    {:phone "253 555 1234"
+     :ok_to_text true
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
+    {:to "+12535551234"
+     :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
+    {:phone "253 555 1234"
+     :ok_to_text 1
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
+    {:to "+12535551234"
+     :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
+    {:phone "253 555 1234"
+     :text-ok true
      :provider_first_name "Ursula"
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
@@ -34,6 +99,7 @@
     {:to "+12535551234"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
     {:phone "1 253 555 1234"
+     :text-ok true
      :provider_first_name "Ursula"
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
@@ -41,6 +107,7 @@
     {:to "+12535551234"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
     {:phone "+1 253 555 1234"
+     :text-ok true
      :provider_first_name "Ursula"
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
@@ -48,6 +115,7 @@
     {:to "+12535551234"
      :message "Your appointment at 4:30PM PST / 7:30PM EST Tue, Mar 9 with Ursula Le Guin is confirmed."}
     {:phone "+12535551234"
+     :text-ok true
      :provider_first_name "Ursula"
      :provider_last_name "Le Guin"
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}))
@@ -89,6 +157,22 @@
     [sms appt]
     (= sms (appt/appointment->reminder-sms appt))
 
+    nil {}
+
+    nil
+    {:phone "253 555 1234"
+     :ok_to_text nil
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
+    nil
+    {:phone "253 555 1234"
+     :ok_to_text false
+     :provider_first_name "Ursula"
+     :provider_last_name "Le Guin"
+     :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
+
     {:to "+12535551234"
      :message (str
                 "This is a reminder that you have an appointment"
@@ -97,6 +181,7 @@
                 " please email info@radicaltelehealthcollective.org"
                 " or call TODO.")}
     {:phone "253 555 1234"
+     :ok_to_text true
      :provider_first_name "Ursula"
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
@@ -109,6 +194,7 @@
                 " please email info@radicaltelehealthcollective.org"
                 " or call TODO.")}
     {:phone "1 253 555 1234"
+     :ok_to_text true
      :provider_first_name "Ursula"
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:33:00.000000000-00:00"}
@@ -121,6 +207,7 @@
                 " please email info@radicaltelehealthcollective.org"
                 " or call TODO.")}
     {:phone "+1 253 555 1234"
+     :ok_to_text true
      :provider_first_name "Ursula"
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
@@ -133,6 +220,7 @@
                 " please email info@radicaltelehealthcollective.org"
                 " or call TODO.")}
     {:phone "+12535551234"
+     :ok_to_text true
      :provider_first_name "Ursula"
      :provider_last_name "Le Guin"
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}))
