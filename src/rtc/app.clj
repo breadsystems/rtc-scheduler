@@ -10,6 +10,7 @@
    [ring.middleware.keyword-params :refer [wrap-keyword-params]]
    [ring.middleware.session :refer [wrap-session]]
    [ring.middleware.session.memory :as memory]
+   [taoensso.timbre]
    [rtc.rest.core :as rest]
    [rtc.assets.core :as assets]
    [rtc.auth.core :as auth]
@@ -119,6 +120,8 @@
   (mount/start))
 
 (comment
+  (.name clojure.tools.logging/*logger-factory*)
+
   ;; Evaluate this to start the app in the REPL.
   (mount/start)
 
