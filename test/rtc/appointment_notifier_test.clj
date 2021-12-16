@@ -64,7 +64,8 @@
     ;; OK TO TEXT
     ;;
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
     {:phone "253 555 1234"
      :text-ok 1
@@ -72,7 +73,8 @@
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
     {:phone "253 555 1234"
      :ok_to_text true
@@ -80,7 +82,8 @@
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
     {:phone "253 555 1234"
      :ok_to_text 1
@@ -88,7 +91,8 @@
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
     {:phone "253 555 1234"
      :text-ok true
@@ -96,7 +100,8 @@
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
     {:phone "1 253 555 1234"
      :text-ok true
@@ -104,7 +109,8 @@
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed."}
     {:phone "+1 253 555 1234"
      :text-ok true
@@ -112,7 +118,8 @@
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "Your appointment at 4:30PM PST / 7:30PM EST Tue, Mar 9 with Ursula Le Guin is confirmed."}
     {:phone "+12535551234"
      :text-ok true
@@ -134,17 +141,20 @@
     nil {:start_time "2021-03-10T00:33:00.000000000-00:00" ;; not an inst
          :provider {:phone "1234567890"}}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "Someone booked an appointment with you at 4:33PM PST / 7:33PM EST Tue, Mar 9."}
     {:provider {:phone "+12535551234"}
      :start_time #inst "2021-03-10T00:33:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "Someone booked an appointment with you at 4:30PM PST / 7:30PM EST Tue, Mar 9."}
     {:provider {:phone "+12535551234"}
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535550987"
+    {:notification/type :sms
+     :to "+12535550987"
      :message "Someone booked an appointment with you at 4:30PM PST / 7:30PM EST Tue, Mar 9."}
     {:provider {:phone "+1 253 555 0987"}
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}
@@ -173,7 +183,8 @@
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message (str
                 "This is a reminder that you have an appointment"
                 " at 5:30PM PDT / 8:30PM EDT Fri, Jul 9"
@@ -186,7 +197,8 @@
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message (str
                 "This is a reminder that you have an appointment"
                 " at 5:33PM PDT / 8:33PM EDT Fri, Jul 9"
@@ -199,7 +211,8 @@
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:33:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message (str
                 "This is a reminder that you have an appointment"
                 " at 5:30PM PDT / 8:30PM EDT Fri, Jul 9"
@@ -212,7 +225,8 @@
      :provider_last_name "Le Guin"
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message (str
                 "This is a reminder that you have an appointment"
                 " at 4:30PM PST / 7:30PM EST Tue, Mar 9"
@@ -239,17 +253,20 @@
     nil {:start_time "2021-03-10T00:33:00.000000000-00:00" ;; not an inst
          :provider {:phone "1234567890"}}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "This is a reminder that you have an appointment at 4:33PM PST / 7:33PM EST Tue, Mar 9."}
     {:provider_phone "+12535551234"
      :start_time #inst "2021-03-10T00:33:00.000000000-00:00"}
 
-    {:to "+12535551234"
+    {:notification/type :sms
+     :to "+12535551234"
      :message "This is a reminder that you have an appointment at 4:30PM PST / 7:30PM EST Tue, Mar 9."}
     {:provider_phone "+12535551234"
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}
 
-    {:to "+12535550987"
+    {:notification/type :sms
+     :to "+12535550987"
      :message "This is a reminder that you have an appointment at 4:30PM PST / 7:30PM EST Tue, Mar 9."}
     {:provider_phone "+1 253 555 0987"
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}
@@ -272,7 +289,8 @@
     [email appt]
     (= email (appt/appointment->email appt))
 
-    {:to "careseeker@example.com"
+    {:notification/type :email
+     :to "careseeker@example.com"
      :to-name nil
      :subject "Your appointment with the Radical Telehealth Collective"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed. Thank you for booking your appointment with the Radical Telehealth Collective."}
@@ -282,7 +300,8 @@
      :start_time #inst "2021-07-10T00:30:00.000000000-00:00"}
 
     ;; With careseeker name
-    {:to "careseeker@example.com"
+    {:notification/type :email
+     :to "careseeker@example.com"
      :to-name "Shevek"
      :subject "Your appointment with the Radical Telehealth Collective"
      :message "Your appointment at 5:30PM PDT / 8:30PM EDT Fri, Jul 9 with Ursula Le Guin is confirmed. Thank you for booking your appointment with the Radical Telehealth Collective."}
@@ -344,19 +363,22 @@
     nil {:start_time "2021-03-10T00:33:00.000000000-00:00" ;; not an inst
          :provider {:email "rtc@example.org"}}
 
-    {:to "rtc@example.org"
+    {:notification/type :email
+     :to "rtc@example.org"
      :subject "New RTC Appointment"
      :message "Someone booked an appointment with you at 4:33PM PST / 7:33PM EST Tue, Mar 9. Go to https://www.radicaltelehealthcollective.org/comrades for details."}
     {:provider {:email "rtc@example.org"}
      :start_time #inst "2021-03-10T00:33:00.000000000-00:00"}
 
-    {:to "rtc@example.org"
+    {:notification/type :email
+     :to "rtc@example.org"
      :subject "New RTC Appointment"
      :message "Someone booked an appointment with you at 4:30PM PST / 7:30PM EST Tue, Mar 9. Go to https://www.radicaltelehealthcollective.org/comrades for details."}
     {:provider {:email "rtc@example.org"}
      :start_time #inst "2021-03-10T00:30:00.000000000-00:00"}
 
-    {:to "rtc@example.org"
+    {:notification/type :email
+     :to "rtc@example.org"
      :subject "New RTC Appointment"
      :message "Someone booked an appointment with you at 4:30PM PST / 7:30PM EST Tue, Mar 9. Go to https://www.radicaltelehealthcollective.org/comrades for details."}
     {:provider {:email "rtc@example.org"}

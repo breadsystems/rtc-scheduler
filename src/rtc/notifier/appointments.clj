@@ -29,7 +29,8 @@
                                 provider_last_name
                                 start_time]}]
   (when (some #{true 1} [text-ok ok_to_text])
-    {:to (twilio/us-phone phone)
+    {:notification/type :sms
+     :to (twilio/us-phone phone)
      :message (format
                 ;; TODO i18n
                 "Your appointment at %s with %s is confirmed."
@@ -42,7 +43,8 @@
                                          provider_last_name
                                          start_time]}]
   (when ok_to_text
-    {:to (twilio/us-phone phone)
+    {:notification/type :sms
+     :to (twilio/us-phone phone)
      :message (format
                 ;; TODO i18n
                 (str
@@ -60,7 +62,8 @@
   empty OR the start_time is not an inst."
   [{:keys [provider start_time]}]
   (when (and (:phone provider) (inst? start_time))
-    {:to (twilio/us-phone (:phone provider))
+    {:notification/type :sms
+     :to (twilio/us-phone (:phone provider))
      :message (format
                 ;; TODO i18n
                 "Someone booked an appointment with you at %s."
@@ -69,7 +72,8 @@
 (defn appointment->provider-reminder-sms
   [{:keys [provider_phone start_time]}]
   (when (and provider_phone) (inst? start_time)
-    {:to (twilio/us-phone provider_phone)
+    {:notification/type :sms
+     :to (twilio/us-phone provider_phone)
      :message (format
                 ;; TODO i18n
                 "This is a reminder that you have an appointment at %s."
@@ -96,7 +100,8 @@
              provider_first_name
              provider_last_name
              (inst? start_time))
-    {:to email
+    {:notification/type :email
+     :to email
      :to-name name
      :subject "Your appointment with the Radical Telehealth Collective"
      :message  (format
@@ -114,7 +119,8 @@
   either the email is empty OR the start_time is not an inst."
   [{:keys [provider start_time]}]
   (when (and (:email provider) (inst? start_time))
-    {:to (:email provider)
+    {:notification/type :email
+     :to (:email provider)
      :subject "New RTC Appointment"
      :message (format
                 ;; TODO i18n
