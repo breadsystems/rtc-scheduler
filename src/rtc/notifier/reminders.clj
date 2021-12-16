@@ -7,28 +7,55 @@
     [rtc.notifier.appointments :as appt]
     [mount.core :refer [defstate]]))
 
+(defn- get-imminent-appointments []
+  (db/query
+     (sql/format
+      {:select [:appt.start_time :appt.email :appt.phone :appt.ok_to_text
+                :appt.reminded_careseeker :appt.reminded_provider
+                [:p.first_name :provider_first_name]
+                [:p.last_name :provider_last_name]
+                [:p.email :provider_email] [:p.phone :provider_phone]]
+       :from [[:appointments :appt]]
+       :join [[:users :p] [:=  :p.id :appt.provider_id]]
+       :where [:and
+               [:> :appt.start_time [:now]]
+               [:< :appt.start_time
+                [:raw "now() + interval '24 hours'"]]
+               [:or
+                [:= :appt.reminded_careseeker false]
+                [:= :appt.reminded_provider false]]]})))
+
 (defmulti send! identity)
 
 
 
 (defmethod send! :appointments [_]
-  (prn 'appointments!!!1))
+  (let [imminent (get-imminent-appointments)
+        sms-reminders
+        (mapcat (juxt appt/appointment->reminder-sms
+                      appt/appointment->provider-reminder-sms)
+                imminent)
+        #_#_
+        email-reminders
+        (mapcat (juxt appt/appointment->reminder-email
+                      appt/appointment->provider-reminder-email)
+                imminent)]
+    sms-reminders))
 
 (defn -main [task & _]
   (send! (keyword task)))
 
 
 (comment
-  (db/get-imminent-appointments)
-  ;; SELECT * FROM appointments
-  ;; WHERE now() > start_time - interval '24 hours' AND now() < start_time
-  ;; AND (reminded_provider = false OR reminded_careseeker = false)
+  (map (juxt :phone :provider_phone) (get-imminent-appointments))
 
-  (sql/format-expr [:date_add [:now] [:interval 24 "hours"]])
   (db/query
      (sql/format
-      {:select [:*]
+      {:select [:appt.start_time :appt.email :appt.phone :appt.ok_to_text
+                :appt.reminded_careseeker :appt.reminded_provider
+                [:p.email :provider_email] [:p.phone :provider_phone]]
        :from [[:appointments :appt]]
+       :join [[:users :p] [:=  :p.id :appt.provider_id]]
        :where [:and
                [:> :appt.start_time [:now]]
                [:< :appt.start_time
@@ -36,6 +63,7 @@
                [:or
                 [:= :appt.reminded_careseeker false]
                 [:= :appt.reminded_provider false]]]}))
+
   (-main "appointments")
 
   ;;
