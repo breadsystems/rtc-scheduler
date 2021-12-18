@@ -70,7 +70,7 @@ In most cases you can leave the `:database-url` value alone.
 
 ### Running the dev environment
 
-Start a REPL from your editor and load the file `src/rtc/app.clj`. This is the main entrypoint for the application.
+Run `clj -M:dev:repl` or start a REPL from your editor and load the file `src/rtc/app.clj`. The `rtc.app` namespace is the main entrypoint for the application, i.e. where `-main` lives.
 
 Find and evaluate the `(mount/start)` form at the beginning of the `comment` form towards the end of the file. This should perform any necessary database migrations and warn you in the REPL window in case you disabled auth/anti-forgery protection in your config. If no admin test user exists, it will also create one for you and print the credentials to the REPL window.
 
@@ -105,10 +105,21 @@ shadow-cljs -A:dev server start
 
 Go to `localhost:9630` to start watching the `app` and `test` builds. Once it's watching `test` you can go to `localhost:3002` to see CLJS test results, and even enable desktop notifications as test results come in.
 
+## Architecture
+
+All production code lives under the `src` folder, per common convention. The main entrypoint to the application is the `rtc.app` namespace. This is where the root `handler` function, a standard Ring handler, live.
+
+The application is split into a few different top-level components:
+
+* The **Get Care** page - single-page app (SPA) for careseeker intake. This is a Re-frame/Reagent app with an entrypoint of `rtc.intake.core`.
+* The **Comrades** backend, where the calendar, user settings, and invites UI live. Together, these comprise a Re-frame/Reagent app with an entrypoint of `rtc.admin.core`.
+* The **Registration** page, a simple Reagent (no Re-frame) app in `rtc.register.core`.
+* The **REST API**, whose routes all live under `/api/v1`. The various SPAs talk to different REST endpoints, which handle their own authorization, etc.
+* The **Homepage**, populated with markdown from `home.md`
+
 ## TODO
 
 * Link to Clojure guides
-* Document basic app architecture
 
 ## License
 
