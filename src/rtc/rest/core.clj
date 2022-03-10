@@ -71,7 +71,8 @@
                            (try
                              (let [params (transit-params req)]
                                {:success true
-                                :data (appt/request-appointment! params user)})
+                                :data {:request
+                                       (appt/request-appointment! params user)}})
                              (catch clojure.lang.ExceptionInfo e
                                {:success false
                                 :errors [{:message (.getMessage e)

@@ -480,7 +480,6 @@
 
 (defn process-request-appointment-response
   [db [_ {:keys [success data errors]}]]
-  (deref (rf/subscribe [::confirmed-info]))
   (if success
     (assoc (next-step db)
            :loading? false
@@ -704,12 +703,13 @@
 
 (defn- confirmation-details []
   (let [answers @(rf/subscribe [::confirmation-values])]
-    [:<> (map (fn [[k v]]
-                ^{:key k}
-                [:div.detail
-                 [:div [:label.field-label @(rf/subscribe [::i18n k])]]
-                 [:div v]])
-              answers)]))
+    [:<> (doall
+           (map (fn [[k v]]
+                  ^{:key k}
+                  [:div.detail
+                   [:div [:label.field-label @(rf/subscribe [::i18n k])]]
+                   [:div v]])
+                answers))]))
 
 (defn- schedule []
   (let [windows @(rf/subscribe [::appointment-windows])
