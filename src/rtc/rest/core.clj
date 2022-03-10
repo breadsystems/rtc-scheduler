@@ -70,11 +70,13 @@
     {:post (rest-handler (fn [{user :identity :as req}]
                            (try
                              (let [params (transit-params req)]
-                               (def $req req)
-                               {:success false ;; TODO
-                                :data {:request
-                                       ;; TODO make an actual request
-                                       params}}))))}]
+                               {:success true
+                                :data (appt/request-appointment! params user)})
+                             (catch clojure.lang.ExceptionInfo e
+                               {:success false
+                                :errors [{:message (.getMessage e)
+                                          :reason (:reason (ex-data e))}]
+                                :data (ex-data e)}))))}]
    ["/appointment"
     {:post (rest-handler (fn [{user :identity :as req}]
                            (try

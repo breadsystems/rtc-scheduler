@@ -481,7 +481,7 @@
 (defn process-request-appointment-response
   [db [_ {:keys [success data errors]}]]
   (deref (rf/subscribe [::confirmed-info]))
-  (if (not success)
+  (if success
     (assoc (next-step db)
            :loading? false
            :confirmed-info (:request data)

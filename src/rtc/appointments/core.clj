@@ -58,6 +58,20 @@
                      windows))
        (flatten-formatted appt)))
 
+(comment
+  $appt
+  $user
+
+  ;;
+  )
+
+(defn request-appointment! [appt user]
+  (prn 'HERE appt)
+  (def $appt appt)
+  (def $user user)
+  ;; TODO
+  appt)
+
 (defn book-appointment! [appt user]
   (let [{:keys [name
                 pronouns
