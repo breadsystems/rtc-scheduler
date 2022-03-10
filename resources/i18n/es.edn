@@ -23,7 +23,10 @@
  :confirmation "Confirmar"
  :confirm-details "Por favor confirmar"
  :appointment-confirmed "Su cita está confirmada!"
+ ;; TODO
+ :request-confirmed "Su cita está confirmada!"
  :we-will-follow-up "TODO Honoring your preferences, we will follow up with you by phone or email. Thank you."
+ :we-will-follow-up-within "Honoring your preferences, we will follow up with you by phone or email within 48 hours. Thank you."
  :select-appointment-time "Por favor seleccione una cita"
  :book-appointment "Reserve su cita"
  :request-appointment "Solicitar una Cita"

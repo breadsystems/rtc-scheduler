@@ -74,6 +74,7 @@
     :answers {}
     :touched #{}
     :confirmed-info nil
+    :request-confirmed? false
     ;; TODO farm this out to an EDN file to make it more configurable?
     :steps
     [{:name :basic-info
@@ -261,6 +262,7 @@
 
 (rf/reg-sub ::appointment :appointment)
 (rf/reg-sub ::confirmed-info :confirmed-info)
+(rf/reg-sub ::request-confirmed? :request-confirmed?)
 
 (comment
   (rf/dispatch [::init-db])
@@ -455,11 +457,50 @@
               ::load-appointment-windows
               #(rf/dispatch [::global-error :unexpected-error]))))
 
+;; For when there are no appointment slots available and the user is
+;; requesting that we get in touch about an appointment.
+(rf/reg-fx
+  ::request-appointment!
+  (fn [params]
+    (rest/post! "/api/v1/request"
+                {:transit-params params}
+                ::request-appointment-response
+                #(rf/dispatch [::global-error :unexpected-error]))))
+
+(rf/reg-event-fx
+  ::request!
+  (fn [{:keys [db]}]
+    (let [{:keys [answers loading? confirmed-info]} db
+          should-mutate? (and (not loading?) (not confirmed-info))]
+      ;; Dispatching this event when the UI is already loading or an
+      ;; appointment has already been requested is a noop.
+      (prn ::request! answers)
+      {:db (assoc db :loading? true)
+       ::request-appointment! answers})))
+
+(defn process-request-appointment-response
+  [db [_ {:keys [success data errors]}]]
+  (deref (rf/subscribe [::confirmed-info]))
+  (if (not success)
+    (assoc (next-step db)
+           :loading? false
+           :confirmed-info (:request data)
+           :request-confirmed? true)
+    (assoc (next-step db)
+           :loading? false
+           :global-error (or (:reason (first errors)) :unexpected-error))))
+
+(rf/reg-event-db
+  ::request-appointment-response
+  process-request-appointment-response)
+
+;; For when appointment slots are available and the user has selected one.
 (rf/reg-fx
  ::book-appointment!
  (fn [params]
    (rest/post! "/api/v1/appointment"
                {:transit-params params
+                ;; TODO I think rest/post! takes care of CSRF now?
                 :headers {"x-csrf-token" (:csrf-token params)}}
                ::appointment-response
                #(rf/dispatch [::global-error :unexpected-error]))))
@@ -473,6 +514,7 @@
      ;; has already been confirmed is a noop.
      (when should-mutate?
        {:db (assoc db :loading? true)
+        ;; TODO I think rest/post! takes care of CSRF now?
         ::book-appointment! (merge {:csrf-token csrf-token} answers appointment)}))))
 
 (defn process-appointment-response [db [_ {:keys [success data errors]}]]
@@ -660,28 +702,6 @@
                       [stateful-question q])
                     qs)}]))
 
-(defn- schedule []
-  (let [windows @(rf/subscribe [::appointment-windows])
-        earliest (moment (:start (first windows)))
-        on-event-click (fn [info]
-                         (rf/dispatch [::update-appointment {:start (.. info -event -start)
-                                                             :end (.. info -event -end)}])
-                         (rf/dispatch [::next-step]))
-        lang @(rf/subscribe [::lang])]
-    (intake-step
-     {:heading
-      "Select a time by clicking on one of the available appointment windows"
-      :sub-heading :select-appointment-time
-      :content
-      [:> FullCalendar {:initial-view "listWeek"
-                        :events windows
-                        :eventClick on-event-click
-                        :plugins [listPlugin timeGridPlugin]
-                        :scrollTime (.format earliest "hh:mm:00")
-                        :noEventsContent #(t :no-appointments-this-week)
-                        ;; TODO why is "TODAY" text not switching on locale?
-                        :locale lang}]})))
-
 (defn- confirmation-details []
   (let [answers @(rf/subscribe [::confirmation-values])]
     [:<> (map (fn [[k v]]
@@ -690,6 +710,42 @@
                  [:div [:label.field-label @(rf/subscribe [::i18n k])]]
                  [:div v]])
               answers)]))
+
+(defn- schedule []
+  (let [windows @(rf/subscribe [::appointment-windows])
+        earliest (moment (:start (first windows)))
+        on-event-click (fn [info]
+                         (rf/dispatch [::update-appointment
+                                       {:start (.. info -event -start)
+                                        :end (.. info -event -end)}])
+                         (rf/dispatch [::next-step]))
+        on-request-appt (fn []
+                          (rf/dispatch [::request!]))
+        lang @(rf/subscribe [::lang])
+        any-windows? (seq windows)]
+    (intake-step
+     (if any-windows?
+       {:sub-heading :select-appointment-time
+        :content
+        [:> FullCalendar
+         {:initial-view "listWeek"
+          :events windows
+          :eventClick on-event-click
+          :plugins [listPlugin timeGridPlugin]
+          :scrollTime (.format earliest "hh:mm:00")
+          :noEventsContent #(t :no-appointments-this-week)
+          ;; TODO why is "TODAY" text not switching on locale?
+          :locale lang}]}
+       {:sub-heading :confirm-details
+        :content
+        [:div.rows
+         [:div
+          [:p (t :request-an-appointment)]
+          [:div.intake-step--confirmation
+           [confirmation-details]
+           [:div.confirm-container
+            [:button.call-to-action {:on-click on-request-appt}
+             (t :request-appointment)]]]]]}))))
 
 (defn- confirmation []
   (let [appt @(rf/subscribe [::appointment])
@@ -710,9 +766,20 @@
   (deref (rf/subscribe [::appointment]))
   (deref (rf/subscribe [::confirmed-info])))
 
+(defn- request-confirmed []
+  (let [appt @(rf/subscribe [::appointment])
+        {:keys [provider_first_name provider_last_name start_time end_time]}
+        @(rf/subscribe [::confirmed-info])
+        provider-name (str provider_first_name " " provider_last_name)
+        lang @(rf/subscribe [::lang])]
+    [:div
+     [:h3.highlight.spacious (t :request-confirmed)]
+     [:p.help.spacious (t :we-will-follow-up-within)]]))
+
 (defn- confirmed []
   (let [appt @(rf/subscribe [::appointment])
-        {:keys [provider_first_name provider_last_name start_time end_time]} @(rf/subscribe [::confirmed-info])
+        {:keys [provider_first_name provider_last_name start_time end_time]}
+        @(rf/subscribe [::confirmed-info])
         provider-name (str provider_first_name " " provider_last_name)
         lang @(rf/subscribe [::lang])]
     [:div
@@ -746,10 +813,11 @@
                   nav-steps))]]))
 
 (defn intake-ui []
-  (let [{:keys [name]} @(rf/subscribe [::current-step])
+  (let [{step :name} @(rf/subscribe [::current-step])
         lang @(rf/subscribe [::lang])
         lang-options @(rf/subscribe [::lang-options])
-        confirmed-info @(rf/subscribe [::confirmed-info])]
+        confirmed-info @(rf/subscribe [::confirmed-info])
+        request-confirmed? @(rf/subscribe [::request-confirmed?])]
     [:div.container.container--get-care {:class (when @(rf/subscribe [::loading?]) "loading")}
      [:aside.lang-selector
       [:label.field-label {:for "select-language"}
@@ -766,12 +834,12 @@
       [:h2 (t :get-care)]
       (when (not confirmed-info) [progress-nav])]
      [:main
-      (if confirmed-info
-        [confirmed]
-        (case name
-          :schedule     [schedule]
-          :confirmation [confirmation]
-          [questions]))]]))
+      (cond
+        request-confirmed? [request-confirmed]
+        confirmed-info [confirmed]
+        (= :schedule step) [schedule]
+        (= :confirmation step) [confirmation]
+        :else [questions])]]))
 
 
 (defn ^:dev/after-load mount! []

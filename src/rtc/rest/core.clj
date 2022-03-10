@@ -66,6 +66,15 @@
     {:get (rest-handler (fn [{params :params user :identity}]
                           {:success true
                            :data (appt/get-available-windows params user)}))}]
+   ["/request"
+    {:post (rest-handler (fn [{user :identity :as req}]
+                           (try
+                             (let [params (transit-params req)]
+                               (def $req req)
+                               {:success false ;; TODO
+                                :data {:request
+                                       ;; TODO make an actual request
+                                       params}}))))}]
    ["/appointment"
     {:post (rest-handler (fn [{user :identity :as req}]
                            (try
