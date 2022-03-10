@@ -312,6 +312,9 @@
 
   @(rf/subscribe [::steps])
 
+  (prn 'hi)
+  (js/console.clear)
+
   ;; Fill out required stuff and jump to schedule step
   (do
     (rf/dispatch [::answer! :state "WA"])
@@ -652,8 +655,7 @@
   (let [step (:name @(rf/subscribe [::current-step]))
         qs @(rf/subscribe [::questions step])]
     [intake-step
-     {:heading (t step)
-      :content (map (fn [q]
+     {:content (map (fn [q]
                       ^{:key (:key q)}
                       [stateful-question q])
                     qs)}]))
