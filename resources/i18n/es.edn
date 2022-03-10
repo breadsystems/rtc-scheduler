@@ -26,6 +26,7 @@
  :we-will-follow-up "TODO Honoring your preferences, we will follow up with you by phone or email. Thank you."
  :select-appointment-time "Por favor seleccione una cita"
  :book-appointment "Reserve su cita"
+ :request-appointment "Solicitar una Cita"
  :appointment-time "Hora de la cita"
  :provider-name "Nombre del médico"
  :back "Atrás"

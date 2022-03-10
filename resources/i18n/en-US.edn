@@ -22,6 +22,7 @@
  :we-will-follow-up "Honoring your preferences, we will follow up with you by phone or email. Thank you."
  :select-appointment-time "Please select an appointment time"
  :book-appointment "Book your appointment"
+ :request-appointment "Request an Appointment"
  :appointment-time "Appointment time"
  :provider-name "Provider name"
  :back "Back"
