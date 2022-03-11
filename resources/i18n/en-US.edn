@@ -120,4 +120,6 @@
   ;{:value "WV" :label "West Virginia"}
   ;{:value "WI" :label "Wisconsin"}
   ;{:value "WY" :label "Wyoming"}
+  :notifications/prc.appointment-requested
+  "Thank you for visiting the RTC. We have received your request and will follow up with you within 48 hours."
   ]}

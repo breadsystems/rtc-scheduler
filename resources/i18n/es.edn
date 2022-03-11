@@ -75,4 +75,7 @@
  [{:value ""   :label "Seleccione..."}
   {:value "WA" :label "Washington"}
   {:value "MA" :label "Massachusetts"}
-  {:value "CA" :label "California"}]}
+  {:value "CA" :label "California"}]
+  :notifications/prc.appointment-requested
+  "Gracias por visitar el RTC. We have received your request and will follow up with you within 48 hours."
+ }
