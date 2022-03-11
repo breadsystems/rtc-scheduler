@@ -111,13 +111,13 @@
     {:to "careseeker@example.com"
      :to-name nil
      :subject "Your appointment with the Radical Telehealth Collective"
-     :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. Honoring your preferences, we will follow up within 48 hours."}
     {:email "careseeker@example.com"}
 
     {:to "careseeker@example.com"
      :to-name "Shevek"
      :subject "Your appointment with the Radical Telehealth Collective"
-     :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. Honoring your preferences, we will follow up within 48 hours."}
     {:email "careseeker@example.com"
      :name "Shevek"}
     ))
