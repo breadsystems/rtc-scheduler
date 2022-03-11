@@ -167,5 +167,7 @@
   (sendgrid/send-email! (appointment->email $with-provider))
   (sendgrid/send-email! (appointment->provider-email $with-provider))
 
+  (requested-appointment! $appt)
+
   (booked-appointment! $with-provider)
   (booked-appointment! (assoc $with-provider :text-ok nil)))

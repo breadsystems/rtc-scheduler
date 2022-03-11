@@ -84,7 +84,7 @@
     ;; Event stream subscribers take care of notifications for us.
     ;; See rtc.event.core, rtc.notifier.core
     (e/publish! {:event/type :requested-appointment
-                 :event/request request-info})
+                 :event/request appt-request})
     request-info))
 
 (defn book-appointment! [appt user]
