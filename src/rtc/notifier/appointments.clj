@@ -96,6 +96,11 @@
 ;; EVENT HANDLERS AND HELPERS
 ;;
 
+(defn requested-appointment! [appt-req]
+  (def $ar appt-req)
+  ;; TODO
+  )
+
 (defn- appt->provider [{:keys [provider_id]}]
   (provider/id->provider provider_id))
 
