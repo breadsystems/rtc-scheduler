@@ -14,17 +14,16 @@
     (= sms (appt/appointment-request->sms appt-req))
 
     {:to "+12535551234"
-     :message "hello"}
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
     {:phone "253 555 1234"}
 
     {:to "+12535551234"
-     :message "hello"}
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
     {:phone "1253 555 1234"}
 
     {:to "+12535551234"
-     :message "hello"}
-    {:phone "253-555-1234"}
-    ))
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
+    {:phone "253-555-1234"}))
 
 (deftest test-appointment->sms
 
@@ -112,13 +111,13 @@
     {:to "careseeker@example.com"
      :to-name nil
      :subject "Your appointment with the Radical Telehealth Collective"
-     :message "hello"}
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
     {:email "careseeker@example.com"}
 
     {:to "careseeker@example.com"
      :to-name "Shevek"
      :subject "Your appointment with the Radical Telehealth Collective"
-     :message "hello"}
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
     {:email "careseeker@example.com"
      :name "Shevek"}
     ))

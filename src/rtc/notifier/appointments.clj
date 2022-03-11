@@ -19,7 +19,7 @@
 
 (defn appointment-request->sms [{:keys [phone]}]
   {:to (twilio/us-phone phone)
-   :message "hello"})
+   :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."})
 
 (defn appointment->sms [{:keys [phone
                                 provider_first_name
@@ -59,7 +59,7 @@
    :to-name name
    ;; TODO i18n
    :subject "Your appointment with the Radical Telehealth Collective"
-   :message "hello"})
+   :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."})
 
 (defn appointment->email
   "Returns an email map of the form {:to ... :to-name ... :message ...}
