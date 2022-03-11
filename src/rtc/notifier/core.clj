@@ -6,6 +6,21 @@
     [rtc.notifier.appointments :as appt]))
 
 ;;
+;; APPOINTMENT REQUEST NOTIFICATIONS
+;;
+
+(defonce unsub-appointment-requests (atom nil))
+
+(defstate appointment-request-notifiers
+  :start (let [unsub! (e/subscribe!
+                        :requested-appointment
+                        (fn [{appt-req :event/request}]
+                          (appt/requested-appointment! appt-req)))]
+           (reset! unsub-appointment-requests unsub!))
+  :stop (when-let [unsub! @unsub-appointment-requests]
+          (unsub!)))
+
+;;
 ;; APPOINTMENT NOTIFICATIONS
 ;;
 

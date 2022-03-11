@@ -8,6 +8,35 @@
 ;; SMS NOTIFICATIONS
 ;;
 
+(deftest test-appointment-request->sms
+  (are
+    [sms appt-req]
+    (= sms (appt/appointment-request->sms appt-req))
+
+    {:to "+12535551234"
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
+    {:phone "253 555 1234"}
+
+    {:to "+12535551234"
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
+    {:phone "1253 555 1234"}
+
+    {:to "+12535551234"
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
+    {:phone "253-555-1234"}))
+
+(deftest test-appointment-request->rtc-sms
+  (are
+    [sms appt-req]
+    (= sms (with-redefs [rtc.env/env {:request-notification-phone
+                                      "2535551234"}]
+             (appt/appointment-request->rtc-sms appt-req)))
+
+    {:to "+12535551234"
+     :message
+     "New appointment request from a careseeker. Please check the inbox for info@ RTC."}
+    {:email "this doesn't really matter."}))
+
 (deftest test-appointment->sms
 
   (are
@@ -85,6 +114,122 @@
 ;;
 ;; EMAIL NOTIFICATIONS
 ;;
+
+(deftest test-appointment-request->email
+  (are
+    [email appt-req]
+    (= email (appt/appointment-request->email appt-req))
+
+    {:to "careseeker@example.com"
+     :to-name nil
+     :subject "Your appointment with the Radical Telehealth Collective"
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. Honoring your preferences, we will follow up within 48 hours."}
+    {:email "careseeker@example.com"}
+
+    {:to "careseeker@example.com"
+     :to-name "Shevek"
+     :subject "Your appointment with the Radical Telehealth Collective"
+     :message "Thank you for visiting the RTC. We have received your request for an appointment. Honoring your preferences, we will follow up within 48 hours."}
+    {:email "careseeker@example.com"
+     :name "Shevek"}
+    ))
+
+(deftest test-appointment-request->email
+  (are
+    [email appt-req]
+    (= email (with-redefs [rtc.env/env {:request-notification-email
+                                        "info@rtc.email"}]
+               (appt/appointment-request->rtc-email appt-req)))
+
+    {:to "info@rtc.email"
+     :to-name "Radical Telehealth Collective"
+     :subject "New appointment request from S."
+     :message
+     (str
+       "There has been a new appointment request on radicaltelehealthcollective.org:\n\n"
+       "Name: Shevek\n"
+       "Pronouns: he/him\n"
+       "State: WA\n"
+       "Email: careseeker@example.email\n"
+       "Phone: 253 555 1234\n"
+       "Text OK: Yes\n"
+       "Preferred comm. method: phone\n"
+       "Needs interpreter for: Amharic\n"
+       "Other access needs: Other\n"
+       "Description of medical needs: Life is pain\n"
+       "Anything else: Nah"
+       )}
+    {:name "Shevek"
+     :pronouns "he/him"
+     :state "WA"
+     :email "careseeker@example.email"
+     :phone "253 555 1234"
+     :text-ok 1
+     :preferred-communication-method "phone"
+     :interpreter-lang "Amharic"
+     :other-access-needs "Other"
+     :description-of-needs "Life is pain"
+     :anything-else "Nah"}
+
+    {:to "info@rtc.email"
+     :to-name "Radical Telehealth Collective"
+     :subject "New appointment request from U.L.G."
+     :message
+     (str
+       "There has been a new appointment request on radicaltelehealthcollective.org:\n\n"
+       "Name: Ursula Le Guin\n"
+       "Pronouns: she/her\n"
+       "State: WA\n"
+       "Email: ursula@earthsea.net\n"
+       "Phone: 253 555 9876\n"
+       "Text OK: No\n"
+       "Preferred comm. method: email\n"
+       "Needs interpreter for: No answer\n"
+       "Other access needs: Temporary secretary\n"
+       "Description of medical needs: Existential boredom\n"
+       "Anything else: Lots!"
+       )}
+    {:name "Ursula Le Guin"
+     :pronouns "she/her"
+     :state "WA"
+     :email "ursula@earthsea.net"
+     :phone "253 555 9876"
+     :text-ok 0
+     :preferred-communication-method "email"
+     :interpreter-lang ""
+     :other-access-needs "Temporary secretary"
+     :description-of-needs "Existential boredom"
+     :anything-else "Lots!"}
+
+    {:to "info@rtc.email"
+     :to-name "Radical Telehealth Collective"
+     :subject "New appointment request from Anon."
+     :message
+     (str
+       "There has been a new appointment request on radicaltelehealthcollective.org:\n\n"
+       "Name: Anonymous\n"
+       "Pronouns: No answer\n"
+       "State: DC\n"
+       "Email: ursula@earthsea.net\n"
+       "Phone: No answer\n"
+       "Text OK: No answer\n"
+       "Preferred comm. method: No answer\n"
+       "Needs interpreter for: No answer\n"
+       "Other access needs: No answer\n"
+       "Description of medical needs: Something to ease the pain\n"
+       "Anything else: No answer"
+       )}
+    {:name ""
+     :pronouns ""
+     :state "DC"
+     :email "ursula@earthsea.net"
+     :phone ""
+     :text-ok nil
+     :preferred-communication-method ""
+     :interpreter-lang ""
+     :other-access-needs ""
+     :description-of-needs "Something to ease the pain"
+     :anything-else ""}))
 
 (deftest test-appointment->email
 

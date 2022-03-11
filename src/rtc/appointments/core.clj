@@ -58,6 +58,35 @@
                      windows))
        (flatten-formatted appt)))
 
+(comment
+  $appt
+  $user
+
+  (request-appointment! $appt {})
+
+  ;;
+  )
+
+(defn request-appointment! [appt-request _user]
+  (let [request-info
+        {:name (:name appt-request)
+         :pronouns (:pronouns appt-request)
+         :email (:email appt-request)
+         :phone (:phone appt-request)
+         :preferred_communication_method (:preferred-communication-method appt-request)
+         :reason (:description-of-needs appt-request)
+         :state (:state appt-request)
+         :ok_to_text (= 1 (:text-ok appt-request))
+         :other_notes (:anything-else appt-request)}]
+    ;; TODO handle access needs
+    ;; TODO persist to DB (need to build schema first)
+    ;; Announce this appointment request on the generic event stream.
+    ;; Event stream subscribers take care of notifications for us.
+    ;; See rtc.event.core, rtc.notifier.core
+    (e/publish! {:event/type :requested-appointment
+                 :event/request appt-request})
+    request-info))
+
 (defn book-appointment! [appt user]
   (let [{:keys [name
                 pronouns

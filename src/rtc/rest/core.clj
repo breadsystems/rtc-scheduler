@@ -66,6 +66,18 @@
     {:get (rest-handler (fn [{params :params user :identity}]
                           {:success true
                            :data (appt/get-available-windows params user)}))}]
+   ["/request"
+    {:post (rest-handler (fn [{user :identity :as req}]
+                           (try
+                             (let [params (transit-params req)]
+                               {:success true
+                                :data {:request
+                                       (appt/request-appointment! params user)}})
+                             (catch clojure.lang.ExceptionInfo e
+                               {:success false
+                                :errors [{:message (.getMessage e)
+                                          :reason (:reason (ex-data e))}]
+                                :data (ex-data e)}))))}]
    ["/appointment"
     {:post (rest-handler (fn [{user :identity :as req}]
                            (try

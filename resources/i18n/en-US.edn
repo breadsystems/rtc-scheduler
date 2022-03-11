@@ -19,9 +19,12 @@
  :confirmation "Confirm"
  :confirm-details "Please confirm your details"
  :appointment-confirmed "Your appointment is confirmed!"
+ :request-confirmed "We have received your request for an appointment!"
  :we-will-follow-up "Honoring your preferences, we will follow up with you by phone or email. Thank you."
+ :we-will-follow-up-within "Honoring your preferences, we will follow up with you by phone or email within 48 hours. Thank you."
  :select-appointment-time "Please select an appointment time"
  :book-appointment "Book your appointment"
+ :request-appointment "Request an Appointment"
  :appointment-time "Appointment time"
  :provider-name "Provider name"
  :back "Back"
@@ -117,4 +120,6 @@
   ;{:value "WV" :label "West Virginia"}
   ;{:value "WI" :label "Wisconsin"}
   ;{:value "WY" :label "Wyoming"}
+  :notifications/prc.appointment-requested
+  "Thank you for visiting the RTC. We have received your request and will follow up with you within 48 hours."
   ]}

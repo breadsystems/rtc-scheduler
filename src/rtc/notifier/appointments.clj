@@ -1,5 +1,7 @@
 (ns rtc.notifier.appointments
   (:require
+    [clojure.string :as string]
+    [rtc.env :refer [env]]
     [rtc.notifier.sendgrid :as sendgrid]
     [rtc.notifier.twilio :as twilio]
     [rtc.providers.core :as provider]
@@ -15,6 +17,14 @@
 ;;
 ;; SMS NOTIFICATIONS
 ;;
+
+(defn appointment-request->sms [{:keys [phone]}]
+  {:to (twilio/us-phone phone)
+   :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."})
+
+(defn appointment-request->rtc-sms [{:keys [phone]}]
+  {:to (twilio/us-phone (:request-notification-phone env))
+   :message "New appointment request from a careseeker. Please check the inbox for info@ RTC."})
 
 (defn appointment->sms [{:keys [phone
                                 provider_first_name
@@ -48,6 +58,67 @@
 
 (defn send-email? [appt]
   (boolean (seq (:email appt))))
+
+(defn appointment-request->email [{:keys [email name]}]
+  {:to email
+   :to-name name
+   ;; TODO i18n
+   :subject "Your appointment with the Radical Telehealth Collective"
+   :message "Thank you for visiting the RTC. We have received your request for an appointment. Honoring your preferences, we will follow up within 48 hours."})
+
+(defn appointment-request->rtc-email [{careseeker-name :name :as appt-req}]
+  (let [initials (if (seq careseeker-name)
+                   (str (string/join "." (map #(subs % 0 1)
+                                              (string/split
+                                                careseeker-name #" ")))
+                        ".")
+                   "Anon.")
+        subject (format "New appointment request from %s" initials)
+        yes-or-no #(cond
+                     (nil? %) nil
+                     (= 1 %) "Yes"
+                     :else "No")
+        fields [[:name "Name" #(if (seq %) % "Anonymous")]
+                [:pronouns "Pronouns"]
+                [:state "State"]
+                [:email "Email"]
+                [:phone "Phone"]
+                [:text-ok "Text OK" yes-or-no]
+                [:preferred-communication-method "Preferred comm. method"]
+                [:interpreter-lang "Needs interpreter for"]
+                [:other-access-needs "Other access needs"]
+                [:description-of-needs "Description of medical needs"]
+                [:anything-else "Anything else"]]
+        message (str
+                  "There has been a new appointment request on radicaltelehealthcollective.org:\n\n"
+                  (string/join "\n"
+                               (map (fn [[k label f]]
+                                      (let [f (or f identity)
+                                            answer (f (k appt-req))
+                                            v (if (seq answer)
+                                                answer
+                                                "No answer")]
+                                        (format "%s: %s" label v)))
+                                    fields)))]
+    {:to (:request-notification-email env)
+     :to-name "Radical Telehealth Collective"
+     :subject subject
+     :message message}))
+
+(comment
+  (:message (appointment-request->rtc-email
+    {:name "Shevek"
+     :pronouns "he/him"
+     :state "WA"
+     :email "careseeker@example.email"
+     :phone "253 555 1234"
+     :text-ok 1
+     :preferred-communication-method "phone"
+     :interpreter-lang "Amharic"
+     :other-access-needs "Other"
+     :description-of-needs "Life is pain"
+     :anything-else "Nah"}))
+  )
 
 (defn appointment->email
   "Returns an email map of the form {:to ... :to-name ... :message ...}
@@ -96,6 +167,18 @@
 ;; EVENT HANDLERS AND HELPERS
 ;;
 
+(defn requested-appointment! [appt-req]
+  ;; Notify the careseeker, honoring their consent.
+  (when (send-sms? appt-req)
+    (twilio/send-sms! (appointment-request->sms appt-req)))
+  (sendgrid/send-email! (appointment-request->email appt-req))
+
+  ;; Notify the RTC.
+  (twilio/send-sms! (appointment-request->rtc-sms appt-req))
+  (sendgrid/send-email! (appointment-request->rtc-email appt-req))
+
+  nil)
+
 (defn- appt->provider [{:keys [provider_id]}]
   (provider/id->provider provider_id))
 
@@ -112,6 +195,10 @@
     (sendgrid/send-email! (appointment->provider-email appt))))
 
 (comment
+
+  (:request-notification-email env)
+  (:request-notification-phone env)
+
   (def $provider (provider/email->provider "ctamayo+test@protonmail.com"))
 
   (def $appt
@@ -145,6 +232,8 @@
   (twilio/send-sms! (appointment->provider-sms $with-provider))
   (sendgrid/send-email! (appointment->email $with-provider))
   (sendgrid/send-email! (appointment->provider-email $with-provider))
+
+  (requested-appointment! $appt)
 
   (booked-appointment! $with-provider)
   (booked-appointment! (assoc $with-provider :text-ok nil)))
