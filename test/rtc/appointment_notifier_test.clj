@@ -25,6 +25,18 @@
      :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."}
     {:phone "253-555-1234"}))
 
+(deftest test-appointment-request->rtc-sms
+  (are
+    [sms appt-req]
+    (= sms (with-redefs [rtc.env/env {:request-notification-phone
+                                      "2535551234"}]
+             (appt/appointment-request->rtc-sms appt-req)))
+
+    {:to "+12535551234"
+     :message
+     "New appointment request from a careseeker. Please check the inbox for info@ RTC."}
+    {:email "this doesn't really matter."}))
+
 (deftest test-appointment->sms
 
   (are

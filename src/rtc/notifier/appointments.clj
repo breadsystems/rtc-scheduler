@@ -21,6 +21,10 @@
   {:to (twilio/us-phone phone)
    :message "Thank you for visiting the RTC. We have received your request for an appointment. We will follow up within 48 hours."})
 
+(defn appointment-request->rtc-sms [{:keys [phone]}]
+  {:to (twilio/us-phone (:request-notification-phone env))
+   :message "New appointment request from a careseeker. Please check the inbox for info@ RTC."})
+
 (defn appointment->sms [{:keys [phone
                                 provider_first_name
                                 provider_last_name
