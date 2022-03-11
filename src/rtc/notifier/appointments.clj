@@ -168,9 +168,16 @@
 ;;
 
 (defn requested-appointment! [appt-req]
-  (def $ar appt-req)
-  ;; TODO
-  )
+  ;; Notify the careseeker, honoring their consent.
+  (when (send-sms? appt-req)
+    (twilio/send-sms! (appointment-request->sms appt-req)))
+  (sendgrid/send-email! (appointment-request->email appt-req))
+
+  ;; Notify the RTC.
+  (twilio/send-sms! (appointment-request->rtc-sms appt-req))
+  (sendgrid/send-email! (appointment-request->rtc-email appt-req))
+
+  nil)
 
 (defn- appt->provider [{:keys [provider_id]}]
   (provider/id->provider provider_id))
