@@ -1,5 +1,6 @@
 (ns rtc.notifier.appointments
   (:require
+    [rtc.env :refer [env]]
     [rtc.notifier.sendgrid :as sendgrid]
     [rtc.notifier.twilio :as twilio]
     [rtc.providers.core :as provider]
@@ -15,6 +16,10 @@
 ;;
 ;; SMS NOTIFICATIONS
 ;;
+
+(defn appointment-request->sms [{:keys [phone]}]
+  {:to (twilio/us-phone phone)
+   :message "hello"})
 
 (defn appointment->sms [{:keys [phone
                                 provider_first_name
@@ -48,6 +53,13 @@
 
 (defn send-email? [appt]
   (boolean (seq (:email appt))))
+
+(defn appointment-request->email [{:keys [email name]}]
+  {:to email
+   :to-name name
+   ;; TODO i18n
+   :subject "Your appointment with the Radical Telehealth Collective"
+   :message "hello"})
 
 (defn appointment->email
   "Returns an email map of the form {:to ... :to-name ... :message ...}
@@ -117,6 +129,10 @@
     (sendgrid/send-email! (appointment->provider-email appt))))
 
 (comment
+
+  (:request-notification-email env)
+  (:request-notification-phone env)
+
   (def $provider (provider/email->provider "ctamayo+test@protonmail.com"))
 
   (def $appt

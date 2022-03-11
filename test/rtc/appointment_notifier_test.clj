@@ -8,6 +8,24 @@
 ;; SMS NOTIFICATIONS
 ;;
 
+(deftest test-appointment-request->sms
+  (are
+    [sms appt-req]
+    (= sms (appt/appointment-request->sms appt-req))
+
+    {:to "+12535551234"
+     :message "hello"}
+    {:phone "253 555 1234"}
+
+    {:to "+12535551234"
+     :message "hello"}
+    {:phone "1253 555 1234"}
+
+    {:to "+12535551234"
+     :message "hello"}
+    {:phone "253-555-1234"}
+    ))
+
 (deftest test-appointment->sms
 
   (are
@@ -85,6 +103,25 @@
 ;;
 ;; EMAIL NOTIFICATIONS
 ;;
+
+(deftest test-appointment-request->email
+  (are
+    [email appt-req]
+    (= email (appt/appointment-request->email appt-req))
+
+    {:to "careseeker@example.com"
+     :to-name nil
+     :subject "Your appointment with the Radical Telehealth Collective"
+     :message "hello"}
+    {:email "careseeker@example.com"}
+
+    {:to "careseeker@example.com"
+     :to-name "Shevek"
+     :subject "Your appointment with the Radical Telehealth Collective"
+     :message "hello"}
+    {:email "careseeker@example.com"
+     :name "Shevek"}
+    ))
 
 (deftest test-appointment->email
 
