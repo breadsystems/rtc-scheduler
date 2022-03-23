@@ -12,20 +12,19 @@
           {:value 0 :label "No"}]
  :communication-methods [{:value "phone" :label "Teléfono"}
                          {:value "email" :label "Dirección de correo electrónica"}]
- :unexpected-error "TODO An unexpected error occurred. Please try again."
+ :unexpected-error "Ocurrió un error inesperado. Inténtalo de nuevo."
  :basic-info "Información Basica"
  :contact-info "Información de Contacto"
  :access-needs "Necesidades de Accesso"
  :medical-needs "Necesidades Médicas"
  :schedule "Programar una Cita"
- :no-appointments-this-week "TODO No citas etsa semana"
- :window-unavailable "TODO Lo siento, that appointment window is no longer available."
+ :no-appointments-this-week "No hay citas etsa semana"
+ :window-unavailable "Lo siento, esa ventana de citas ya no está disponible."
  :confirmation "Confirmar"
  :confirm-details "Por favor confirmar"
  :appointment-confirmed "Su cita está confirmada!"
- ;; TODO
- :request-confirmed "We have received your request for an appointment!"
- :we-will-follow-up "TODO Honoring your preferences, we will follow up with you by phone or email. Thank you."
+ :request-confirmed "¡Hemos recibido su solicitud de cita!"
+ :we-will-follow-up "Respetando sus preferencias, nos pondremos en contacto con usted por teléfono o correo electrónico dentro de las 48 horas. Gracias."
  :we-will-follow-up-within "Honoring your preferences, we will follow up with you by phone or email within 48 hours. Thank you."
  :select-appointment-time "Por favor seleccione una cita"
  :book-appointment "Reserve su cita"
@@ -76,6 +75,6 @@
   {:value "WA" :label "Washington"}
   {:value "MA" :label "Massachusetts"}
   {:value "CA" :label "California"}]
-  :notifications/prc.appointment-requested
-  "Gracias por visitar el RTC. We have received your request and will follow up with you within 48 hours."
+ :notifications/prc.appointment-requested
+ "Gracias por visitar el RTC. Hemos recibido su solicitud de cita, y nos pondremos en contacto con usted por teléfono o correo electrónico dentro de las 48 horas."
  }
