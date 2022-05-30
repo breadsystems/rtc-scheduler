@@ -55,7 +55,7 @@
 
 
 (comment
-  (map #(select-keys % [:id :email
+  (map #(select-keys % [:id :email :phone
                         :reminded_careseeker
                         :reminded_provider])
        (get-imminent-appointments))

@@ -7,6 +7,7 @@
    [rtc.appointments.availabilities :as avail]
    [rtc.appointments.appointments :as appt]
    [rtc.db :as d]
+   [rtc.env :refer [env]]
    [rtc.providers.core :as p]
    [rtc.users.core :as u]
    [rtc.util :refer [thirty-minutes one-hour six-hours one-day one-week]])
@@ -21,7 +22,7 @@
                      :first_name "Test"
                      :last_name "Provider"
                      :pronouns "they/them"
-                     :phone "2532229139"
+                     :phone (:request-notification-phone env)
                      :state "WA"
                      :is_admin false
                      :is_provider true}
@@ -30,7 +31,7 @@
                      :first_name "Octavia"
                      :last_name "Butler"
                      :pronouns "she/her"
-                     :phone "1234567890"
+                     :phone (:request-notification-phone env)
                      :state ""
                      :is_admin true
                      :is_provider false}
@@ -39,7 +40,7 @@
                      :first_name "Ursula"
                      :last_name "Le Guin"
                      :pronouns "she/her"
-                     :phone "1234567890"
+                     :phone (:request-notification-phone env)
                      :state "WA"
                      :is_admin true
                      :is_provider true}
@@ -48,7 +49,7 @@
                      :first_name "Shevek"
                      :last_name ""
                      :pronouns "he/him"
-                     :phone "1234567890"
+                     :phone (:request-notification-phone env)
                      :state "WA"
                      :is_admin true
                      :is_provider true}
@@ -57,7 +58,7 @@
                      :first_name "Bedap"
                      :last_name ""
                      :pronouns "he/him"
-                     :phone "1234567890"
+                     :phone (:request-notification-phone env)
                      :state "DC"
                      :is_admin true
                      :is_provider true}
@@ -66,7 +67,7 @@
                      :first_name "Lauren"
                      :last_name "Olamina"
                      :pronouns "she/her"
-                     :phone "1234567890"
+                     :phone (:request-notification-phone env)
                      :state "CA"
                      :is_admin false
                      :is_provider true}])
@@ -95,7 +96,7 @@
       :name "Somebody"
       :email "prc@example.com"
       :pronouns "they/them"
-      :phone ""
+      :phone (:request-notification-phone env)
       :ok_to_text true
       :date_created (c/to-sql-time today-8am)
       :other_access_needs "Popsicles"
@@ -110,7 +111,7 @@
       :name "Larry"
       :email "prc@example.com"
       :pronouns "they/them"
-      :phone ""
+      :phone (:request-notification-phone env)
       :ok_to_text true
       :date_created (c/to-sql-time today-8am)
       :other_access_needs "Things"
@@ -126,7 +127,7 @@
                      :alias ""
                      :email "laura@twinpeaks.email"
                      :pronouns "she/her"
-                     :phone ""
+                     :phone (:request-notification-phone env)
                      :ok_to_text true
                      :date_created (c/to-sql-time today-8am)
                      :other_access_needs "Coconut"
@@ -151,7 +152,7 @@
                      :alias ""
                      :email "damnfinecoffee@fbi.gov"
                      :pronouns "he/him"
-                     :phone ""
+                     :phone (:request-notification-phone env)
                      :ok_to_text true
                      :date_created (c/to-sql-time today-8am)
                      :reason "Other"
@@ -176,7 +177,7 @@
       :alias ""
       :email "prc.1983@example.com"
       :pronouns "she/her"
-      :phone ""
+      :phone (:request-notification-phone env)
       :ok_to_text true
       :date_created (c/to-sql-time today-8am)
       :other_access_needs ""
@@ -191,7 +192,7 @@
       :alias ""
       :email "audrey@greatnorthern.com"
       :pronouns "she/her"
-      :phone ""
+      :phone (:request-notification-phone env)
       :ok_to_text true
       :date_created (c/to-sql-time today-8am)
       :other_access_needs ""
@@ -205,7 +206,7 @@
       :alias "Anon"
       :email "prc.1983@example.com"
       :pronouns "she/her"
-      :phone ""
+      :phone (:request-notification-phone env)
       :ok_to_text true
       :date_created (c/to-sql-time today-8am)
       :other_access_needs ""
@@ -219,7 +220,7 @@
       :name "Takver"
       :email "prc.1983@example.com"
       :pronouns "she/her"
-      :phone ""
+      :phone (:request-notification-phone env)
       :ok_to_text true
       :date_created (c/to-sql-time today-8am)
       :other_access_needs ""
@@ -233,7 +234,7 @@
       :name "Lilith"
       :email "prc.1983@example.com"
       :pronouns "she/her"
-      :phone ""
+      :phone (:request-notification-phone env)
       :ok_to_text true
       :date_created (c/to-sql-time today-8am)
       :other_access_needs ""
