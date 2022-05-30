@@ -2,7 +2,7 @@
   (:require
     ;; HoneySQL 2.x
     [honey.sql :as sql]
-    [mount.core :refer [defstate]]
+    [mount.core :as mount :refer [defstate]]
     [rtc.db :as db]
     [rtc.env :refer [env]]
     [rtc.notifier.api :as api]
@@ -51,7 +51,10 @@
       (record-reminder! appt))))
 
 (defn -main [task & _]
-  (send! (keyword task)))
+  (mount/start)
+  (send! (keyword task))
+  (mount/stop)
+  (System/exit 0))
 
 
 (comment
