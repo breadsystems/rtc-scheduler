@@ -4,6 +4,7 @@
  :get-care "Get Care"
  :choose-a-language "Choose a language"
  :on-winter-break "Thank you for visiting the RTC. We are currently on winter break. We will begin scheduling appointments again on January 10th, 2022. If you have an urgent need, please reach out to your local urgent care clinic."
+ :on-summer-break "Thank you for visiting the RTC. We will be on Summer Break starting Monday, June 27th. We will begin scheduling appointments again on July 5th. If you have an urgent need, please reach out to your local urgent care clinic."
  :yes-no [{:value 1 :label "Yes"}
           {:value 0 :label "No"}]
  :communication-methods [{:value "phone" :label "Phone"}
