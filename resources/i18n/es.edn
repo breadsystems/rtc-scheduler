@@ -8,6 +8,7 @@
  :get-care "Recibe Atencion Médica"
  :choose-a-language "Seleccione un idioma"
  :on-winter-break "Gracias por visitar el RTC. En este momento estamos de vacaciones de invierno. Volveremos a programar citas el 10 de enero de 2022. Si usted tiene una necesidad urgente, por favor, póngase en contacto con su clínica local de atención urgente."
+ :on-summer-break "Gracias por visitar el RTC. Estamos de vacaciones de verano a partir del 27 de junio. Volveremos a programar citas el 5 de julio. Si usted tiene una necesidad urgente, por favor, póngase en contacto con su clínica local de atención urgente."
  :yes-no [{:value 1 :label "Sí"}
           {:value 0 :label "No"}]
  :communication-methods [{:value "phone" :label "Teléfono"}
