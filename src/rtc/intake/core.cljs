@@ -832,7 +832,6 @@
      [:header
       [:h1 [:a {:href "/"} "Radical Telehealth Collective"]]
       [:h2 (t :get-care)]
-      [:h3.notice (t :on-summer-break)]
       (when (not confirmed-info) [progress-nav])]
      [:main
       (cond
