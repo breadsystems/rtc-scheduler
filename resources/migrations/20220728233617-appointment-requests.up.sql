@@ -1,0 +1,3 @@
+ALTER TABLE appointments ALTER COLUMN start_time DROP NOT NULL;
+ALTER TABLE appointments ALTER COLUMN end_time DROP NOT NULL;
+ALTER TABLE appointments ALTER COLUMN provider_id DROP NOT NULL;
