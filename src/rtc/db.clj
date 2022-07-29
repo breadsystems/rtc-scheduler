@@ -78,14 +78,17 @@
    :db {:datasource *db*}})
 
 (defstate migrations
-  :start (do
-           (println "Performing database migrations...")
+  :start (try
+           (println "Initializing Migratus...")
            (migratus/init (migration-config))
+           (println "Performing database migrations...")
            (if-let [status (migratus/migrate (migration-config))]
              ;; Returns nil on success; if we're here it means there
              ;; was some kind of error.
              (printf "Migratus reported status %s\n" status)
-             (println "Done."))))
+             (println "Done."))
+           (catch Throwable ex
+             (println "ERROR performing migrations:" (.getMessage ex)))))
 
 (defn reset-everything!! []
   (try
@@ -102,7 +105,7 @@
   (reset-everything!!)
 
   ;; create a migration
-  (migratus/create (migration-config) "appointment-requests")
+  (migratus/create (migration-config) "increase-email-length")
 
   ;; list all schema migrations
   (get-migrations))
