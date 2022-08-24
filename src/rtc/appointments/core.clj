@@ -68,7 +68,8 @@
   )
 
 (defn request-appointment! [appt-request _user]
-  (let [request-info
+  (let [{:keys [other-access-needs interpreter-lang]} appt-request
+        request-info
         {:name (:name appt-request)
          :pronouns (:pronouns appt-request)
          :email (:email appt-request)
@@ -77,9 +78,17 @@
          :reason (:description-of-needs appt-request)
          :state (:state appt-request)
          :ok_to_text (= 1 (:text-ok appt-request))
-         :other_notes (:anything-else appt-request)}]
-    ;; TODO handle access needs
-    ;; TODO persist to DB (need to build schema first)
+         :other_notes (:anything-else appt-request)}
+        {:keys [id] :as requested}
+        (appt/create! request-info)]
+    (when (seq other-access-needs)
+      (d/create-appointment-need! {:appointment/id id
+                                   :need/id "other"
+                                   :info other-access-needs}))
+    (when (seq interpreter-lang)
+      (d/create-appointment-need! {:appointment/id id
+                                   :need/id "interpretation"
+                                   :info interpreter-lang}))
     ;; Announce this appointment request on the generic event stream.
     ;; Event stream subscribers take care of notifications for us.
     ;; See rtc.event.core, rtc.notifier.core

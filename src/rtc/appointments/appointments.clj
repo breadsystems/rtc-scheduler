@@ -18,11 +18,16 @@
 (spec/def ::provider_id int?)
 (spec/def ::reason string?)
 
+(defn- ends-after-start? [{:keys [start_time end_time]}]
+  (or
+    (and (nil? start_time) (nil? end_time))
+    (> (inst-ms end_time) (inst-ms start_time))))
+
 (spec/def ::appointment
   (spec/and
-   (spec/keys :req-un [::start_time ::end_time ::provider_id ::reason]
-              :opt-un [::id])
-   #(> (inst-ms (:end_time %)) (inst-ms (:start_time %)))))
+   (spec/keys :req-un [::reason]
+              :opt-un [::start_time ::end_time ::provider_id ::id])
+   ends-after-start?))
 
 
 (defn id->needs [id]
