@@ -167,6 +167,40 @@
                          :info "Clean room, reasonably priced"}])
           (sql/format)
           (d/execute!)))
+    ;; Create some requests
+    (appt/create!
+     {:name "Akin Iyapo"
+      :alias ""
+      :email "akin@lo.email"
+      :pronouns "he/him"
+      :phone ""
+      :ok_to_text true
+      :date_created (c/to-sql-time today-8am)
+      :other_access_needs ""
+      :reason "Other"
+      :state "CA"})
+    (appt/create!
+     {:name "Jodahs"
+      :alias ""
+      :email "jodahs@lo.email"
+      :pronouns "it/its"
+      :phone ""
+      :ok_to_text true
+      :date_created (c/to-sql-time today-8am)
+      :other_access_needs ""
+      :reason "Other"
+      :state "CA"})
+    (appt/create!
+     {:name "Aaor"
+      :alias ""
+      :email "aaor@lo.email"
+      :pronouns "it/its"
+      :phone ""
+      :ok_to_text true
+      :date_created (c/to-sql-time today-8am)
+      :other_access_needs ""
+      :reason "Other"
+      :state "WA"})
     (appt/create!
      {:provider_id (:id lauren)
       ;; in one day
@@ -230,8 +264,8 @@
       ;; in eight days
       :start_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-day))
       :end_time (c/to-sql-time (+ (inst-ms today-8am) one-week one-day one-hour))
-      :name "Lilith"
-      :email "prc.1983@example.com"
+      :name "Lilith Iyapo"
+      :email "iyapo@example.com"
       :pronouns "she/her"
       :phone ""
       :ok_to_text true
