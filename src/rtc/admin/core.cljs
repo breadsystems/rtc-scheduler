@@ -57,6 +57,8 @@
               :access-needs #{}}
     :availabilities {}
     :appointments {}
+    ;; TODO use sorted-map
+    :requests {}
     :users {}
     :needs {:interpretation    {:id :interpretation
                                 :name "Interpreter"}
@@ -66,6 +68,8 @@
                                 :name "Other"}}
     :current-invite {:email ""}
     :my-invitations []
+    :requests? true
+    :scheduling-request nil
     :focused-appointment nil
     :note ""
     :colors colors/availability-colors

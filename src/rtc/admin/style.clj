@@ -5,6 +5,17 @@
    [garden.def :refer [defstyles]]
    [garden.color :refer [rgba]]))
 
+(def ^:private owl "> * + *")
+
+(def requests
+  [[:.requests-ui [owl {:margin-top "0.5em"}]]
+   [:.appointment-request-info {:font-weight 700}
+    [:.help {:font-weight :normal
+             :margin-left "1ch"}]]
+   [:.appointment-request {:display :flex
+                           :justify-content :space-between}]
+   [:.appointment-request-actions [owl {:margin-left "1ch"}]]])
+
 (def calendar
   [[:.rtc-appointment {:cursor :pointer}]
    [:.fc-event.rtc-availability {:cursor :default}
@@ -98,5 +109,6 @@
   core/sidebar
   calendar
   modal
+  requests
   appointment
   invites)
