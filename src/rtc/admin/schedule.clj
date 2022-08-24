@@ -21,6 +21,7 @@
   (let [appts (appt/get-appointments
                {:from (one-week-ago)
                 :to (* 8 (one-week-from-now))})
+        requests (appt/get-requests)
         avails (avail/get-availabilities
                 {:from (one-week-ago)
                  :to (* 8 (one-week-from-now))})
@@ -31,6 +32,12 @@
     {:appointments
      (as-> appts $
        (map (comp assoc-access-needs rename-keys*) $)
+       (index-by :id $))
+     :requests
+     (as-> requests $
+       (map (comp assoc-access-needs rename-keys*) $)
+       ; TODO
+       (map #(assoc % :preferred_times "Weekdays only") $)
        (index-by :id $))
      :availabilities
      (as-> avails $
@@ -46,6 +53,7 @@
 
   ;; TODO exceptions, y tho
   (appt/get-appointments {})
+  (appt/get-requests)
   (avail/get-availabilities {})
 
   ;;

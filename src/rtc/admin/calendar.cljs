@@ -72,9 +72,9 @@
 (defn current-user [{:keys [users user-id]}]
   (get users user-id))
 
-(defn focused-appointment [{:keys [appointments focused-appointment]}]
+(defn focused-appointment [{:keys [appointments requests focused-appointment]}]
   (some->> focused-appointment
-           (get appointments)))
+           (get (merge appointments requests))))
 
 (defn current-access-needs [db]
   (when-let [{:keys [access-needs]} (focused-appointment db)]
@@ -295,6 +295,19 @@
 (rf/reg-sub ::can-view-medical-needs? (fn [db]
                                         (:is_provider (current-user db))))
 
+(rf/reg-sub ::requests? :requests?)
+(rf/reg-sub ::picking-provider? :picking-provider?)
+(rf/reg-sub
+  ::scheduling-request
+  (fn [{:keys [requests scheduling-request]}]
+    (get requests scheduling-request)))
+(rf/reg-sub
+  ::requests
+  (fn [{:keys [requests]}]
+    (->> requests
+      (map val)
+      (sort-by :date_created))))
+
 ;; Persistent Calendar UI state - saved transparently to Local Storage.
 (rf/reg-sub ::ui-state :calendar/ui-state)
 
@@ -354,6 +367,28 @@
                      :view "timeGridWeek"})]
       (assoc cofx :ui-state state))))
 
+(rf/reg-event-db
+  ::update-pending-request
+  (fn [db [_ {:keys [id] :as request}]]
+    (update-in db [:requests id] merge request)))
+
+(defn next-pending-request
+  [{:keys [requests appointments] :as db} {:keys [id] :as request}]
+  (let [requests (dissoc requests id)
+        sorted (sort-by :date_created (map val requests))
+        next-id (:id (first sorted))]
+    (assoc db
+           ;; TODO be pessimistic here
+           :appointments (assoc appointments id request)
+           :requests requests
+           :scheduling-request next-id)))
+
+(rf/reg-event-fx
+  ::confirm-request
+  (fn [{:keys [db]} [_ request]]
+    {::create-appointment! {:appointment request}
+     :db (next-pending-request db request)}))
+
 (rf/reg-event-fx
  ::create-availability
  (fn [{:keys [db]} [_ avail]]
@@ -377,6 +412,13 @@
          avail (get-in db [:availabilities (js/parseInt id)])]
      {::delete-availability! {:availability avail
                               :csrf-token csrf-token}})))
+
+(rf/reg-fx
+  ::create-appointment!
+  (fn [{:keys [appointment]}]
+    (rest/post! "/api/v1/admin/appointment"
+                {:transit-params appointment}
+                ::appointment-created)))
 
 ;; TODO use interceptors to inject CSRF token
 (rf/reg-fx
@@ -424,12 +466,18 @@
                :my-invitations (:invitations data)
                :availabilities (:availabilities data)
                :appointments   (:appointments data)
+               :requests       (:requests data)
 
                :calendar/ui-state ui-state)
               (assoc-in
                [:filters :providers]
                (union (set (map :user/id (vals (:availabilies data))))
                       (set (map :user/id (vals (:appointments data)))))))})))
+
+(rf/reg-event-db
+ ::scheduling
+ (fn [db [_ id]]
+   (assoc db :scheduling-request id)))
 
 (rf/reg-event-fx
  ::availability-created
@@ -484,6 +532,9 @@
                                        {:db (assoc db :focused-appointment id)
                                         ::get-appointment-details id}))
 
+(rf/reg-event-db ::toggle-requests (fn [db]
+                                     (update db :requests? not)))
+
 (rf/reg-fx
  ::get-appointment-details
  (fn [id]
@@ -534,7 +585,8 @@
   @(rf/subscribe [::filters])
   @(rf/subscribe [::providers])
   @(rf/subscribe [::access-needs-filter-summary])
-  @(rf/subscribe [::appointments])
+  (deref (rf/subscribe [::requests]))
+  (deref (rf/subscribe [::events]))
 
   (rf/dispatch [::update-filter :providers 3])
   (rf/dispatch [::update-filter :providers 4]))
@@ -549,16 +601,20 @@
 
 
 (defn- careseeker-name [person]
-  (if (> (count (:name person)) 0)
+  (if (seq (:name person))
     [:span (:name person)]
     [:i "Anonymous"]))
 
-(defn modal [children]
+(defn- careseeker-pronouns [person]
+  (when (seq (:pronouns person))
+    (str " (" (:pronouns person) ")")))
+
+(defn modal [{:keys [on-close-button-click]} children]
   [:div.modal-bg
    [:aside.modal
     [:div.modal__contents
      [:<> children]
-     [:span.modal__close {:on-click #(rf/dispatch [::focus-appointment nil])} "×"]]]])
+     [:span.modal__close {:on-click on-close-button-click} "×"]]]])
 
 (defn filter-controls []
   (let [filters @(rf/subscribe [::filters])
@@ -640,8 +696,11 @@
 (comment
   @(rf/subscribe [::focused-appointment]))
 
+(defn- request? [{:keys [start end]}]
+  (and (nil? start) (nil? end)))
+
 (defn- appointment-contact
-  [{:keys [email phone ok_to_text preferred_communication_method]}]
+  [{:keys [email phone ok_to_text preferred_communication_method state]}]
   [:div.appointment-field-group
    [:h3 "Contact"]
    [:dl
@@ -660,7 +719,9 @@
     [:dt "Preferred comm. method"]
     [:dd (if (seq preferred_communication_method)
            preferred_communication_method
-           [:span.help "not given"])]]])
+           [:span.help "not given"])]
+    [:dt "State"]
+    [:dd state]]])
 
 (defn- appointment-access-needs [{appt-id :id}]
   (let [access-needs @(rf/subscribe [::current-access-needs])]
@@ -687,6 +748,15 @@
                 [:label {:for (str "fulfilled-" (name id))}
                  label ": " info]]))
            access-needs))]))
+
+(defn- preferred-times [{:keys [id preferred_times] :as appt}]
+  (when (request? appt))
+    [:div.appointment-field-group
+     [:h3 "Preferred Times"]
+     [:p (if (seq preferred_times) preferred_times "not given")]
+     [:p
+      [:button {:on-click #(rf/dispatch [::scheduling id])}
+       "Schedule now"]]])
 
 (defn- medical-needs [{:keys [reason]}]
   (when @(rf/subscribe [::can-view-medical-needs?])
@@ -739,23 +809,134 @@
      [:header
       [:h2.appointment-name
        (careseeker-name appt)
-       (when (seq pronouns)
-         (str " (" pronouns ")"))]
+       (careseeker-pronouns appt)]
       [:h3
-       (.format start "h:mma* ddd, MMM D")
-       " with " (:first_name provider) " " (:last_name provider)]
-      [:p.help.left "*All times are local."]]
+       (if (request? appt)
+         "(Pending appointment request)"
+         (str
+           (.format start "h:mma* ddd, MMM D")
+           " with ")) (:first_name provider) " " (:last_name provider)]
+      (when-not (request? appt)
+        [:p.help.left "*All times are local."])]
      [:div.appointment-details
       (appointment-contact appt)
       (appointment-access-needs appt)]
+     (preferred-times appt)
      (medical-needs appt)
      (other-notes appt)
      (appointment-notes appt)]))
 
 
+(defn requests-ui []
+  (let [requests? @(rf/subscribe [::requests?])
+        requests @(rf/subscribe [::requests])
+        button-verb (if requests? "Hide" "Show")]
+    [:section.requests-ui
+     [:div
+      (if (seq requests)
+        [:button.secondary {:on-click #(rf/dispatch [::toggle-requests])}
+         button-verb " " (count requests) " pending requests"]
+        [:p "No pending requests."])]
+     (when requests?
+       [:div.appointment-requests-list
+        (map (fn [{:keys [id name pronouns state] :as request}]
+               ^{:key id}
+               [:div.appointment-request.flex-field
+                [:span.appointment-request-info
+                 (careseeker-name request)
+                 (careseeker-pronouns request)
+                 [:span.help (.fromNow (moment (:date_created request)))]]
+                [:span.appointment-request-actions
+                 [:a {:href "#"
+                      :on-click #(rf/dispatch [::focus-appointment id])}
+                  "Details"]
+                 [:a {:href "#"
+                     :on-click #(rf/dispatch [::scheduling id])}
+                 "Schedule"]]])
+             requests)])]))
+
+(defn scheduling-ui []
+  (let [{:keys [id start end preferred_times] :as request}
+        @(rf/subscribe [::scheduling-request])
+        providers @(rf/subscribe [::providers])
+        ui-state @(rf/subscribe [::ui-state])
+        {:keys [view initial-date]} ui-state
+        events @(rf/subscribe [::events])
+        events-fn (fn [info done _]
+                    (let [start (.-start info)
+                          state (merge ui-state {:initial-date start})]
+                      (rf/dispatch [::save-ui-state state]))
+                    (done (clj->js events)))
+        view-mounted (fn [info]
+                       (let [view (.. info -view -type)
+                             state (merge ui-state {:view view})]
+                         (rf/dispatch [::save-ui-state state])))]
+    (when request
+      (prn (keys request))
+      [modal
+       {:on-close-button-click #(rf/dispatch [::scheduling nil])}
+       [:<>
+        [:h3 "Scheduling appointment for "
+         (careseeker-name request)
+         (careseeker-pronouns request)]
+        (cond
+          (nil? (:user/id request))
+          [:div
+           [:h4 "Pick a provider..."]
+           [:select {:on-change
+                     (fn [e]
+                       (let [pid (.-value (.-target e))]
+                         (rf/dispatch [::update-pending-request
+                                       {:id id
+                                        :user/id pid}])))}
+            (doall (map (fn [{:keys [id] :as provider}]
+                          ^{:key id}
+                          [:option {:value id}
+                           (event-name provider)])
+                        providers))]]
+          (nil? (:start request))
+          [:<>
+           [:p
+            [:strong "Preferred times: "]
+            (if preferred_times
+              preferred_times
+              "(None specified)")]
+           [:> FullCalendar
+            {:header-toolbar #js {:left "prev,next today"
+                                  :center "title"
+                                  :right ""}
+             :selectable true
+             :select (fn [event]
+                       (let [updated {:id id
+                                      :start (.-start event)
+                                      :end   (.-end event)}]
+                         (rf/dispatch [::update-pending-request updated])))
+             :initial-date initial-date
+             :events events-fn
+             :initial-view "timeGridWeek"
+             :view-did-mount view-mounted
+             :plugins [interactionPlugin timeGridPlugin]}]]
+          :default
+          [:div
+           [:h4 "Confirm appointment details"]
+           [:p.help.left "All times are local."]
+           [:div.appointment-field-group
+            [:dl
+             [:dt "Provider"]
+             [:dd "Ursula K. Le Guin"] ;; TODO
+             [:dt "Start"]
+             [:dd (.format (moment start) "h:mma ddd, MMM D")]
+             [:dt "End"]
+             [:dd (.format (moment end) "h:mma ddd, MMM D")]]
+            [:div
+             [:button {:on-click #(rf/dispatch [::confirm-request request])}
+              "Book appointment"]]]])]])))
+
+
 
 (defn care-schedule []
-  (let [appt @(rf/subscribe [::focused-appointment])
+  (let [request @(rf/subscribe [::scheduling-request])
+        appt @(rf/subscribe [::focused-appointment])
         ui-state @(rf/subscribe [::ui-state])
         {:keys [view initial-date]} ui-state
         view-mounted (fn [info]
@@ -769,12 +950,15 @@
                       (rf/dispatch [::save-ui-state state]))
                     (done (clj->js events)))]
     [:div.schedule-container
-     (when appt
+     (when (and (nil? request) appt)
        [modal
+        {:on-close-button-click #(rf/dispatch [::focus-appointment nil])}
         [appointment-details]])
+     [scheduling-ui]
      [:div.with-sidebar
       [:div
        [:div
+        [requests-ui]
         [:p.help.left "All times are local."]
         [:> FullCalendar
          {:header-toolbar #js {:left "prev,next today"
@@ -799,10 +983,10 @@
           :initial-view (or view "timeGridWeek")
           :view-did-mount view-mounted
           :event-click (fn [info]
-                        (let [e (.-event info)
-                              id (js/parseInt (.-id e))]
-                          (when (appointment? e)
-                            (rf/dispatch [::focus-appointment id]))))
+                         (let [e (.-event info)
+                               id (js/parseInt (.-id e))]
+                           (when (appointment? e)
+                             (rf/dispatch [::focus-appointment id]))))
           :event-change (fn [info]
                           (let [e (.-event info)
                                 id (js/parseInt (.-id e))]

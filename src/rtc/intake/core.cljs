@@ -328,7 +328,7 @@
   (do
     (rf/dispatch [::answer! :name "Coby"])
     (rf/dispatch [::answer! :pronouns "he/him"])
-    (rf/dispatch [::answer! :state "WA"])
+    (rf/dispatch [::answer! :state "CA"])
     (rf/dispatch [::answer! :email "coby@tamayo.email"])
     (rf/dispatch [::answer! :phone "253 555 1234"])
     (rf/dispatch [::answer! :text-ok 1])
@@ -740,8 +740,12 @@
         :content
         [:div.rows
          [:div
-          [:p (t :request-an-appointment)]
           [:div.intake-step--confirmation
+           [question {:key :preferred-times
+                      :type :text
+                      :required? false
+                      :help :preferred-times-help
+                      :placeholder :preferred-times-placeholder}]
            [confirmation-details]
            [:div.confirm-container
             [:button.call-to-action {:on-click on-request-appt}

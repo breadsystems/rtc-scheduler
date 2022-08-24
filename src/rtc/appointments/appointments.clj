@@ -92,6 +92,13 @@
 (defn get-appointments [params]
   (-> params params->query sql/format d/query))
 
+(defn get-requests []
+  (-> {:select [:*]
+       :from [[:appointments :a]]
+       :where [:and [:is :start_time nil] [:is :end_time nil]]}
+      sql/format
+      d/query))
+
 
 (comment
   (c/to-sql-time (inst-ms (Date. 2021 01 01)))
