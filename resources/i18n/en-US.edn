@@ -105,7 +105,7 @@
   ;{:value "NH" :label "New Hampshire"}
   ;{:value "NJ" :label "New Jersey"}
   ;{:value "NM" :label "New Mexico"}
-  ;{:value "NY" :label "New York"}
+  {:value "NY" :label "New York"}
   ;{:value "NC" :label "North Carolina"}
   ;{:value "ND" :label "North Dakota"}
   ;{:value "OH" :label "Ohio"}
