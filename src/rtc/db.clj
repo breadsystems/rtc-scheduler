@@ -88,7 +88,8 @@
              (printf "Migratus reported status %s\n" status)
              (println "Done."))
            (catch Throwable ex
-             (println "ERROR performing migrations:" (.getMessage ex)))))
+             (println "ERROR performing migrations:" (.getMessage ex))
+             (prn ex))))
 
 (defn reset-everything!! []
   (try
