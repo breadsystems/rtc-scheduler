@@ -28,6 +28,7 @@
         re-frame/re-frame                   {:mvn/version "0.12.0"}
         ring/ring                           {:mvn/version "1.7.0"}
         ring/ring-defaults                  {:mvn/version "0.3.2"}
+        thheller/shadow-cljs                {:mvn/version "2.25.9"}
         com.taoensso/timbre                 {:mvn/version "5.1.2"}
         com.cognitect/transit-clj           {:mvn/version "1.0.324"}
         com.cognitect/transit-cljs          {:mvn/version "0.8.264"}

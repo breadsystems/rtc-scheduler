@@ -1,4 +1,5 @@
 {:deps true
+ :src-paths ["src" "resources"]
  :builds {:app {:output-dir "resources/public/js"
                 :target :browser
                 :modules {:shared     {:entries []}
