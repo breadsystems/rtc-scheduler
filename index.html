@@ -26,9 +26,11 @@
       <main class="prose">
         <div class="before">
           <section class="center spacious">
-            <a class="call-to-action" href="/get-care">
-              <span data-lang="en" style="display: initial;">Get Care</span>
-              <span data-lang="es" style="display: none;">Recibe Atencion Médica</span>
+            <a data-lang="en" style="display: initial" class="call-to-action" href="https://docs.google.com/forms/d/e/1FAIpQLSeNUEo1oQZYtOGc4DFz8hxYMrGSVkMGEl6CT2lYlTUoRb7ZgQ/viewform">
+              <span>Get Care</span>
+            </a>
+            <a data-lang="es" style="display: none" class="call-to-action" href="https://docs.google.com/forms/d/e/1FAIpQLScsDtU3mOeznmzk7sgpjLwvvczFiEUk1OyEduJSAnxwz7DHug/viewform">
+              <span>Recibe Atencion Médica</span>
             </a>
           </section>
         </div>
@@ -125,28 +127,32 @@
         </section>
         <div class="after">
           <section class="center spacious">
-            <a class="call-to-action" href="https://www.radicaltelehealthcollective.org/get-care">
-              <span data-lang="en" style="display: initial;">Get Care</span>
-              <span data-lang="es" style="display: none;">Recibe Atencion Médica</span>
+            <a data-lang="en" style="display: initial" class="call-to-action" href="https://docs.google.com/forms/d/e/1FAIpQLSeNUEo1oQZYtOGc4DFz8hxYMrGSVkMGEl6CT2lYlTUoRb7ZgQ/viewform">
+              <span>Get Care</span>
+            </a>
+            <a data-lang="es" style="display: none" class="call-to-action" href="https://docs.google.com/forms/d/e/1FAIpQLScsDtU3mOeznmzk7sgpjLwvvczFiEUk1OyEduJSAnxwz7DHug/viewform">
+              <span>Recibe Atencion Médica</span>
             </a>
           </section>
         </div>
       </main>
     </div>
     <script>
-    function displayLang(lang) {
-      if (!lang) return;
-      Array.from(document.querySelectorAll("[data-lang]"))
-        .forEach(function(el){
-          el.style.display = el.dataset.lang === lang ? "initial" : "none";
-        })
-    }
-    // Display the current language according to the user's preferences
-    displayLang(navigator.language.slice(0,2)||"en")
-    document.getElementById('select-language')
-      .addEventListener('change', function(e) {
+      function displayLang(lang) {
+        if (!lang) return;
+        Array.from(document.querySelectorAll("[data-lang]"))
+          .forEach(function(el){
+            el.style.display = el.dataset.lang === lang ? "initial" : "none";
+          })
+      }
+
+      var langSelect = document.getElementById('select-language');
+      // Display the current language selection
+      displayLang(langSelect.value);
+
+      langSelect.addEventListener('change', function(e) {
         displayLang(e.target.value)
-      })
+      });
     </script>
   </body>
 </html>
