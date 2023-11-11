@@ -1,0 +1,210 @@
+@font-face {
+  font-family: 'Libre Franklin';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/librefranklin/v14/jizDREVItHgc8qDIbSTKq4XkRiUR2zcLig.woff2) format('woff2');
+  unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Libre Franklin';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/librefranklin/v14/jizDREVItHgc8qDIbSTKq4XkRiUf2zc.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+*{
+    box-sizing:border-box
+
+}
+body{
+    width:80em;
+    max-width:90%;
+    margin:1em auto;
+    padding-top:2em;
+    line-height:1.5;
+    font-family:'Libre Franklin',sans-serif;
+    font-weight:400
+}
+section{
+    margin-bottom:2em
+}
+header{
+    text-align:center
+}
+h1{
+    color:#ff1a4f;
+    text-transform:uppercase
+}
+h2,h3,h4,h5,h6{
+    color:#6e19a0
+}
+a{
+    color:#6e19a0
+}
+.prose{
+    margin:3em auto;
+    max-width:40em
+}
+.call-to-action{
+    border-width:3px;
+    border-color:#ff1a4f;
+    text-transform:uppercase;
+    padding:.7em 1.3em;
+    border-style:solid;
+    cursor:pointer;
+    font-weight:700;
+    background:#ff1a4f;
+    color:white;
+    font-size:1.2em;
+    text-decoration:none;
+    background:#6e19a0;
+    border-color:#6e19a0
+}
+.call-to-action:focus{
+    background:white;
+    color:#6e19a0
+}
+.call-to-action:hover{
+    background:white;
+    color:#6e19a0
+}
+.help{
+    color:#646464;
+    font-style:italic
+}
+.highlight{
+    color:#ff1a4f
+}
+.notice{
+    border-width:3px;
+    max-width:65ch;
+    border-color:#ff1a4f;
+    margin-right:auto;
+    padding:1em;
+    text-align:left;
+    border-style:dashed;
+    margin-left:auto;
+    background:#fff0fa;
+    color:#6e19a0
+}
+.spacious{
+    margin-top:3em;
+    margin-bottom:3em
+}
+.center{
+    text-align:center
+}
+select{
+    width:25rem;
+    max-width:100%;
+    border:2px solid #b9a1fb;
+    padding:.7em;
+    border-radius:.3em;
+    border:2px solid #b9a1fb;
+    background-color:lavender;
+    background-image:url(/img/caret-down.svg);
+    background-position:right 10px bottom 12px;
+    background-repeat:no-repeat;
+    -moz-appearance:none;
+    -webkit-appearance:none
+}
+select:focus{
+    outline:0;
+    border-color:#6e19a0
+}
+select:ms-expand{
+    display:none
+}
+.field{
+    margin:.7em 0
+}
+.flex-field{
+    display:flex
+}
+.flex-field label{
+    margin-top:1.5em;
+    flex-basis:20ch
+}
+.flex-field field{
+    margin-top:0;
+    margin-bottom:0
+}
+button,.button{
+    border-width:3px;
+    border-color:#ff1a4f;
+    text-transform:uppercase;
+    padding:.7em 1.3em;
+    border-style:solid;
+    cursor:pointer;
+    font-weight:700;
+    background:#ff1a4f;
+    color:white
+}
+button.secondary,.button.secondary{
+    border-width:3px;
+    border-color:#7f5af0;
+    text-transform:uppercase;
+    padding:.7em 1.3em;
+    border-style:solid;
+    cursor:pointer;
+    font-weight:700;
+    background:#7f5af0;
+    color:white
+}
+button.secondary:focus,.button.secondary:focus{
+    background-color:white;
+    color:#ff1a4f
+}
+button.secondary:disabled,button.secondary.disabled,.button.secondary:disabled,.button.secondary.disabled{
+    background-color:#370550;
+    border-color:#370550;
+    color:#fff0fa;
+    cursor:no-allowed
+}
+button.next,.button.next{
+    text-align:right
+}
+button:focus,.button:focus{
+    background-color:white;
+    color:#ff1a4f
+}
+button:disabled,button.disabled,.button:disabled,.button.disabled{
+    background-color:#b95a73;
+    border-color:#b95a73;
+    color:#fff0fa;
+    cursor:not-allowed
+}
+.lang-selector{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    z-index:2;
+    text-align:right;
+    background:#f5f5f5
+}
+.lang-selector *{
+    font-size:.8em
+}
+.lang-selector label{
+    margin:1em
+}
+.lang-selector select{
+    margin:.3em;
+    width:10rem
+}
+h1 a{
+    color:#ff1a4f;
+    text-decoration:none
+}
+h1 a:hover{
+    text-decoration:underline
+}
+.field-label{
+    font-weight:700;
+    color:#6e19a0
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Radical Telehealth Collective</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="/fonts.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+  </head>
+  <body data-extension-installed="2.1.4" cz-shortcut-listen="true">
+    <div class="container page-container">
+      <aside class="lang-selector">
+        <label class="field-label" for="select-language">
+          <span data-lang="en" style="display: initial;">Select a language</span>
+          <span data-lang="es" style="display: none;">Seleccione un idioma</span>
+        </label>
+        <select id="select-language">
+          <option selected="selected" value="en">English</option>
+          <option value="es">Español</option>
+        </select>
+      </aside>
+      <main class="prose">
+        <section data-lang="en" style="display: initial;">
+          <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeNUEo1oQZYtOGc4DFz8hxYMrGSVkMGEl6CT2lYlTUoRb7ZgQ/viewform?embedded=true" width="640" height="1433" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+        </section>
+        <section data-lang="es" style="display: none;">
+          <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScsDtU3mOeznmzk7sgpjLwvvczFiEUk1OyEduJSAnxwz7DHug/viewform?embedded=true" width="640" height="1040" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+        </section>
+      </main>
+    </div>
+    <script>
+    function displayLang(lang) {
+      if (!lang) return;
+      Array.from(document.querySelectorAll("[data-lang]"))
+        .forEach(function(el){
+          el.style.display = el.dataset.lang === lang ? "initial" : "none";
+        })
+    }
+    // Display the current language according to the user's preferences
+    displayLang(navigator.language.slice(0,2)||"en")
+    document.getElementById('select-language')
+      .addEventListener('change', function(e) {
+        displayLang(e.target.value)
+      })
+    </script>
+  </body>
+</html>
