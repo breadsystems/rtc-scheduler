@@ -1,1 +1,0 @@
-; This file is just here to get Heroku to recognize this as a Clojure app. See deps.edn.
