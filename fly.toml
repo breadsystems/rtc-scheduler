@@ -1,0 +1,14 @@
+# fly.toml app configuration file generated for radical-telehealth-collective-static on 2023-11-11T10:03:12-08:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "radical-telehealth-collective-static"
+primary_region = "sea"
+
+[build]
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8043
+  processes = ["app"]
