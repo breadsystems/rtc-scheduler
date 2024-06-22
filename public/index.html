@@ -24,7 +24,7 @@
         <h1>Radical Telehealth Collective</h1>
       </header>
       <main class="prose">
-        <div class="notice">
+        <div class="notice" style="display: none" data-notice-begin="2024-06-21" data-notice-end="2024-07-01">
           <h3 data-lang="en" style="display: initial">
             Thank you for visiting the RTC. We are currently on summer break. We will begin scheduling appointments again on July 1st, 2024. If you have an urgent need, please reach out to your local urgent care clinic.
           </h3>
@@ -161,6 +161,19 @@
       langSelect.addEventListener('change', function(e) {
         displayLang(e.target.value)
       });
+
+      var noticeElem  = document.querySelector('[data-notice-begin]');
+      if (noticeElem && noticeElem.dataset.noticeBegin && noticeElem.dataset.noticeEnd) {
+        var now         = new Date().valueOf();
+        var noticeBegin = new Date(noticeElem.dataset.noticeBegin).valueOf();
+        var noticeEnd   = new Date(noticeElem.dataset.noticeEnd).valueOf();
+
+        console.log(noticeBegin, now, noticeEnd);
+        console.log(noticeBegin < now, noticeEnd > now);
+        if (noticeBegin <= now && now <= noticeEnd) {
+          noticeElem.style.display = 'block';
+        }
+      }
     </script>
   </body>
 </html>
