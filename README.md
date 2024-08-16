@@ -1,8 +1,6 @@
-# RTC Care Schedule
+# RTC Website & Provider Intake
 
-Static HTML website with language selector - links to Google Forms.
-
-Deployed on Fly.io.
+Built with [Electric Clojure](https://github.com/hyperfiddle/electric)
 
 ## License
 

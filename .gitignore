@@ -1,6 +1,5 @@
 .cpcache/
 .lsp/
-env/**/config.edn
 lock
 *.repl-file
 .clj-kondo/
@@ -11,7 +10,5 @@ lock
 /resources/public/css/*.edn
 /resources/public/css/*.css
 /resources/public/css/*/
-
-/.s.PGSQL.*.lock
-/*.sql
 /db/
+.direnv
