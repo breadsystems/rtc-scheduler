@@ -3,22 +3,43 @@
     [aero.core :as aero]
     [integrant.core :as ig]
     [org.httpkit.server :as http]
-    [reitit.core :as reitit]
+    [reitit.ring :as rr]
     [ring.middleware.defaults :as ring]
 
-    [rtc.middleware :refer [wrap-keyword-headers]])
+    [rtc.admin :as admin]
+    [rtc.auth :as auth]
+    [rtc.intake :as intake]
+    )
   (:import
     [java.time LocalDateTime]))
 
-(defonce system (atom nil))
-
-(defn app [_]
-  {:body "hello, world!"
-   :status 200
+(defn not-found [_]
+  {:body "404 Not Found"
+   :status 404
    :headers
    {:content-type "text/html"}})
 
+(def router
+  (rr/router
+    [["/admin"
+      {:get {:handler #'admin/show
+             :middleware [#_auth/wrap-require-auth]}}]
+     ["/login"
+      {:get {:handler #'auth/show-login}}]
+     ["/get-care"
+      {:get {:handler #'intake/show}}]]))
+
 ;; CONFIG
+
+(defn -wrap-keyword-headers [f]
+  (fn [req]
+    (let [res (f req)]
+      (update res :headers clojure.walk/stringify-keys))))
+
+(defn -wrap-default-content-type [f]
+  (fn [req]
+    (let [res (f req)]
+      (update res :headers #(merge {:content-type "text/html"} %)))))
 
 (defmethod ig/init-key :clojure-version [_ _]
   (clojure-version))
@@ -36,8 +57,10 @@
   (let [wrap-config (as-> ring/secure-site-defaults $
                         (reduce #(assoc-in %1 (key %2) (val %2)) $ ring-defaults)
                         (assoc-in $ [:params :keywordize] true))
-        handler (-> #'app
-                    wrap-keyword-headers
+        handler (-> router
+                    (rr/ring-handler (rr/create-default-handler {:not-found not-found}))
+                    -wrap-default-content-type
+                    -wrap-keyword-headers
                     (ring/wrap-defaults wrap-config))]
     (http/run-server handler {:port port})))
 
@@ -46,6 +69,8 @@
     @prom))
 
 ;; RUNTIME
+
+(defonce system (atom nil))
 
 (defn start! [config]
   (let [config (assoc config
@@ -66,6 +91,10 @@
 (comment
 
   (restart! (-> "resources/dev.edn" aero/read-config))
+
+  (deref system)
+  ((rr/ring-handler router) {:uri "/admin"
+                             :request-method :get})
 
   ;;
 
