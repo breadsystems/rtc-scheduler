@@ -1,0 +1,14 @@
+;; shadow-cljs configuration
+{:deps true
+ :dev-http
+ {4040 "resources/debug"}
+
+ :builds
+ {;; shadow-cljs watch intake
+  :intake
+  {:target :browser
+   :output-dir "resources/debug/js"
+   :asset-path "/js"
+   :devtools {:watch-dir "resources/debug"}
+   :modules {:main ; becomes debug/js/main.js
+             {:init-fn systems.bread.alpha.tools.debug.core/init}}}}}
