@@ -7,8 +7,17 @@
  {;; shadow-cljs watch intake
   :intake
   {:target :browser
-   :output-dir "resources/debug/js"
+   :output-dir "resources/intake/js"
    :asset-path "/js"
-   :devtools {:watch-dir "resources/debug"}
-   :modules {:main ; becomes debug/js/main.js
-             {:init-fn systems.bread.alpha.tools.debug.core/init}}}}}
+   :devtools {:watch-dir "resources/intake"}
+   :modules {:main ; becomes intake/js/main.js
+             {:init-fn rtc.intake/init}}}
+
+  ;; shadow-cljs watch admin
+  :admin
+  {:target :browser
+   :output-dir "resources/admin/js"
+   :asset-path "/js"
+   :devtools {:watch-dir "resources/admin"}
+   :modules {:main ; becomes admin/js/main.js
+             {:init-fn rtc.admin/init}}}}}
