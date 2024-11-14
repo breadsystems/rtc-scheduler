@@ -1,0 +1,4 @@
+{:app/http {:port 8000
+            :router #ig/ref :app/router}
+ :app/router {:authentication #ig/ref :app/authentication}
+ :app/authentication {}}

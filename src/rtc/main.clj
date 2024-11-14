@@ -19,17 +19,21 @@
    :headers
    {:content-type "text/html"}})
 
-(def router
-  (rr/router
-    [["/admin"
-      {:get {:handler #'admin/show
-             :middleware [#_auth/wrap-require-auth]}}]
-     ["/login"
-      {:get {:handler #'auth/show-login}}]
-     ["/get-care"
-      {:get {:handler #'intake/show}}]]))
-
 ;; CONFIG
+
+(defmethod ig/init-key :app/router [_ {:keys [authentication]}]
+  (let [auth-enabled? (:enabled? authentication)]
+    (rr/router
+      [["/admin"
+        {:get {:middleware [(when auth-enabled? auth/wrap-require-auth)]}}
+        [""
+         {:get {:handler #'admin/show}}]
+        ["/providers"
+         {:get {:handler #'admin/show-providers}}]]
+       ["/login"
+        {:get {:handler #'auth/show-login}}]
+       ["/get-care"
+        {:get {:handler #'intake/show}}]])))
 
 (defn -wrap-keyword-headers [f]
   (fn [req]
@@ -41,6 +45,12 @@
     (let [res (f req)]
       (update res :headers #(merge {:content-type "text/html"} %)))))
 
+(defmethod aero/reader 'ig/ref [_ _ value]
+  (ig/ref value))
+
+(defmethod ig/init-key :app/authentication [_ auth-config]
+  (merge {:enabled? true} auth-config))
+
 (defmethod ig/init-key :clojure-version [_ _]
   (clojure-version))
 
@@ -50,7 +60,7 @@
 (defmethod ig/init-key :initial-config [_ config]
   config)
 
-(defmethod ig/init-key :http [_ {:keys [port ring-defaults]
+(defmethod ig/init-key :app/http [_ {:keys [port ring-defaults router]
                                  :or {ring-defaults {}}}]
   ;; TODO timbre
   (println "Starting HTTP server on port" port)
@@ -64,7 +74,7 @@
                     (ring/wrap-defaults wrap-config))]
     (http/run-server handler {:port port})))
 
-(defmethod ig/halt-key! :http [_ stop-server]
+(defmethod ig/halt-key! :app/http [_ stop-server]
   (when-let [prom (stop-server :timeout 100)]
     @prom))
 
@@ -91,6 +101,7 @@
 (comment
 
   (restart! (-> "resources/dev.edn" aero/read-config))
+  (stop! (-> "resources/dev.edn" aero/read-config))
 
   (deref system)
   ((rr/ring-handler router) {:uri "/admin"
