@@ -1,6 +1,5 @@
 ;; shadow-cljs configuration
-{:deps true
- :dev-http
+{:dev-http
  {4040 "resources/debug"}
 
  :builds

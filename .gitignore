@@ -12,3 +12,7 @@ lock
 /resources/public/css/*/
 /db/
 .direnv
+.shadow-cljs/
+
+.pnp.*
+.yarn
