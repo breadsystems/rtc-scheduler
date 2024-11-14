@@ -1,5 +1,8 @@
-(ns rtc.intake)
+(ns rtc.intake
+  (:require
+    [rtc.ui :as ui]))
 
 (defn show [_]
-  {:body "INTAKE."
-   :status 200})
+  (ui/Page
+    :content
+    [:p "it's a page"]))

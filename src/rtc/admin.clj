@@ -1,9 +1,15 @@
-(ns rtc.admin)
+(ns rtc.admin
+  (:require
+    [rtc.ui :as ui]))
 
 (defn show-providers [_]
   {:body "show providers"
    :status 200})
 
 (defn show [_]
-  {:body "this is the admin"
-   :status 200})
+  (ui/Page
+    :title "Admin"
+    :footer
+    [:<> [:script {:src "/js/admin.js"}]]
+    :content
+    [:p "It's the admin"]))

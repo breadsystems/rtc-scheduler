@@ -1,14 +1,17 @@
 (ns rtc.main
   (:require
     [aero.core :as aero]
+    [clojure.edn :as edn]
     [integrant.core :as ig]
     [org.httpkit.server :as http]
     [reitit.ring :as rr]
     [ring.middleware.defaults :as ring]
 
+    [rtc.actions :as actions]
     [rtc.admin :as admin]
     [rtc.auth :as auth]
     [rtc.intake :as intake]
+    [rtc.ui :as ui]
     )
   (:import
     [java.time LocalDateTime]))
@@ -71,10 +74,31 @@
                     (rr/ring-handler (rr/create-default-handler {:not-found not-found}))
                     -wrap-default-content-type
                     -wrap-keyword-headers
+                    ui/wrap-rum-html
                     (ring/wrap-defaults wrap-config))]
     (http/run-server handler {:port port})))
 
 (defmethod ig/halt-key! :app/http [_ stop-server]
+  (when-let [prom (stop-server :timeout 100)]
+    @prom))
+
+(defn websocket-handler [{:keys [authentication]}]
+  (fn [req]
+    (if (or (false? (:enabled? authentication)) (get-in req [:session :user]))
+      (http/with-channel req chan
+        (http/on-close chan (fn [status]
+                              (println "channel closed:" status)))
+        (http/on-receive chan (fn [data]
+                                (let [action (edn/read-string data)]
+                                  (actions/act! action chan)))))
+      {:status 401
+       :body "Not authorized"})))
+
+(defmethod ig/init-key :app/websocket [_ {:keys [port authentication]}]
+  (http/run-server (websocket-handler {:authentication authentication})
+                   {:port port}))
+
+(defmethod ig/halt-key! :app/websocket [_ stop-server]
   (when-let [prom (stop-server :timeout 100)]
     @prom))
 
