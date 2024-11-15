@@ -44,6 +44,10 @@
        ["/get-care"
         {:get {:handler #'intake/show}}]])))
 
+(defn -wrap-now [f]
+  (fn [req]
+    (f (assoc req :now (LocalDateTime/now)))))
+
 (defn -wrap-keyword-headers [f]
   (fn [req]
     (let [res (f req)]
@@ -80,6 +84,7 @@
                     (rr/ring-handler (rr/create-default-handler {:not-found not-found}))
                     -wrap-default-content-type
                     -wrap-keyword-headers
+                    -wrap-now
                     ui/wrap-rum-html
                     (ring/wrap-defaults wrap-config))]
     (http/run-server handler {:port port})))
