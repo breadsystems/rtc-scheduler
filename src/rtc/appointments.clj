@@ -118,24 +118,25 @@
          :info/days-ago (days-between (Date->LocalDateTime updated-at) now)))
 
 (defn AppointmentCard [{:as appt
-                        :appt/keys [status]
+                        :appt/keys [status state email phone]
                         :info/keys [days-ago]
                         :or {status ""}}]
   [:article.appointment-card {:data-status (name status)}
    [:.status-line.flex
-    [:.appt-status
-     (status->label (:appt/status appt))]
+    [:.appt-status (status->label status)]
     [:.spacer]
     [:.days-ago (readable-days-ago days-ago)]]
    [:h3 (or (:appt/alias appt))]
-   [:div
-    [:dl {:style {:display :flex}}
-     [:dt "State"]
-     [:dd (state->label (:appt/state appt))]
-     [:dt "Email"]
-     [:dd (:appt/email appt)]
-     [:dt "Phone"]
-     [:dd (:appt/phone appt)]]]])
+   [:div.appt-summary
+    [:div
+     [:.field-label "State"]
+     [:.field-value (state->label state)]]
+    [:div
+     [:.field-label "Email"]
+     [:.field-value email]]
+    [:div
+     [:.field-label "Phone"]
+     [:.field-value phone]]]])
 
 (defn show-all [{:keys [params filters now] :as req}]
   (let [{:keys [status state]} filters

@@ -154,6 +154,19 @@ button {
   content: "🕗";
   padding-right: 0.5ch;
 }
+.appt-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.appt-summary > * {
+  display: flex;
+  flex-direction: column
+}
+.field-label {
+  font-weight: 800;
+  font-size: 0.8em;
+  opacity: 0.7;
+}
 
 
 
