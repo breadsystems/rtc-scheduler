@@ -7,6 +7,14 @@
     (let [res (f req)]
       (update res :body rum/render-static-markup))))
 
+(defn Option [labels selected-value value]
+  [:option {:value value
+            :label (labels value)
+            :selected (= selected-value value)}])
+
+(defn Filter [label value]
+  [:span label ": " value])
+
 (defn Page [& {:keys [title content status head footer]
                :or {status 200}}]
   {:body
@@ -20,6 +28,5 @@
      [:title title " | Rad Telehealth Collective"]
      head]
     [:body
-     [:main
-      content]
+     content
      footer]]})

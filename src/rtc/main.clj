@@ -9,10 +9,10 @@
 
     [rtc.actions :as actions]
     [rtc.admin :as admin]
+    [rtc.appointments :as appt]
     [rtc.auth :as auth]
     [rtc.intake :as intake]
-    [rtc.ui :as ui]
-    )
+    [rtc.ui :as ui])
   (:import
     [java.time LocalDateTime]))
 
@@ -31,8 +31,14 @@
         {:get {:middleware [(when auth-enabled? auth/wrap-require-auth)]}}
         [""
          {:get {:handler #'admin/show}}]
+        ["/appointments"
+         {:get {:handler #'appt/show-all
+                :middleware [(admin/wrap-filter-params {:query appt/filter-coercions})]}}]
+        ["/appointments/{:appt/uuid}"
+         {:get {:handler #'admin/show}}]
         ["/providers"
-         {:get {:handler #'admin/show-providers}}]]
+         {:get {:handler #'admin/show-providers
+                :middleware [#_(admin/wrap-filter-params {:query provider/filter-params})]}}]]
        ["/login"
         {:get {:handler #'auth/show-login}}]
        ["/get-care"

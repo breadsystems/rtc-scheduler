@@ -5,11 +5,11 @@
         :proxy-url "http://localhost:4040"}}
 
  :builds
- {;; npx shadow-cljs watch app
-  :app
+ {;; npx shadow-cljs watch admin
+  :admin
   {:target :browser
-   :output-dir "resources/public/js"
+   :output-dir "resources/public/admin/js"
    :asset-path "/js"
-   :devtools {:watch-dir "resources/public"}
+   :devtools {:watch-dir "resources/public/admin"}
    :modules {:admin ; becomes public/js/admin.js
              {:init-fn rtc.admin/init}}}}}
