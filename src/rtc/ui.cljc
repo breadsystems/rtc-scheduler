@@ -12,8 +12,18 @@
             :label (labels value)
             :selected (= selected-value value)}])
 
-(defn Filter [label value]
-  [:span label ": " value])
+(defn- filter-pair [[k v]]
+  (str (name k) "=" (when v (name v))))
+
+(defn filters->query-string [filters]
+  (str "?" (clojure.string/join "&" (map filter-pair filters))))
+
+(comment
+  (filters->query-string {:a :b :c :d}))
+
+(defn FilterChip [label value uri]
+  [:a {:href uri}
+   label ": " value])
 
 (defn Page [& {:keys [title content status head footer]
                :or {status 200}}]

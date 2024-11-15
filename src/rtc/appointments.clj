@@ -103,9 +103,11 @@
           "Filter appointments"]]
         [:div
          (when status
-           (ui/Filter "Status" (name status)))
+           (ui/FilterChip "Status" (status->label status)
+                          (ui/filters->query-string (dissoc filters :status))))
          (when state
-           (ui/Filter "State" (name state)))
+           (ui/FilterChip "State" (state->label state)
+                          (ui/filters->query-string (dissoc filters :state))))
          (when any-filters?
            [:span
             [:a {:href "/admin/appointments"} "Clear filters"]])]
