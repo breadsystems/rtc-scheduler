@@ -1,0 +1,193 @@
+:root {
+  /* https://css-tricks.com/snippets/css/system-font-stack/ */
+  --system-sans: system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+
+  --col-hotpink: rgb(255, 26, 79);
+  --col-pink: rgb(239, 189, 200);
+  --col-lightpink: rgb(248, 221, 226);
+  --col-teal: rgb(40, 103, 97);
+  --col-lightgrey: rgb(200, 206, 206);
+  --col-link-hover: rgb(255, 26, 79);
+
+  --col-alert-bg: var(--col-lightpink);
+  --col-alert-border: var(--col-pink);
+
+  --border-form-elem: 2px solid var(--col-lightgrey);
+  --spacing-form-elem: 0.25rem 0.5rem;
+}
+
+html[data-color-mode=high-contrast] {
+  --col-alert-bg: rgb(255, 227, 227);
+  --col-alert-border: rgb(218, 43, 92);
+}
+
+
+
+/*
+ * LAYOUT
+ */
+
+html {
+  font-family: var(--system-sans);
+  font-size: 18px;
+}
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  margin: 0 auto;
+  max-width: 90ch;
+  width: 96%;
+}
+
+body > nav {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+
+  padding: 0.5rem;
+  border-bottom: 2px solid pink;
+}
+body > nav > ul {
+  display: flex;
+  gap: 1rem;
+}
+nav h1, nav ul {
+  margin: 0;
+  padding: 0;
+}
+nav ul {
+  list-style: none;
+}
+
+
+
+/*
+ * COMPONENTS
+ */
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+fieldset {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+
+  border: 2px solid var(--col-lightgrey);
+  margin: 0;
+}
+fieldset > legend {
+  font-style: italic;
+  padding: 0 0.5rem;
+  margin-bottom: 0.5rem;
+}
+fieldset > * {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+fieldset label {
+  font-weight: 800;
+}
+
+button, select {
+  padding: var(--spacing-form-elem);
+  border: var(--border-form-elem);
+  font-size: 1em;
+  cursor: pointer;
+}
+button {
+  font-weight: 800;
+}
+
+.applied-filters {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+.applied-filters a {
+  font-weight: 400;
+  text-decoration: none;
+  padding: var(--spacing-form-elem);
+  --col-link-hover: var(--col-teal);
+}
+.applied-filters a:not(:last-child) {
+  border: var(--border-form-elem);
+  cursor: crosshair;
+}
+.applied-filters a:not(:last-child):hover {
+  text-decoration: line-through;
+}
+.applied-filters a:not(:last-child):after {
+  content: "×";
+  padding-left: 0.5rem;
+}
+.applied-filters a:not(:last-child):hover:after {
+  /* FIXME */
+  text-decoration: none;
+}
+
+.appointment-card {
+  padding: 0.5rem;
+
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--col-lightgrey);
+}
+.appointment-card[data-status=needs-attention] {
+  background-color: var(--col-alert-bg);
+  border-color: var(--col-alert-border);
+}
+.appointment-card .status-line {
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+.appt-status {
+  font-weight: 800;
+}
+.days-ago:before {
+  content: "🕗";
+  padding-right: 0.5ch;
+}
+
+
+
+/*
+ * TYPOGRAPHY
+ */
+
+nav h1 {
+  color: var(--col-hotpink);
+}
+a {
+  font-weight: 800;
+  color: var(--col-teal);
+  text-decoration: currentcolor underline 2px;
+  cursor: pointer;
+}
+a:hover {
+  color: var(--col-link-hover);
+  text-decoration-style: dotted;
+}
+
+
+
+/*
+ * UTILITY
+ */
+
+.flex {
+  display: flex;
+  gap: 1em;
+}
+.col {
+  flex-direction: column;
+}
+.flex > .spacer {
+  flex-grow: 1;
+}

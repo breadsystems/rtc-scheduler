@@ -21,10 +21,6 @@
 (comment
   (filters->query-string {:a :b :c :d}))
 
-(defn FilterChip [label value uri]
-  [:a {:href uri}
-   label ": " value])
-
 (defn Page [& {:keys [title content status head footer]
                :or {status 200}}]
   {:body
@@ -32,10 +28,18 @@
     [:head
      [:meta {:charset :utf-8}]
      [:meta {:name :viewport :content "width=device-width, initial-scale=1"}]
+     [:title title " | Rad Telehealth Collective"]
      [:link {:rel :stylesheet
              :href "/admin/admin.css"}]
-     [:title title " | Rad Telehealth Collective"]
      head]
     [:body
-     content
-     footer]]})
+     [:nav
+      [:h1 "RTC"]
+      [:ul
+       [:li [:a {:href "/admin/appointments"} "Appointments"]]
+       [:li [:a {:href "/admin/schedulers"} "Schedulers"]]
+       [:li [:a {:href "/admin/providers"} "Providers"]]
+       [:li [:a {:href "/account"} "My account"]]]]
+     [:.container
+      content
+      footer]]]})
