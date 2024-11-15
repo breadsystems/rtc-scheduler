@@ -138,10 +138,18 @@
      [:.field-label "Phone"]
      [:.field-value phone]]]])
 
+(defn get-appointments [db {:keys [status state]}]
+  (filter (fn [appt]
+            (and (or (nil? status) (= status (:appt/status appt)))
+                 (or (nil? state) (= state (:appt/state appt)))))
+          db))
+
 (defn show-all [{:keys [params filters now] :as req}]
-  (let [{:keys [status state]} filters
+  (let [db $appointments ;; TODO
+        {:keys [status state]} filters
         any-filters? (or status state)
-        appts (map (partial annotate {:now now}) $appointments)]
+        results (get-appointments db filters)
+        appts (map (partial annotate {:now now}) results)]
     (ui/Page
       :title "Appointments"
       :footer
