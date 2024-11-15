@@ -10,8 +10,9 @@
   --col-paleblue: rgb(221, 248, 242);
   --col-palepurple: rgb(225, 214, 240);
   --col-purple: rgb(201, 115, 250);
-  --col-lavender: rgb(194, 188, 213);
+  --col-lavender: rgb(153, 141, 188);
   --col-lightgrey: rgb(200, 206, 206);
+  --col-palegrey: rgb(221, 221, 221);
 
   --col-link: var(--col-teal);
   --col-link-hover: rgb(255, 26, 79);
@@ -160,6 +161,11 @@ button {
 .appointment-card[data-status=waiting] {
   background-color: var(--col-emphasis-bg);
   border-color: var(--col-emphasis-border);
+}
+.appointment-card[data-status=archived] {
+  background-color: var(--col-palegrey);
+  border-color: var(--col-emphasis-border);
+  border-style: dashed;
 }
 .appointment-card .status-line {
   font-size: 0.8em;
