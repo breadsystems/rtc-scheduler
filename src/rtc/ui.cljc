@@ -32,9 +32,8 @@
     [:head
      [:meta {:charset :utf-8}]
      [:meta {:name :viewport :content "width=device-width, initial-scale=1"}]
-     #_ ;; TODO
      [:link {:rel :stylesheet
-             :href "/css/style.css"}]
+             :href "/admin/admin.css"}]
      [:title title " | Rad Telehealth Collective"]
      head]
     [:body

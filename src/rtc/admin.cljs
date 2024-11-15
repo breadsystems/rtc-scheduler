@@ -9,6 +9,7 @@
       (.send ws (pr-str action)))))
 
 (defn ^:dev/after-load start []
+  (prn 'hiiii?)
   (reset! !ws (doto (js/WebSocket. "ws://localhost:4042/_ws")
                 (.addEventListener "open" #(do
                                              (js/console.log "open!")

@@ -96,7 +96,7 @@
     (ui/Page
       :title "Appointments"
       :footer
-      [:<> [:script {:src "/js/admin/js"}]]
+      [:<> [:script {:src "/admin/admin.js"}]]
       :content
       [:main
        [:h1 "Appointments"]

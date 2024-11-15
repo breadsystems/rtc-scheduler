@@ -8,8 +8,9 @@
  {;; npx shadow-cljs watch admin
   :admin
   {:target :browser
-   :output-dir "resources/public/admin/js"
+   :output-dir "resources/public/admin"
    :asset-path "/js"
-   :devtools {:watch-dir "resources/public/admin"}
-   :modules {:admin ; becomes public/js/admin.js
+   :devtools {:watch-dir "resources/public/admin"
+              :watch-path "/admin"}
+   :modules {:admin ; becomes public/admin/js/admin.js
              {:init-fn rtc.admin/init}}}}}
