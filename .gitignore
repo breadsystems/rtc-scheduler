@@ -5,11 +5,13 @@ lock
 .clj-kondo/
 .calva/
 /target/
-/resources/public/*/js/
+/resources/public/*/*.js
+/resources/public/*/manifest.edn
 /resources/public/test/
 /resources/public/css/*.edn
 /resources/public/css/*.css
 /resources/public/css/*/
+cljs-runtime/
 /db/
 .direnv
 .shadow-cljs/
