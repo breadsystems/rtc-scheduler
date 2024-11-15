@@ -2,23 +2,34 @@
   /* https://css-tricks.com/snippets/css/system-font-stack/ */
   --system-sans: system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
+  --col-inky: rgb(21, 3, 37);
   --col-hotpink: rgb(255, 26, 79);
   --col-pink: rgb(239, 189, 200);
   --col-lightpink: rgb(248, 221, 226);
   --col-teal: rgb(40, 103, 97);
+  --col-paleblue: rgb(221, 248, 242);
+  --col-palepurple: rgb(225, 214, 240);
+  --col-purple: rgb(201, 115, 250);
+  --col-lavender: rgb(194, 188, 213);
   --col-lightgrey: rgb(200, 206, 206);
-  --col-link-hover: rgb(255, 26, 79);
 
-  --col-alert-bg: var(--col-lightpink);
-  --col-alert-border: var(--col-pink);
+  --col-link: var(--col-teal);
+  --col-link-hover: rgb(255, 26, 79);
+  --col-alert-bg: var(--col-palepurple);
+  --col-alert-border: var(--col-purple);
+  --col-emphasis-bg: var(--col-paleblue);
+  --col-emphasis-border: var(--col-lavender);
 
   --border-form-elem: 2px solid var(--col-lightgrey);
   --spacing-form-elem: 0.25rem 0.5rem;
 }
 
-html[data-color-mode=high-contrast] {
+[data-color-mode=high-contrast] {
+  --col-link: rgb(41, 0, 76);
   --col-alert-bg: rgb(255, 227, 227);
   --col-alert-border: rgb(218, 43, 92);
+  --col-emphasis-bg: rgb(216, 245, 238);
+  --col-emphasis-border: rgb(12, 3, 39);
 }
 
 
@@ -34,6 +45,9 @@ html {
 body {
   margin: 0;
   padding: 0;
+}
+* {
+  color: var(--col-inky);
 }
 
 .container {
@@ -143,6 +157,10 @@ button {
   background-color: var(--col-alert-bg);
   border-color: var(--col-alert-border);
 }
+.appointment-card[data-status=waiting] {
+  background-color: var(--col-emphasis-bg);
+  border-color: var(--col-emphasis-border);
+}
 .appointment-card .status-line {
   font-size: 0.8em;
   opacity: 0.7;
@@ -179,7 +197,7 @@ nav h1 {
 }
 a {
   font-weight: 800;
-  color: var(--col-teal);
+  color: var(--col-link);
   text-decoration: currentcolor underline 2px;
   cursor: pointer;
 }
