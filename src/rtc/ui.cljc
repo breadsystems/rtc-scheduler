@@ -24,7 +24,7 @@
 (defn Page [& {:keys [title content status head footer]
                :or {status 200}}]
   {:body
-   [:html
+   [:html #_{:data-color-mode :high-contrast}
     [:head
      [:meta {:charset :utf-8}]
      [:meta {:name :viewport :content "width=device-width, initial-scale=1"}]
