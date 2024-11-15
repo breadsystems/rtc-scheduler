@@ -143,7 +143,7 @@
 (def status->label
   {:needs-attention "Needs attention"
    :waiting "Waiting"
-   :confirmed "Confirmed"
+   :scheduled "Scheduled"
    :archived "Archived"})
 
 (def state->label
@@ -212,7 +212,7 @@
            [:option {:value "" :label "Any status"}]
            (map (partial ui/Option status->label status) [:needs-attention
                                                           :waiting
-                                                          :confirmed
+                                                          :scheduled
                                                           :archived])]]
          [:span
           [:label {:for "appt-state"} "State"]
