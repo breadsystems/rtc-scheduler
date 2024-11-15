@@ -5,7 +5,7 @@ lock
 .clj-kondo/
 .calva/
 /target/
-/resources/public/js/
+/resources/public/*/js/
 /resources/public/test/
 /resources/public/css/*.edn
 /resources/public/css/*.css
