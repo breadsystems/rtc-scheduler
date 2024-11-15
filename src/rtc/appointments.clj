@@ -135,8 +135,7 @@
      [:dt "Email"]
      [:dd (:appt/email appt)]
      [:dt "Phone"]
-     [:dd (:appt/phone appt)]]]
-   [:pre (pr-str (:info/days-ago appt))]])
+     [:dd (:appt/phone appt)]]]])
 
 (defn show-all [{:keys [params filters now] :as req}]
   (let [{:keys [status state]} filters
@@ -180,8 +179,7 @@
            [:span
             [:a {:href "/admin/appointments"} "Clear filters"]])]]
        [:.flex.col
-        (map AppointmentCard appts)]
-       [:pre [:code (pr-str filters)]]])))
+        (map AppointmentCard appts)]])))
 
 (defn show [_]
   (ui/Page
