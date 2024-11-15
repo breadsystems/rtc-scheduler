@@ -182,12 +182,13 @@
      [:.field-value phone]]]])
 
 (defn get-appointments [db {:keys [status state]}]
-  (filter (fn [appt]
-            (and (or (and (nil? status)
-                          (not= :archived (:appt/status appt)))
-                     (= status (:appt/status appt)))
-                 (or (nil? state) (= state (:appt/state appt)))))
-          db))
+  (->> db
+       (filter (fn [appt]
+                 (and (or (and (nil? status)
+                               (not= :archived (:appt/status appt)))
+                          (= status (:appt/status appt)))
+                      (or (nil? state) (= state (:appt/state appt))))))
+       (sort-by :appt/created-at)))
 
 (defn show-all [{:keys [params filters now] :as req}]
   (let [db $appointments ;; TODO
