@@ -95,6 +95,49 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Need to schedule live captioner"}]}
+   {:appt/datetime #inst "2024-11-15T17:00:00-07:00"
+    :appt/created-at #inst "2024-11-12T09:06:00-07:00"
+    :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
+    :appt/name "Bobby Seale"
+    :appt/alias "D."
+    :appt/pronouns "he/him"
+    :appt/email "bobby@panthers.social"
+    :appt/phone "+17245556859"
+    :appt/state :WA
+    :appt/status :archived
+    :appt/text-ok? true
+    :appt/preferred-comm :text
+    :appt/provider {:provider/name "Ruha Benjamin"
+                    :provider/title "MD, PDO"
+                    :provider/specialty "MD, PDO"
+                    :provider/pronouns "she/her"
+                    :provider/email "ruha@princeton.edu"
+                    :provider/phone "+12535559876"
+                    :provider/licensure #{{:license/state "MD"}}}
+    :appt/reason "HRT"
+    :appt/access-needs [{:need/type :need.type/captioning
+                         :need/met? false}]
+    :appt/notes [{:note/created-by {:user/name "Danielle"
+                                    :user/pronouns "they/them"}
+                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
+                  :note/content "Need to schedule live captioner"}]}
+   {:appt/created-at #inst "2024-11-10T08:02:00-07:00"
+    :appt/updated-at #inst "2024-11-11T05:42:00-07:00"
+    :appt/alias "E."
+    :appt/pronouns "they/them"
+    :appt/email "c@example.com"
+    :appt/phone "+17245556859"
+    :appt/state :WA
+    :appt/status :archived
+    :appt/text-ok? true
+    :appt/preferred-comm :text
+    :appt/reason "HRT"
+    :appt/access-needs [{:need/type :need.type/captioning
+                         :need/met? false}]
+    :appt/notes [{:note/created-by {:user/name "Danielle"
+                                    :user/pronouns "they/them"}
+                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
+                  :note/content "Need to schedule live captioner"}]}
    ])
 
 (def status->label
@@ -140,7 +183,9 @@
 
 (defn get-appointments [db {:keys [status state]}]
   (filter (fn [appt]
-            (and (or (nil? status) (= status (:appt/status appt)))
+            (and (or (and (nil? status)
+                          (not= :archived (:appt/status appt)))
+                     (= status (:appt/status appt)))
                  (or (nil? state) (= state (:appt/state appt)))))
           db))
 
