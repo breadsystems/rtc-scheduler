@@ -233,6 +233,8 @@
            [:span
             [:a {:href "/admin/appointments"} "Clear filters"]])]]
        [:.flex.col
+        (when (zero? (count appts))
+          [:p "No appointments found."])
         (map AppointmentCard appts)]])))
 
 (defn show [_]
