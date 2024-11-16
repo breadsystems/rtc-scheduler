@@ -177,10 +177,6 @@ button {
 .appt-access-needs.unmet {
   font-weight: 800;
 }
-.days-ago:before {
-  content: "🕗";
-  padding-right: 0.5ch;
-}
 .appt-summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

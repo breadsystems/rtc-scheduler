@@ -47,10 +47,7 @@
     :appt/reason "HRT"
     :appt/access-needs [{:need/type :need.type/captioning
                          :need/met? false}]
-    :appt/notes [{:note/created-by {:user/name "Danielle"
-                                    :user/pronouns "they/them"}
-                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
-                  :note/content "Reached out today"}]}
+    :appt/notes []}
    {:appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
     :appt/name "Bobby Seale"
@@ -92,7 +89,8 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Need to schedule live captioner"}]}
-   {:appt/datetime #inst "2024-11-15T17:00:00-07:00"
+   {:appt/scheduled-for #inst "2024-11-19T17:00:00-07:00"
+    :appt/scheduled-at #inst "2024-11-13T03:46:00-07:00"
     :appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
     :appt/name "Someone"
@@ -117,8 +115,13 @@
     :appt/notes [{:note/created-by {:user/name "Danielle"
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
+                  :note/content "Doing stuff..."}
+                 {:note/created-by {:user/name "Danielle"
+                                    :user/pronouns "they/them"}
+                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "All set!"}]}
-   {:appt/datetime #inst "2024-11-15T17:00:00-07:00"
+   {:appt/scheduled-for #inst "2024-11-15T17:00:00-07:00"
+    :appt/scheduled-at #inst "2024-11-13T03:46:00-07:00"
     :appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
     :appt/name "Bobby Seale"
@@ -172,42 +175,61 @@
   {:CA "California"
    :WA "Washington"})
 
-(defn readable-days-ago [n]
+(defn in-days [n]
   (cond
     (> n 1) (str n " days ago")
     (= n 1) "Yesterday"
-    :else "Today"))
+    (= n 0) "Today"
+    (= n -1) "Tomorrow"
+    (< n 0) (str (abs n) " days from now")))
 
 (defn access-needs-met? [{:appt/keys [access-needs]}]
   (reduce #(if (:need/met? %2) %1 (reduced false)) true access-needs))
 
-(defn annotate [{:keys [now]} {:as appt :appt/keys [updated-at]}]
+(defn annotate [{:keys [now]} {:as appt :appt/keys [updated-at
+                                                    created-at
+                                                    scheduled-for
+                                                    notes]}]
   (assoc appt
-         :info/days-ago (days-between (Date->LocalDateTime updated-at) now)))
+         :info/updated-days-ago (days-between (Date->LocalDateTime updated-at) now)
+         :info/created-days-ago (days-between (Date->LocalDateTime created-at) now)
+         :info/scheduled-for-days (when scheduled-for
+                                    (days-between (Date->LocalDateTime scheduled-for) now))
+         :info/note-count (case (count notes)
+                            0 "No notes"
+                            1 "1 note"
+                            (str (count notes) " notes"))
+         :info/last-note-from (if (seq notes)
+                                (get-in (last notes) [:note/created-by :user/name])
+                                "No notes")
+         ))
 
 (defn AppointmentCard [{:as appt
                         :appt/keys [status state email phone]
-                        :info/keys [days-ago]
+                        :info/keys [updated-days-ago
+                                    created-days-ago
+                                    scheduled-for-days
+                                    last-note-from]
                         :or {status ""}}]
   [:article.appointment-card {:data-status (name status)}
    [:.status-line.flex
     [:.appt-status (status->label status)]
+    (when scheduled-for-days
+      [:.appt-scheduled-for "📅 " (in-days scheduled-for-days)])
     (if (access-needs-met? appt)
       [:.appt-access-needs.met "✓ Access needs met"]
       [:.appt-access-needs.unmet "♿ Unmet access needs"])
     [:.spacer]
-    [:.days-ago (readable-days-ago days-ago)]]
-   [:h3 (or (:appt/alias appt))]
+    [:.days-ago "🕗 last updated " (in-days updated-days-ago)]]
+   [:h3 (:appt/alias appt) " in " (state->label state)]
    [:div.appt-summary
     [:div
-     [:.field-label "State"]
-     [:.field-value (state->label state)]]
+     [:.field-label "First requested"]
+     [:.field-value (in-days created-days-ago)]]
     [:div
-     [:.field-label "Email"]
-     [:.field-value email]]
-    [:div
-     [:.field-label "Phone"]
-     [:.field-value phone]]]])
+     [:.field-label "Last note from"]
+     [:.field-value last-note-from]]
+    ]])
 
 (defn get-appointments [db {:keys [status state]}]
   (->> db
