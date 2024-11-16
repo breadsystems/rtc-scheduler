@@ -26,8 +26,7 @@
   [])
 
 (def $appointments
-  [{:appt/datetime #inst "2024-11-15T17:00:00-07:00"
-    :appt/created-at #inst "2024-11-12T09:06:00-07:00"
+  [{:appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
     :appt/name "Angela Davis"
     :appt/alias "A."
@@ -52,8 +51,7 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Reached out today"}]}
-   {:appt/datetime #inst "2024-11-15T17:00:00-07:00"
-    :appt/created-at #inst "2024-11-12T09:06:00-07:00"
+   {:appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
     :appt/name "Bobby Seale"
     :appt/alias "B."
@@ -73,7 +71,7 @@
                     :provider/licensure #{{:license/state "MD"}}}
     :appt/reason "HRT"
     :appt/access-needs [{:need/type :need.type/captioning
-                         :need/met? false}]
+                         :need/met? true}]
     :appt/notes [{:note/created-by {:user/name "Danielle"
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
@@ -89,12 +87,37 @@
     :appt/text-ok? true
     :appt/preferred-comm :text
     :appt/reason "HRT"
-    :appt/access-needs [{:need/type :need.type/captioning
-                         :need/met? false}]
+    :appt/access-needs []
     :appt/notes [{:note/created-by {:user/name "Danielle"
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Need to schedule live captioner"}]}
+   {:appt/datetime #inst "2024-11-15T17:00:00-07:00"
+    :appt/created-at #inst "2024-11-12T09:06:00-07:00"
+    :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
+    :appt/name "Someone"
+    :appt/alias "G."
+    :appt/pronouns "they/them"
+    :appt/email "someone@example.vom"
+    :appt/phone "+17145555896"
+    :appt/state :WA
+    :appt/status :scheduled
+    :appt/text-ok? true
+    :appt/preferred-comm :text
+    :appt/provider {:provider/name "Ruha Benjamin"
+                    :provider/title "MD, PDO"
+                    :provider/specialty "MD, PDO"
+                    :provider/pronouns "she/her"
+                    :provider/email "ruha@princeton.edu"
+                    :provider/phone "+12535559876"
+                    :provider/licensure #{{:license/state "MD"}}}
+    :appt/reason "HRT"
+    :appt/access-needs [{:need/type :need.type/captioning
+                         :need/met? true}]
+    :appt/notes [{:note/created-by {:user/name "Danielle"
+                                    :user/pronouns "they/them"}
+                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
+                  :note/content "All set!"}]}
    {:appt/datetime #inst "2024-11-15T17:00:00-07:00"
     :appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
@@ -116,7 +139,7 @@
                     :provider/licensure #{{:license/state "MD"}}}
     :appt/reason "HRT"
     :appt/access-needs [{:need/type :need.type/captioning
-                         :need/met? false}]
+                         :need/met? true}]
     :appt/notes [{:note/created-by {:user/name "Danielle"
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
@@ -132,8 +155,7 @@
     :appt/text-ok? true
     :appt/preferred-comm :text
     :appt/reason "HRT"
-    :appt/access-needs [{:need/type :need.type/captioning
-                         :need/met? false}]
+    :appt/access-needs []
     :appt/notes [{:note/created-by {:user/name "Danielle"
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
@@ -156,6 +178,9 @@
     (= n 1) "Yesterday"
     :else "Today"))
 
+(defn access-needs-met? [{:appt/keys [access-needs]}]
+  (reduce #(if (:need/met? %2) %1 (reduced false)) true access-needs))
+
 (defn annotate [{:keys [now]} {:as appt :appt/keys [updated-at]}]
   (assoc appt
          :info/days-ago (days-between (Date->LocalDateTime updated-at) now)))
@@ -167,6 +192,9 @@
   [:article.appointment-card {:data-status (name status)}
    [:.status-line.flex
     [:.appt-status (status->label status)]
+    (if (access-needs-met? appt)
+      [:.appt-access-needs.met "✓ Access needs met"]
+      [:.appt-access-needs.unmet "♿ Unmet access needs"])
     [:.spacer]
     [:.days-ago (readable-days-ago days-ago)]]
    [:h3 (or (:appt/alias appt))]

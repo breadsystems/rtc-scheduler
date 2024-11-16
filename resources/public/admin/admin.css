@@ -174,6 +174,9 @@ button {
 .appt-status {
   font-weight: 800;
 }
+.appt-access-needs.unmet {
+  font-weight: 800;
+}
 .days-ago:before {
   content: "🕗";
   padding-right: 0.5ch;
