@@ -2,7 +2,7 @@
   /* https://css-tricks.com/snippets/css/system-font-stack/ */
   --system-sans: system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
-  --col-inky: rgb(21, 3, 37);
+  --col-inky: rgb(33, 0, 62);
   --col-hotpink: rgb(255, 26, 79);
   --col-pink: rgb(239, 189, 200);
   --col-lightpink: rgb(248, 221, 226);
