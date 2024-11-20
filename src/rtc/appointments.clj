@@ -211,7 +211,7 @@
                                     scheduled-for-days
                                     last-note-from]
                         :or {status ""}}]
-  [:article.appointment-card {:data-status (name status)}
+  [:article.card.appointment {:data-status (name status)}
    [:.status-line.flex
     [:.appt-status (status->label status)]
     (when scheduled-for-days

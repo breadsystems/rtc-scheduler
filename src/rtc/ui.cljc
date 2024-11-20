@@ -34,10 +34,11 @@
      head]
     [:body
      [:nav
-      [:h1 "RTC"]
+      [:a {:href "/admin"} [:h1 "RTC"]]
       [:ul
        [:li [:a {:href "/admin/appointments"} "Appointments"]]
        [:li [:a {:href "/admin/schedulers"} "Schedulers"]]
+       #_
        [:li [:a {:href "/admin/providers"} "Providers"]]
        [:li [:a {:href "/account"} "My account"]]]]
      [:.container

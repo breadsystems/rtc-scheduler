@@ -3,7 +3,7 @@
   --system-sans: system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
   --col-inky: rgb(33, 0, 62);
-  --col-hotpink: rgb(255, 26, 79);
+  --col-hotpink: rgb(230, 8, 60);
   --col-pink: rgb(239, 189, 200);
   --col-lightpink: rgb(248, 221, 226);
   --col-teal: rgb(40, 103, 97);
@@ -11,6 +11,7 @@
   --col-palepurple: rgb(225, 214, 240);
   --col-purple: rgb(201, 115, 250);
   --col-lavender: rgb(153, 141, 188);
+  --col-grey: rgb(114, 92, 121);
   --col-lightgrey: rgb(200, 206, 206);
   --col-palegrey: rgb(221, 221, 221);
 
@@ -51,6 +52,17 @@ body {
   color: var(--col-inky);
 }
 
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  padding-top: 1em;
+}
+
+form {
+  margin: 0;
+}
+
 .container {
   margin: 0 auto;
   max-width: 90ch;
@@ -59,7 +71,7 @@ body {
 
 body > nav {
   display: flex;
-  gap: 2rem;
+  gap: 2ch;
   align-items: center;
 
   padding: 0.5rem;
@@ -67,7 +79,7 @@ body > nav {
 }
 body > nav > ul {
   display: flex;
-  gap: 1rem;
+  gap: 2ch;
 }
 nav h1, nav ul {
   margin: 0;
@@ -147,27 +159,42 @@ button {
   text-decoration: none;
 }
 
-.appointment-card {
+.card {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1rem;
   padding: 0.5rem;
 
   border-width: 2px;
   border-style: solid;
   border-color: var(--col-lightgrey);
 }
-.appointment-card[data-status=needs-attention] {
+.card h1 {
+  margin: 0;
+  font-size: 1em;
+  color: var(--col-hotpink);
+}
+
+.card.appointment {
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--col-lightgrey);
+}
+.card.appointment[data-status=needs-attention] {
   background-color: var(--col-alert-bg);
   border-color: var(--col-alert-border);
 }
-.appointment-card[data-status=waiting] {
+.card.appointment[data-status=waiting] {
   background-color: var(--col-emphasis-bg);
   border-color: var(--col-emphasis-border);
 }
-.appointment-card[data-status=archived] {
+.card.appointment[data-status=archived] {
   background-color: var(--col-palegrey);
   border-color: var(--col-emphasis-border);
   border-style: dashed;
 }
-.appointment-card .status-line {
+.card.appointment .status-line {
   font-size: 0.8em;
   opacity: 0.7;
 }
@@ -197,6 +224,9 @@ button {
  * TYPOGRAPHY
  */
 
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
 nav h1 {
   color: var(--col-hotpink);
 }
@@ -209,6 +239,10 @@ a {
 a:hover {
   color: var(--col-link-hover);
   text-decoration-style: dotted;
+}
+.instruct {
+  color: var(--col-grey);
+  font-style: italic;
 }
 
 
@@ -226,4 +260,9 @@ a:hover {
 }
 .flex > .spacer {
   flex-grow: 1;
+}
+.spacious {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  gap: 2rem;
 }
