@@ -26,7 +26,8 @@
   [])
 
 (def $appointments
-  [{:appt/created-at #inst "2024-11-12T09:06:00-07:00"
+  [{:appt/uuid 123
+    :appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
     :appt/name "Angela Davis"
     :appt/alias "A."
@@ -48,7 +49,8 @@
     :appt/access-needs [{:need/type :need.type/captioning
                          :need/met? false}]
     :appt/notes []}
-   {:appt/created-at #inst "2024-11-12T09:06:00-07:00"
+   {:appt/uuid 234
+    :appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
     :appt/name "Bobby Seale"
     :appt/alias "B."
@@ -73,7 +75,8 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Need to schedule live captioner"}]}
-   {:appt/created-at #inst "2024-11-10T08:02:00-07:00"
+   {:appt/uuid 345
+    :appt/created-at #inst "2024-11-10T08:02:00-07:00"
     :appt/updated-at #inst "2024-11-11T05:42:00-07:00"
     :appt/alias "C."
     :appt/pronouns "they/them"
@@ -89,7 +92,8 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Need to schedule live captioner"}]}
-   {:appt/scheduled-for #inst "2024-11-19T17:00:00-07:00"
+   {:appt/uuid 456
+    :appt/scheduled-for #inst "2024-11-19T17:00:00-07:00"
     :appt/scheduled-at #inst "2024-11-13T03:46:00-07:00"
     :appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
@@ -120,7 +124,8 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "All set!"}]}
-   {:appt/scheduled-for #inst "2024-11-15T17:00:00-07:00"
+   {:appt/uuid 567
+    :appt/scheduled-for #inst "2024-11-15T17:00:00-07:00"
     :appt/scheduled-at #inst "2024-11-13T03:46:00-07:00"
     :appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
@@ -147,7 +152,8 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Need to schedule live captioner"}]}
-   {:appt/created-at #inst "2024-11-10T08:02:00-07:00"
+   {:appt/uuid 678
+    :appt/created-at #inst "2024-11-10T08:02:00-07:00"
     :appt/updated-at #inst "2024-11-11T05:42:00-07:00"
     :appt/alias "E."
     :appt/pronouns "they/them"
@@ -162,8 +168,7 @@
     :appt/notes [{:note/created-by {:user/name "Danielle"
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
-                  :note/content "Need to schedule live captioner"}]}
-   ])
+                  :note/content "Need to schedule live captioner"}]}])
 
 (def status->label
   {:needs-attention "Needs attention"
@@ -205,7 +210,7 @@
          ))
 
 (defn AppointmentCard [{:as appt
-                        :appt/keys [status state email phone]
+                        :appt/keys [status state email phone uuid]
                         :info/keys [updated-days-ago
                                     created-days-ago
                                     scheduled-for-days
@@ -221,15 +226,20 @@
       [:.appt-access-needs.unmet "♿ Unmet access needs"])
     [:.spacer]
     [:.days-ago "🕗 last updated " (in-days updated-days-ago)]]
-   [:h3 (:appt/alias appt) " in " (state->label state)]
-   [:div.appt-summary
+   [:h2 (:appt/alias appt) " in " (state->label state)]
+   [:.appt-summary
     [:div
      [:.field-label "First requested"]
      [:.field-value (in-days created-days-ago)]]
     [:div
      [:.field-label "Last note from"]
      [:.field-value last-note-from]]
-    ]])
+    ]
+   [:.flex
+    [:.spacer]
+    [:div
+     [:a {:href (str "/admin/appointments/" uuid)}
+      "Details"]]]])
 
 (defn get-appointments [db {:keys [status state]}]
   (->> db
