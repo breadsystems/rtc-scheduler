@@ -28,6 +28,7 @@
 }
 
 [data-color-mode=high-contrast] {
+  --col-offwhite: white;
   --col-link: rgb(41, 0, 76);
   --col-alert-bg: rgb(255, 227, 227);
   --col-alert-border: rgb(218, 43, 92);
