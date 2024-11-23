@@ -2,6 +2,7 @@
   /* https://css-tricks.com/snippets/css/system-font-stack/ */
   --system-sans: system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 
+  --col-offwhite: rgb(247, 239, 245);
   --col-inky: rgb(33, 0, 62);
   --col-hotpink: rgb(230, 8, 60);
   --col-pink: rgb(239, 189, 200);
@@ -47,6 +48,7 @@ html {
 body {
   margin: 0;
   padding: 0;
+  background-color: var(--col-offwhite);
 }
 * {
   color: var(--col-inky);
