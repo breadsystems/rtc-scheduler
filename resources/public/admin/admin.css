@@ -67,7 +67,7 @@ form {
 }
 
 .container {
-  margin: 0 auto;
+  margin: 0 auto 2em;
   max-width: 90ch;
   width: 96%;
 }
