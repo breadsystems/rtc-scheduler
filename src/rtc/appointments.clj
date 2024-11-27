@@ -311,7 +311,7 @@
          [:span
           [:label {:for "appt-status"} "Status"]
           [:select#appt-status {:name :status}
-           [:option {:value "" :label "Any status"}]
+           [:option {:value "" :label "All outstanding"}]
            (map (partial ui/Option status->label status) [:needs-attention
                                                           :waiting
                                                           :scheduled
