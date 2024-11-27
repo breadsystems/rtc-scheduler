@@ -45,6 +45,7 @@
 html {
   font-family: var(--system-sans);
   font-size: 18px;
+  line-height: 1.5;
 }
 body {
   margin: 0;
@@ -98,7 +99,7 @@ nav ul {
  * COMPONENTS
  */
 
-form {
+.filter-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -179,25 +180,30 @@ button {
   color: var(--col-hotpink);
 }
 
-.card.appointment {
+.appointment section {
+  padding: 1rem;
+  border: 2px solid var(--col-lightgrey);
+}
+
+[data-status] {
   border-width: 2px;
   border-style: solid;
   border-color: var(--col-lightgrey);
 }
-.card.appointment[data-status=needs-attention] {
+[data-status=needs-attention] {
   background-color: var(--col-alert-bg);
   border-color: var(--col-alert-border);
 }
-.card.appointment[data-status=waiting] {
+[data-status=waiting] {
   background-color: var(--col-emphasis-bg);
   border-color: var(--col-emphasis-border);
 }
-.card.appointment[data-status=archived] {
+[data-status=archived] {
   background-color: var(--col-palegrey);
   border-color: var(--col-emphasis-border);
   border-style: dashed;
 }
-.card.appointment .status-line {
+.card .status-line {
   font-size: 0.8em;
   opacity: 0.7;
 }
@@ -210,6 +216,7 @@ button {
 .appt-summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  gap: 1em;
 }
 .appt-summary > * {
   display: flex;
@@ -220,6 +227,32 @@ button {
   font-size: 0.8em;
   opacity: 0.7;
 }
+
+.status {
+  padding: 0.25em 0.5em;
+}
+
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.add-note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.note {
+  position: relative;
+  width: calc(100% - 1em);
+  padding: 0.5em;
+  border-radius: 5px;
+  background-color: var(--col-palegrey);
+}
+.note .byline {
+  font-size: 0.8em;
+}
+
 
 
 

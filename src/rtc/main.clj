@@ -34,7 +34,7 @@
         ["/appointments"
          {:get {:handler #'appt/show-all
                 :middleware [(admin/wrap-filter-params {:query appt/filter-coercions})]}}]
-        ["/appointments/{:appt/uuid}"
+        ["/appointments/{appt/uuid}"
          {:get {:handler #'appt/show}}]
         ["/providers"
          {:get {:handler #'admin/show-providers

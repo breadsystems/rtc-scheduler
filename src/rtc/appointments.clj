@@ -2,7 +2,8 @@
   (:require
     [rtc.ui :as ui])
   (:import
-    [java.time LocalDateTime ZoneId]))
+    [java.time LocalDateTime ZoneId]
+    [java.text SimpleDateFormat]))
 
 (defn days-between [a b]
   (.between (java.time.temporal.ChronoUnit/DAYS) a b))
@@ -78,8 +79,9 @@
    {:appt/uuid 345
     :appt/created-at #inst "2024-11-10T08:02:00-07:00"
     :appt/updated-at #inst "2024-11-11T05:42:00-07:00"
+    :appt/name "Cornel"
     :appt/alias "C."
-    :appt/pronouns "they/them"
+    :appt/pronouns "he/him"
     :appt/email "c@example.com"
     :appt/phone "+17245556859"
     :appt/state :WA
@@ -118,7 +120,7 @@
                          :need/met? true}]
     :appt/notes [{:note/created-by {:user/name "Danielle"
                                     :user/pronouns "they/them"}
-                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
+                  :note/created-at #inst "2024-11-11T12:17:00-05:00"
                   :note/content "Doing stuff..."}
                  {:note/created-by {:user/name "Danielle"
                                     :user/pronouns "they/them"}
@@ -170,6 +172,24 @@
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Need to schedule live captioner"}]}])
 
+(defn get-appointments [db {:keys [status state]}]
+  (->> db
+       (filter (fn [appt]
+                 (and (or (and (nil? status)
+                               (not= :archived (:appt/status appt)))
+                          (= status (:appt/status appt)))
+                      (or (nil? state) (= state (:appt/state appt))))))
+       (sort-by :appt/created-at)))
+
+(defn uuid->appointment [db uuid]
+  (->> db
+       (reduce (fn [_ appt]
+                 (when (= (str uuid) (str (:appt/uuid appt)))
+                   (reduced appt)))
+               nil)))
+
+;; TODO ^^^ REFACTOR WITH A REAL DATABASE
+
 (def status->label
   {:needs-attention "Needs attention"
    :waiting "Waiting"
@@ -179,6 +199,9 @@
 (def state->label
   {:CA "California"
    :WA "Washington"})
+
+(def need-type->label
+  {:need.type/captioning "Captioning"})
 
 (defn in-days [n]
   (cond
@@ -191,39 +214,67 @@
 (defn access-needs-met? [{:appt/keys [access-needs]}]
   (reduce #(if (:need/met? %2) %1 (reduced false)) true access-needs))
 
-(defn annotate [{:keys [now]} {:as appt :appt/keys [updated-at
-                                                    created-at
-                                                    scheduled-for
-                                                    notes]}]
-  (assoc appt
-         :info/updated-days-ago (days-between (Date->LocalDateTime updated-at) now)
-         :info/created-days-ago (days-between (Date->LocalDateTime created-at) now)
-         :info/scheduled-for-days (when scheduled-for
-                                    (days-between (Date->LocalDateTime scheduled-for) now))
-         :info/note-count (case (count notes)
-                            0 "No notes"
-                            1 "1 note"
-                            (str (count notes) " notes"))
-         :info/last-note-from (if (seq notes)
-                                (get-in (last notes) [:note/created-by :user/name])
-                                "No notes")
-         ))
+(def fmt (SimpleDateFormat. "EEEE, LLL d, yyyy"))
+(def note-fmt (SimpleDateFormat. "LLL d 'at' h:mm a"))
+
+(defn annotate [{:keys [now]} {:as appt
+                               :appt/keys [pronouns
+                                           updated-at
+                                           created-at
+                                           scheduled-for
+                                           preferred-comm
+                                           notes
+                                           text-ok?
+                                           uuid]}]
+  (some->
+    appt
+    (assoc
+      :appt/notes (reverse (sort-by :note/created-at notes))
+      :info/name-and-pronouns (str (:appt/name appt)
+                                   (when (seq pronouns)
+                                     (str " (" pronouns ")")))
+      :info/updated-at (.format fmt updated-at)
+      :info/updated-days-ago (days-between (Date->LocalDateTime updated-at) now)
+      :info/created-at (.format fmt created-at)
+      :info/created-days-ago (days-between (Date->LocalDateTime created-at) now)
+      :info/scheduled-for-days (when scheduled-for
+                                 (days-between (Date->LocalDateTime scheduled-for) now))
+      :info/note-count (case (count notes)
+                         0 "No notes"
+                         1 "1 note"
+                         (str (count notes) " notes"))
+      :info/last-note-from (if (seq notes)
+                             (get-in (last notes) [:note/created-by :user/name])
+                             "No notes")
+      :info/uri (str "/admin/appointments/" uuid)
+      :info/preferred-comm (when preferred-comm
+                             (clojure.string/capitalize (name preferred-comm)))
+      :info/text-ok? (clojure.string/capitalize (ui/yes-or-no text-ok?))
+      :info/all-access-needs-met? (access-needs-met? appt)
+      :info/access-needs-summary (if (access-needs-met? appt)
+                                   "Access needs met"
+                                   "Unmet access needs")
+      :info/access-needs-icon (if (access-needs-met? appt) "✓" "♿"))))
 
 (defn AppointmentCard [{:as appt
-                        :appt/keys [status state email phone uuid]
-                        :info/keys [updated-days-ago
+                        :appt/keys [status state email phone]
+                        :info/keys [alias
+                                    all-access-needs-met?
+                                    access-needs-icon
+                                    access-needs-summary
+                                    updated-days-ago
                                     created-days-ago
                                     scheduled-for-days
-                                    last-note-from]
+                                    last-note-from
+                                    uri]
                         :or {status ""}}]
   [:article.card.appointment {:data-status (name status)}
    [:.status-line.flex
     [:.appt-status (status->label status)]
     (when scheduled-for-days
       [:.appt-scheduled-for "📅 " (in-days scheduled-for-days)])
-    (if (access-needs-met? appt)
-      [:.appt-access-needs.met "✓ Access needs met"]
-      [:.appt-access-needs.unmet "♿ Unmet access needs"])
+    [:.appt-access-needs {:class (when-not all-access-needs-met? :unmet)}
+     access-needs-icon " " access-needs-summary]
     [:.spacer]
     [:.days-ago "🕗 last updated " (in-days updated-days-ago)]]
    [:h2 (:appt/alias appt) " in " (state->label state)]
@@ -238,17 +289,7 @@
    [:.flex
     [:.spacer]
     [:div
-     [:a {:href (str "/admin/appointments/" uuid)}
-      "Details"]]]])
-
-(defn get-appointments [db {:keys [status state]}]
-  (->> db
-       (filter (fn [appt]
-                 (and (or (and (nil? status)
-                               (not= :archived (:appt/status appt)))
-                          (= status (:appt/status appt)))
-                      (or (nil? state) (= state (:appt/state appt))))))
-       (sort-by :appt/created-at)))
+     [:a {:href uri} "Details"]]]])
 
 (defn show-all [{:keys [params filters now] :as req}]
   (let [db $appointments ;; TODO
@@ -263,8 +304,8 @@
       :content
       [:main
        [:h1 "Appointments"]
-       [:form {:method :get
-               :action "/admin/appointments"}
+       [:form.filter-form {:method :get
+                           :action "/admin/appointments"}
         [:fieldset
          [:legend "Filter by..."]
          [:span
@@ -299,9 +340,98 @@
           [:div "Listing " (count appts) " appointments"])
         (map AppointmentCard appts)]])))
 
-(defn show [_]
-  (ui/Page
-    :title "Appointment"
-    :content
-    [:main
-     "TODO Single Appointment"]))
+(defn AccessNeed [{:as need :need/keys [type met?]}]
+  [:.access-need
+   (if met? "✓" "✗")
+   " " (need-type->label type)])
+
+(defn AppointmentNote [{:as note
+                        :note/keys [created-at
+                                    created-by
+                                    content]}]
+  [:.note
+   [:.byline.flex
+    [:div (:user/name created-by)]
+    [:.instruct (.format note-fmt created-at)]]
+   [:.content content]])
+
+(defn AppointmentDetails [{:as appt
+                           :appt/keys [status
+                                       state
+                                       notes
+                                       access-needs
+                                       phone
+                                       email]
+                           :info/keys [name-and-pronouns
+                                       created-at
+                                       updated-at
+                                       scheduled-for
+                                       preferred-comm
+                                       text-ok?
+                                       access-needs-summary
+                                       note-count]}]
+  [:article.appointment.flex.col
+   [:.flex
+    [:span.status {:data-status status} (status->label status)]]
+   [:header.flex
+    [:h1 name-and-pronouns]]
+   [:section.appt-summary
+    (when scheduled-for
+      [:div
+       [:.field-label "Scheduled for"]
+       [:.field-value
+        scheduled-for]])
+    [:div
+     [:.field-label "State"]
+     [:.field-value (state->label state)]]
+    [:div
+     [:.field-label "First requested"]
+     [:.field-value created-at]]
+    [:div
+     [:.field-label "Last updated"]
+     [:.field-value updated-at]]
+    [:div
+     [:.field-label "Email"]
+     [:.field-value email]]
+    [:div
+     [:.field-label "Phone"]
+     [:.field-value phone]]
+    [:div
+     [:.field-label "Preferred Comm."]
+     [:.field-value preferred-comm]]
+    [:div
+     [:.field-label "Text OK?"]
+     [:.field-value text-ok?]]]
+   [:section.access-needs
+    [:header
+     [:h2 "Access needs"]
+     [:div access-needs-summary]]
+    (when (seq access-needs)
+      (map AccessNeed access-needs))]
+   [:section.notes
+    [:h2 "Notes"]
+    [:form.add-note-form {:method :post
+                          :name :add-note
+                          :data-action {:hello true}}
+     [:h3 "Add a note"]
+     [:textarea {:name :note-content
+                 :rows 5}]
+     [:div
+      [:button {:type :submit}
+       "Add"]]]
+    [:header
+     [:h3 note-count]]
+    (map AppointmentNote notes)]])
+
+(defn show [{{:appt/keys [uuid]} :path-params :as req}]
+  (let [appt (annotate {:now (:now req)} (uuid->appointment $appointments uuid))]
+    (ui/Page
+      :title "Appointment"
+      :content
+      [:main
+       (if appt
+         (AppointmentDetails appt)
+         [:<>
+          [:h2 "Appointment not found."]
+          [:div [:a {:href "/admin/appointments"} "All appointments"]]])
+       [:pre (with-out-str (clojure.pprint/pprint appt))]])))

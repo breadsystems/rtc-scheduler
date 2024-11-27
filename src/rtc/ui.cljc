@@ -18,6 +18,9 @@
 (defn filters->query-string [filters]
   (str "?" (clojure.string/join "&" (map filter-pair filters))))
 
+(defn yes-or-no [b]
+  (if b "yes" "no"))
+
 (comment
   (filters->query-string {:a :b :c :d}))
 
