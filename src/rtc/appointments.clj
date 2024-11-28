@@ -1,5 +1,6 @@
 (ns rtc.appointments
   (:require
+    [clojure.string :as string]
     [rtc.ui :as ui])
   (:import
     [java.time LocalDateTime ZoneId]
@@ -39,6 +40,8 @@
     :appt/status :needs-attention
     :appt/text-ok? true
     :appt/preferred-comm :text
+    :appt/available-days #{:mon :tues :weds :thurs :fri :sat :sun}
+    :appt/available-times #{"Mornings" "Afternoons" "Evenings"}
     :appt/provider {:provider/name "Ruha Benjamin"
                     :provider/title "MD, PDO"
                     :provider/specialty "MD, PDO"
@@ -62,6 +65,8 @@
     :appt/status :waiting
     :appt/text-ok? true
     :appt/preferred-comm :text
+    :appt/available-days #{:mon :weds :fri}
+    :appt/available-times #{"Afternoons"}
     :appt/provider {:provider/name "Ruha Benjamin"
                     :provider/title "MD, PDO"
                     :provider/specialty "MD, PDO"
@@ -88,6 +93,8 @@
     :appt/status :waiting
     :appt/text-ok? true
     :appt/preferred-comm :text
+    :appt/available-days #{}
+    :appt/available-times #{"Evenings"}
     :appt/reason "HRT"
     :appt/access-needs []
     :appt/notes [{:note/created-by {:user/name "Danielle"
@@ -102,7 +109,7 @@
     :appt/name "Someone"
     :appt/alias "G."
     :appt/pronouns "they/them"
-    :appt/email "someone@example.vom"
+    :appt/email "someone@example.com"
     :appt/phone "+17145555896"
     :appt/state :WA
     :appt/status :scheduled
@@ -190,11 +197,9 @@
 
 ;; TODO ^^^ REFACTOR WITH A REAL DATABASE
 
-(def $appt-statuses
-  [:needs-attention
-   :waiting
-   :scheduled
-   :archived])
+(def $appt-statuses [:needs-attention :waiting :scheduled :archived])
+
+(def $days [:mon :tues :weds :thurs :fri :sat :sun])
 
 (def status->label
   {:needs-attention "Needs attention"
@@ -209,6 +214,34 @@
 (def need-type->label
   {:need.type/captioning "Captioning"})
 
+(def day->label
+  {:mon "Monday"
+   :tues "Tuesday"
+   :weds "Wednesday"
+   :thurs "Thursday"
+   :fri "Friday"
+   :sat "Saturday"
+   :sun "Sunday"})
+
+(defn days->labels [days]
+  (->> $days (filter (set days)) (map day->label)))
+
+(defn summarize-days [days]
+  (cond
+    (empty? days) "No days specified"
+    (= 7 (count days)) "Any day"
+    (= #{:mon :tues :weds :thurs :fri} (set days)) "Weekdays"
+    (= #{:sat :sun} (set days)) "Weekends"
+    :else (string/join ", " (days->labels days))))
+
+(comment
+  (summarize-days [:tues :mon])
+  (summarize-days nil)
+  (summarize-days [])
+  (summarize-days [:sat :sun])
+  (summarize-days [:mon :tues :weds :thurs :fri])
+  (summarize-days [:mon :tues :weds :thurs :fri :sat :sun]))
+
 (defn in-days [n]
   (cond
     (> n 1) (str n " days ago")
@@ -220,7 +253,7 @@
 (defn access-needs-met? [{:appt/keys [access-needs]}]
   (reduce #(if (:need/met? %2) %1 (reduced false)) true access-needs))
 
-(def fmt (SimpleDateFormat. "EEEE, LLL d, yyyy"))
+(def fmt (SimpleDateFormat. "EEE, LLL d 'at' h:mm a"))
 (def note-fmt (SimpleDateFormat. "LLL d 'at' h:mm a"))
 
 (defn annotate [{:keys [now]} {:as appt
@@ -229,8 +262,10 @@
                                            created-at
                                            scheduled-for
                                            preferred-comm
-                                           notes
                                            text-ok?
+                                           available-days
+                                           available-times
+                                           notes
                                            uuid]}]
   (some->
     appt
@@ -243,6 +278,8 @@
       :info/updated-days-ago (days-between (Date->LocalDateTime updated-at) now)
       :info/created-at (.format fmt created-at)
       :info/created-days-ago (days-between (Date->LocalDateTime created-at) now)
+      :info/scheduled-for (when scheduled-for
+                            (.format fmt scheduled-for))
       :info/scheduled-for-days (when scheduled-for
                                  (days-between (Date->LocalDateTime scheduled-for) now))
       :info/note-count (case (count notes)
@@ -254,8 +291,12 @@
                              "No notes")
       :info/uri (str "/admin/appointments/" uuid)
       :info/preferred-comm (when preferred-comm
-                             (clojure.string/capitalize (name preferred-comm)))
-      :info/text-ok? (clojure.string/capitalize (ui/yes-or-no text-ok?))
+                             (string/capitalize (name preferred-comm)))
+      :info/text-ok? (string/capitalize (ui/yes-or-no text-ok?))
+      :info/available-days (summarize-days available-days)
+      :info/available-times (if available-times
+                              (string/join ", " available-times)
+                              "No times specified")
       :info/all-access-needs-met? (access-needs-met? appt)
       :info/access-needs-summary (if (access-needs-met? appt)
                                    "Access needs met"
@@ -372,6 +413,8 @@
                                        scheduled-for
                                        preferred-comm
                                        text-ok?
+                                       available-days
+                                       available-times
                                        access-needs-summary
                                        note-count]}]
   (let [available-statuses (filter #(not= status %) $appt-statuses)]
@@ -381,33 +424,43 @@
        [:h1 name-and-pronouns]]
       [:.spacer]
       [:.status {:data-status status} (status->label status)]]
-     [:section.appt-summary
-      (when scheduled-for
+     [:.flex
+      [:div
+        [:.field-label "First requested"]
+        [:.field-value created-at]]
+      [:.spacer]
+      (if scheduled-for
         [:div
          [:.field-label "Scheduled for"]
-         [:.field-value
-          scheduled-for]])
-      [:div
-       [:.field-label "State"]
-       [:.field-value (state->label state)]]
-      [:div
-       [:.field-label "First requested"]
-       [:.field-value created-at]]
-      [:div
-       [:.field-label "Last updated"]
-       [:.field-value updated-at]]
-      [:div
-       [:.field-label "Email"]
-       [:.field-value email]]
-      [:div
-       [:.field-label "Phone"]
-       [:.field-value phone]]
-      [:div
-       [:.field-label "Preferred Comm."]
-       [:.field-value preferred-comm]]
-      [:div
-       [:.field-label "Text OK?"]
-       [:.field-value text-ok?]]]
+         [:.field-value scheduled-for]]
+        [:div
+         [:.instruct "Not scheduled"]])]
+     [:section
+      [:div [:h2 "Contact"]]
+      [:.appt-summary
+       [:div
+        [:.field-label "State"]
+        [:.field-value (state->label state)]]
+       [:div
+        [:.field-label "Email"]
+        [:.field-value email]]
+       [:div
+        [:.field-label "Phone"]
+        [:.field-value phone]]
+       [:div
+        [:.field-label "Preferred Comm."]
+        [:.field-value preferred-comm]]
+       [:div
+        [:.field-label "Text OK?"]
+        [:.field-value text-ok?]]]
+      [:div [:h3 "Availability"]]
+      [:.appt-availability
+       [:div
+        [:.field-label "Days"]
+        [:.field-value available-days]]
+       [:div
+        [:.field-label "Times"]
+        [:.field-value available-times]]]]
      [:section.medical-needs
       [:header
        [:h2 "Medical needs"]]
@@ -424,7 +477,7 @@
 (defn show [{{:appt/keys [uuid]} :path-params :as req}]
   (let [{:as appt
          :appt/keys [status notes]
-         :info/keys [note-count]}
+         :info/keys [note-count updated-at]}
         (->> uuid
              (uuid->appointment $appointments)
              (annotate {:now (:now req)}))
@@ -443,19 +496,31 @@
         ]
        [:aside
         [:section.actions
+         [:.flex
+          [:div [:h2 "Appointment Updates"]]
+          [:.spacer]
+          [:div
+           [:.field-label "Last updated"]
+           [:.field-value updated-at]]]
          [:form.flex.col
-          [:h2 "Update status"]
+          [:.flex
+           [:input {:name :scheduled-for
+                    :type :datetime-local}]
+           [:button {:type :submit}
+            "Schedule"]]]
+         [:form.flex.col
           [:.flex
            [:select {:name :status}
             (map (partial ui/Option status->label status) available-statuses)]
            [:button {:type :submit}
-            "Update"]]]]
+            "Update status"]]]]
         [:section.notes
          [:h2 "Notes"]
          [:header.flex.row
           [:h3 note-count]]
-         [:.notes-container
-          (map AppointmentNote notes)]
+         (when (seq notes)
+           [:.notes-container
+            (map AppointmentNote notes)])
          [:form.add-note-form {:method :post
                                :name :add-note
                                :data-action {:hello true}}

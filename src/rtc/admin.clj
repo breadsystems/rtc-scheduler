@@ -26,8 +26,7 @@
     :content
     [:main.spacious
      [:article.card
-      [:a {:href "/admin/appointments"}
-       [:h1 "Appointments"]]
+      [:h1 "Appointments"]
       [:a {:href "/admin/appointments?status=needs-attention"}
        [:h2 3 #_(count $appointments) " Appointments need follow-up"]]
       [:a {:href "/admin/appointments?status=scheduled"}

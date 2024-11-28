@@ -115,7 +115,7 @@ footer {
   padding: 1em;
 }
 .bottom {
-  width: 100%;
+  width: calc(100% - 2em);
   text-align: right;
   color: var(--col-grey);
 }
@@ -258,10 +258,18 @@ aside * {
   display: flex;
   flex-direction: column
 }
+.appt-availability {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 1em;
+}
 .field-label {
   font-weight: 800;
   font-size: 0.8em;
   opacity: 0.7;
+}
+.spacer ~ * :is(.field-label, .field-value) {
+  text-align: right;
 }
 
 .status {
@@ -277,6 +285,7 @@ aside * {
   max-height: 40vh;
   overflow: scroll;
   border: 1px solid var(--col-lightgrey);
+  padding: 0.5em;
 }
 .add-note-form {
   display: flex;
@@ -285,13 +294,16 @@ aside * {
 }
 .note {
   position: relative;
-  width: calc(100% - 1em);
+}
+.note .byline {
+  width: 100%;
+  justify-content: flex-end;
+  font-size: 0.8em;
+}
+.note .content {
   padding: 0.5em;
   border-radius: 5px;
   background-color: var(--col-palegrey);
-}
-.note .byline {
-  font-size: 0.8em;
 }
 
 
