@@ -111,7 +111,13 @@ main {
 }
 footer {
   width: calc(100% - 2em);
+  margin-top: 10em;
   padding: 1em;
+}
+.bottom {
+  width: 100%;
+  text-align: right;
+  color: var(--col-grey);
 }
 
 

@@ -49,5 +49,5 @@
       content]
      [:footer
       footer
-      [:div
-       "Version hash: abd872f"]]]]})
+      [:.bottom
+       "Release version: abd872f | Clojure version: " (clojure-version)]]]]})
