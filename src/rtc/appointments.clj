@@ -190,6 +190,12 @@
 
 ;; TODO ^^^ REFACTOR WITH A REAL DATABASE
 
+(def $appt-statuses
+  [:needs-attention
+   :waiting
+   :scheduled
+   :archived])
+
 (def status->label
   {:needs-attention "Needs attention"
    :waiting "Waiting"
@@ -312,10 +318,7 @@
           [:label {:for "appt-status"} "Status"]
           [:select#appt-status {:name :status}
            [:option {:value "" :label "All outstanding"}]
-           (map (partial ui/Option status->label status) [:needs-attention
-                                                          :waiting
-                                                          :scheduled
-                                                          :archived])]]
+           (map (partial ui/Option status->label status) $appt-statuses)]]
          [:span
           [:label {:for "appt-state"} "State"]
           [:select#appt-state {:name :state}
@@ -361,7 +364,8 @@
                                        notes
                                        access-needs
                                        phone
-                                       email]
+                                       email
+                                       reason]
                            :info/keys [name-and-pronouns
                                        created-at
                                        updated-at
@@ -370,58 +374,69 @@
                                        text-ok?
                                        access-needs-summary
                                        note-count]}]
-  [:article.appointment.flex.col
-   [:.flex
-    [:span.status {:data-status status} (status->label status)]]
-   [:header.flex
-    [:h1 name-and-pronouns]]
-   [:section.appt-summary
-    (when scheduled-for
+  (let [available-statuses (filter #(not= status %) $appt-statuses)]
+    [:article.appointment.flex.col
+     [:header.flex
       [:div
-       [:.field-label "Scheduled for"]
-       [:.field-value
-        scheduled-for]])
-    [:div
-     [:.field-label "State"]
-     [:.field-value (state->label state)]]
-    [:div
-     [:.field-label "First requested"]
-     [:.field-value created-at]]
-    [:div
-     [:.field-label "Last updated"]
-     [:.field-value updated-at]]
-    [:div
-     [:.field-label "Email"]
-     [:.field-value email]]
-    [:div
-     [:.field-label "Phone"]
-     [:.field-value phone]]
-    [:div
-     [:.field-label "Preferred Comm."]
-     [:.field-value preferred-comm]]
-    [:div
-     [:.field-label "Text OK?"]
-     [:.field-value text-ok?]]]
-   [:section.access-needs
-    [:header
-     [:h2 "Access needs"]
-     [:div access-needs-summary]]
-    (when (seq access-needs)
-      (map AccessNeed access-needs))]
-   [:section.notes
-    [:h2 "Notes"]
-    [:form.add-note-form {:method :post
-                          :name :add-note
-                          :data-action {:hello true}}
-     [:h3 "Add a note"]
-     [:textarea {:name :note-content
-                 :rows 5}]
-     [:div
-      [:button {:type :submit}
-       "Add"]]]
-    [:header
-     [:h3 note-count]]
-    (map AppointmentNote notes)]])
+       [:h1 name-and-pronouns]]
+      [:.spacer]
+      [:.status {:data-status status} (status->label status)]
+      [:div
+       [:select {:name :status}
+        (map (partial ui/Option status->label status) available-statuses)]]]
+     [:section.appt-summary
+      (when scheduled-for
+        [:div
+         [:.field-label "Scheduled for"]
+         [:.field-value
+          scheduled-for]])
+      [:div
+       [:.field-label "State"]
+       [:.field-value (state->label state)]]
+      [:div
+       [:.field-label "First requested"]
+       [:.field-value created-at]]
+      [:div
+       [:.field-label "Last updated"]
+       [:.field-value updated-at]]
+      [:div
+       [:.field-label "Email"]
+       [:.field-value email]]
+      [:div
+       [:.field-label "Phone"]
+       [:.field-value phone]]
+      [:div
+       [:.field-label "Preferred Comm."]
+       [:.field-value preferred-comm]]
+      [:div
+       [:.field-label "Text OK?"]
+       [:.field-value text-ok?]]]
+     [:section.medical-needs
+      [:header
+       [:h2 "Medical needs"]]
+      [:div
+       [:.field-label "Reason for contacting RTC"]
+       [:.field-value reason]]]
+     [:section.access-needs
+      [:header
+       [:h2 "Access needs"]
+       [:div access-needs-summary]]
+      (when (seq access-needs)
+        (map AccessNeed access-needs))]
+     [:section.notes
+      [:h2 "Notes"]
+      [:form.add-note-form {:method :post
+                            :name :add-note
+                            :data-action {:hello true}}
+       [:h3 "Add a note"]
+       [:textarea {:name :note-content
+                   :rows 5}]
+       [:div
+        [:button {:type :submit}
+         "Add"]]]
+      [:header
+       [:h3 note-count]]
+      (map AppointmentNote notes)]]))
 
 (defn show [{{:appt/keys [uuid]} :path-params :as req}]
   (let [appt (annotate {:now (:now req)} (uuid->appointment $appointments uuid))]
