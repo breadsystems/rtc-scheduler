@@ -56,23 +56,6 @@ body {
   color: var(--col-inky);
 }
 
-main {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-  padding-top: 1em;
-}
-
-form {
-  margin: 0;
-}
-
-.container {
-  margin: 0 auto 2em;
-  max-width: 90ch;
-  width: 96%;
-}
-
 body > nav {
   display: flex;
   gap: 2ch;
@@ -93,12 +76,28 @@ nav ul {
   list-style: none;
 }
 
+.container {
+  margin: 0 auto 2em;
+  max-width: 150ch;
+  width: 96%;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  padding-top: 1em;
+}
+
 
 
 /*
  * COMPONENTS
  */
 
+form {
+  margin: 0;
+}
 .filter-form {
   display: flex;
   flex-direction: column;
