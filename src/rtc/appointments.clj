@@ -69,7 +69,7 @@
                     :provider/email "ruha@princeton.edu"
                     :provider/phone "+12535559876"
                     :provider/licensure #{{:license/state "MD"}}}
-    :appt/reason "HRT"
+    :appt/reason "ADHD prescription"
     :appt/access-needs [{:need/type :need.type/captioning
                          :need/met? true}]
     :appt/notes [{:note/created-by {:user/name "Danielle"
@@ -115,7 +115,7 @@
                     :provider/email "ruha@princeton.edu"
                     :provider/phone "+12535559876"
                     :provider/licensure #{{:license/state "MD"}}}
-    :appt/reason "HRT"
+    :appt/reason "ADHD prescription"
     :appt/access-needs [{:need/type :need.type/captioning
                          :need/met? true}]
     :appt/notes [{:note/created-by {:user/name "Danielle"
