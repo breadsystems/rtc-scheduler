@@ -308,36 +308,36 @@
       :footer
       [:<> [:script {:src "/admin/admin.js"}]]
       :content
-      [:main
-       [:h1 "Appointments"]
-       [:form.filter-form {:method :get
-                           :action "/admin/appointments"}
-        [:fieldset
-         [:legend "Filter by..."]
-         [:span
+      [:<>
+       [:aside
+        [:h1 "Appointments"]
+        [:form.filter-form {:method :get
+                            :action "/admin/appointments"}
+         [:fieldset
+          [:legend "Filter by..."]
           [:label {:for "appt-status"} "Status"]
           [:select#appt-status {:name :status}
            [:option {:value "" :label "All outstanding"}]
-           (map (partial ui/Option status->label status) $appt-statuses)]]
-         [:span
+           (map (partial ui/Option status->label status) $appt-statuses)]
           [:label {:for "appt-state"} "State"]
           [:select#appt-state {:name :state}
            [:option {:value "" :label "Any state"}]
            (map (partial ui/Option state->label state) [:CA
-                                                        :WA])]]
-         [:button {:type :submit}
-          "Filter appointments"]]
-        [:.applied-filters
-         (when status
-           [:a {:href (ui/filters->query-string (dissoc filters :status))}
-            (status->label status)])
-         (when state
-           [:a {:href (ui/filters->query-string (dissoc filters :state))}
-            (state->label state)])
-         (when any-filters?
+                                                        :WA])]
+          [:div
+           [:button {:type :submit}
+            "Filter appointments"]]]]]
+       [:main
+        (when any-filters?
+          [:.applied-filters
+           (when status
+             [:a {:href (ui/filters->query-string (dissoc filters :status))}
+              (status->label status)])
+           (when state
+             [:a {:href (ui/filters->query-string (dissoc filters :state))}
+              (state->label state)])
            [:span
-            [:a {:href "/admin/appointments"} "Clear filters"]])]]
-       [:.flex.col
+            [:a {:href "/admin/appointments"} "Clear filters"]]])
         (if (zero? (count appts))
           [:div "No appointments found."]
           [:div "Listing " (count appts) " appointments"])
@@ -380,10 +380,7 @@
       [:div
        [:h1 name-and-pronouns]]
       [:.spacer]
-      [:.status {:data-status status} (status->label status)]
-      [:div
-       [:select {:name :status}
-        (map (partial ui/Option status->label status) available-statuses)]]]
+      [:.status {:data-status status} (status->label status)]]
      [:section.appt-summary
       (when scheduled-for
         [:div
@@ -422,31 +419,53 @@
        [:h2 "Access needs"]
        [:div access-needs-summary]]
       (when (seq access-needs)
-        (map AccessNeed access-needs))]
-     [:section.notes
-      [:h2 "Notes"]
-      [:form.add-note-form {:method :post
-                            :name :add-note
-                            :data-action {:hello true}}
-       [:h3 "Add a note"]
-       [:textarea {:name :note-content
-                   :rows 5}]
-       [:div
-        [:button {:type :submit}
-         "Add"]]]
-      [:header
-       [:h3 note-count]]
-      (map AppointmentNote notes)]]))
+        (map AccessNeed access-needs))]]))
 
 (defn show [{{:appt/keys [uuid]} :path-params :as req}]
-  (let [appt (annotate {:now (:now req)} (uuid->appointment $appointments uuid))]
+  (let [{:as appt
+         :appt/keys [status notes]
+         :info/keys [note-count]}
+        (->> uuid
+             (uuid->appointment $appointments)
+             (annotate {:now (:now req)}))
+        available-statuses (filter #(not= status %) $appt-statuses)]
     (ui/Page
       :title "Appointment"
+      :container-class :appt-details
       :content
-      [:main
-       (if appt
-         (AppointmentDetails appt)
-         [:<>
-          [:h2 "Appointment not found."]
-          [:div [:a {:href "/admin/appointments"} "All appointments"]]])
+      [:<>
+       [:main
+        (if appt
+          (AppointmentDetails appt)
+          [:<>
+           [:h2 "Appointment not found."]
+           [:div [:a {:href "/admin/appointments"} "All appointments"]]])
+        ]
+       [:aside
+        [:section.actions
+         [:form.flex.col
+          [:h2 "Update status"]
+          [:.flex
+           [:select {:name :status}
+            (map (partial ui/Option status->label status) available-statuses)]
+           [:button {:type :submit}
+            "Update"]]]]
+        [:section.notes
+         [:h2 "Notes"]
+         [:header.flex.row
+          [:h3 note-count]]
+         [:.notes-container
+          (map AppointmentNote notes)]
+         [:form.add-note-form {:method :post
+                               :name :add-note
+                               :data-action {:hello true}}
+          [:h3 "Add a note"]
+          [:textarea {:name :note-content
+                      :rows 5}]
+          [:div
+           [:button {:type :submit}
+            "Add"]]]]]]
+      :footer
+      [:details
+       [:summary "Debug info"]
        [:pre (with-out-str (clojure.pprint/pprint appt))]])))

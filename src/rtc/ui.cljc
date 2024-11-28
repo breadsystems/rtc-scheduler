@@ -24,7 +24,7 @@
 (comment
   (filters->query-string {:a :b :c :d}))
 
-(defn Page [& {:keys [title content status head footer]
+(defn Page [& {:keys [title container-class content status head footer]
                :or {status 200}}]
   {:body
    [:html #_{:data-color-mode :high-contrast}
@@ -40,10 +40,14 @@
       [:a {:href "/admin"} [:h1 "RTC"]]
       [:ul
        [:li [:a {:href "/admin/appointments"} "Appointments"]]
+       #_
        [:li [:a {:href "/admin/schedulers"} "Schedulers"]]
        #_
        [:li [:a {:href "/admin/providers"} "Providers"]]
        [:li [:a {:href "/account"} "My account"]]]]
-     [:.container
-      content
-      footer]]]})
+     [:.container {:class container-class}
+      content]
+     [:footer
+      footer
+      [:div
+       "Version hash: abd872f"]]]]})
