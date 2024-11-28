@@ -25,6 +25,10 @@
 
   --border-form-elem: 2px solid var(--col-lightgrey);
   --spacing-form-elem: 0.25rem 0.5rem;
+
+  --gutter-narrow: 0.5em;
+  --gutter-normal: 1em;
+  --gutter-wide: 2em;
 }
 
 [data-color-mode=high-contrast] {
@@ -201,8 +205,14 @@ button {
 }
 
 section {
+  display: flex;
+  flex-direction: column;
   padding: 1rem;
+  gap: var(--gutter-normal);
   border: 2px solid var(--col-lightgrey);
+}
+aside * {
+  gap: var(--gutter-narrow);
 }
 
 [data-status] {
