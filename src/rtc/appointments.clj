@@ -497,7 +497,7 @@
        [:aside
         [:section.actions
          [:.flex
-          [:div [:h2 "Appointment Updates"]]
+          [:div [:h2 "Actions"]]
           [:.spacer]
           [:div
            [:.field-label "Last updated"]
