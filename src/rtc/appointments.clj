@@ -474,10 +474,49 @@
       (when (seq access-needs)
         (map AccessNeed access-needs))]]))
 
+(defn AppointmentActions [{:appt/keys [notes status]
+                           :info/keys [note-count updated-at]}]
+  (let [available-statuses (filter #(not= status %) $appt-statuses)]
+    [:<>
+     [:section.actions
+      [:.flex
+       [:div [:h2 "Actions"]]
+       [:.spacer]
+       [:div
+        [:.field-label "Last updated"]
+        [:.field-value updated-at]]]
+      [:form.flex.col
+       [:.flex
+        [:input {:name :scheduled-for
+                 :type :datetime-local}]
+        [:button {:type :submit}
+         "Schedule"]]]
+      [:form.flex.col
+       [:.flex
+        [:select {:name :status}
+         (map (partial ui/Option status->label status) available-statuses)]
+        [:button {:type :submit}
+         "Update status"]]]]
+     [:section.notes
+      [:h2 "Notes"]
+      [:header.flex.row
+       [:h3 note-count]]
+      (when (seq notes)
+        [:.notes-container
+         (map AppointmentNote notes)])
+      [:form.add-note-form {:method :post
+                            :name :add-note
+                            :data-action {:hello true}}
+       [:h3 "Add a note"]
+       [:textarea {:name :note-content
+                   :rows 5}]
+       [:div
+        [:button {:type :submit}
+         "Add"]]]]]))
+
 (defn show [{{:appt/keys [uuid]} :path-params :as req}]
   (let [{:as appt
-         :appt/keys [status notes]
-         :info/keys [note-count updated-at]}
+         :appt/keys [status]}
         (->> uuid
              (uuid->appointment $appointments)
              (annotate {:now (:now req)}))
@@ -486,50 +525,13 @@
       :title "Appointment"
       :container-class :appt-details
       :content
-      [:<>
-       [:main
-        (if appt
-          (AppointmentDetails appt)
-          [:<>
-           [:h2 "Appointment not found."]
-           [:div [:a {:href "/admin/appointments"} "All appointments"]]])
-        ]
-       [:aside
-        [:section.actions
-         [:.flex
-          [:div [:h2 "Actions"]]
-          [:.spacer]
-          [:div
-           [:.field-label "Last updated"]
-           [:.field-value updated-at]]]
-         [:form.flex.col
-          [:.flex
-           [:input {:name :scheduled-for
-                    :type :datetime-local}]
-           [:button {:type :submit}
-            "Schedule"]]]
-         [:form.flex.col
-          [:.flex
-           [:select {:name :status}
-            (map (partial ui/Option status->label status) available-statuses)]
-           [:button {:type :submit}
-            "Update status"]]]]
-        [:section.notes
-         [:h2 "Notes"]
-         [:header.flex.row
-          [:h3 note-count]]
-         (when (seq notes)
-           [:.notes-container
-            (map AppointmentNote notes)])
-         [:form.add-note-form {:method :post
-                               :name :add-note
-                               :data-action {:hello true}}
-          [:h3 "Add a note"]
-          [:textarea {:name :note-content
-                      :rows 5}]
-          [:div
-           [:button {:type :submit}
-            "Add"]]]]]]
+      (if appt
+        [:<>
+         [:main (AppointmentDetails appt)]
+         [:aside (AppointmentActions appt)]]
+        [:main
+         [:h2 "Appointment not found."]
+         [:div [:a {:href "/admin/appointments"} "All appointments"]]])
       :footer
       [:details
        [:summary "Debug info"]
