@@ -52,7 +52,8 @@
     :appt/reason "HRT"
     :appt/access-needs [{:need/type :need.type/captioning
                          :need/met? false}]
-    :appt/notes []}
+    :appt/notes []
+    :appt/misc "Lorem ipsum dolor sit amet"}
    {:appt/uuid 234
     :appt/created-at #inst "2024-11-12T09:06:00-07:00"
     :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
@@ -406,7 +407,8 @@
                                        access-needs
                                        phone
                                        email
-                                       reason]
+                                       reason
+                                       misc]
                            :info/keys [name-and-pronouns
                                        created-at
                                        updated-at
@@ -426,8 +428,8 @@
       [:.status {:data-status status} (status->label status)]]
      [:.flex
       [:div
-        [:.field-label "First requested"]
-        [:.field-value created-at]]
+       [:.field-label "First requested"]
+       [:.field-value created-at]]
       [:.spacer]
       (if scheduled-for
         [:div
@@ -472,7 +474,15 @@
        [:h2 "Access needs"]
        [:div access-needs-summary]]
       (when (seq access-needs)
-        (map AccessNeed access-needs))]]))
+        (map AccessNeed access-needs))]
+     [:section.access-needs
+      [:header
+       [:h2 "Miscellaneous"]]
+      [:div
+       [:.field-label "Anything we forgot to ask?"]
+       (if misc
+         [:.field-value misc]
+         [:.field-value.instruct "Nothing specified"])]]]))
 
 (defn AppointmentActions [{:appt/keys [notes status]
                            :info/keys [note-count updated-at]}]
