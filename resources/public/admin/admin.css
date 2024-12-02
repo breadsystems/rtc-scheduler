@@ -287,7 +287,7 @@ aside * {
   border: 1px solid var(--col-lightgrey);
   padding: 0.5em;
 }
-.add-note-form {
+.action-form {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

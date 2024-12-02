@@ -514,9 +514,9 @@
       (when (seq notes)
         [:.notes-container
          (map AppointmentNote notes)])
-      [:form.add-note-form {:method :post
-                            :name :add-note
-                            :data-action {:hello true}}
+      [:form.action-form {:method :post
+                          :name :add-note
+                          :data-action {:hello true}}
        [:h3 "Add a note"]
        [:textarea {:name :note-content
                    :rows 5}]
