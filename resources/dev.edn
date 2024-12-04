@@ -7,5 +7,5 @@
  :app/authentication {:dev/user {:user/id 123
                                  :user/email "coby@example.com"
                                  :user/preferences
-                                 {:color-mode :high-contrast}}}
+                                 {:color-mode :default}}}
  :app/env :dev}
