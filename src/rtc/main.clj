@@ -23,7 +23,7 @@
 (declare system)
 
 (defmethod ig/init-key :app/router [_ {:keys [authentication]}]
-  (let [auth-enabled? (:enabled? authentication)]
+  (let [auth-enabled? (:enabled? authentication true)]
     ;; TODO trailing slash
     (rr/router
       [["/admin"
