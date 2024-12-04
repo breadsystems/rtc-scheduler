@@ -51,3 +51,11 @@
       footer
       [:.bottom
        "Release version: abd872f | Clojure version: " (clojure-version)]]]]})
+
+(defn NotFoundPage [_req]
+  (Page
+    :title "404"
+    :content
+    [:main
+     [:h1 "404 Not found"]
+     [:p "Sorry, we couldn't find the page you were looking for."]]))

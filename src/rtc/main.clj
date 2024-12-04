@@ -16,14 +16,6 @@
   (:import
     [java.time LocalDateTime]))
 
-(defn not-found [_]
-  (ui/Page
-    :title "404"
-    :content
-    [:main
-     [:h1 "404 Not found"]
-     [:p "Sorry, we couldn't find the page you were looking for."]]))
-
 ;; CONFIG
 
 (defmethod ig/init-key :app/router [_ {:keys [authentication]}]
@@ -83,7 +75,7 @@
                         (reduce #(assoc-in %1 (key %2) (val %2)) $ ring-defaults)
                         (assoc-in $ [:params :keywordize] true))
         handler (-> router
-                    (rr/ring-handler (rr/create-default-handler {:not-found not-found}))
+                    (rr/ring-handler (rr/create-default-handler {:not-found ui/NotFoundPage}))
                     -wrap-default-content-type
                     -wrap-keyword-headers
                     -wrap-now
