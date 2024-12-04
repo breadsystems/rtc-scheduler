@@ -51,6 +51,8 @@
              :href "/admin/admin.css"}]
      head]
     [:body
+     (when (false? (get-in system [:app/authentication :enabled?]))
+       [:div.banner-alert "NOTE: AUTHENTICATION IS DISABLED!"])
      [:nav
       [:a {:href "/admin"} [:h1 "RTC"]]
       [:ul

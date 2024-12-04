@@ -126,6 +126,12 @@ footer {
  * COMPONENTS
  */
 
+.banner-alert {
+  padding: var(--gutter-narrow);
+  background-color: var(--col-pink);
+  text-align: center;
+}
+
 form {
   margin: 0;
 }
