@@ -17,10 +17,12 @@
     [java.time LocalDateTime]))
 
 (defn not-found [_]
-  {:body "404 Not Found"
-   :status 404
-   :headers
-   {:content-type "text/html"}})
+  (ui/Page
+    :title "404"
+    :content
+    [:main
+     [:h1 "404 Not found"]
+     [:p "Sorry, we couldn't find the page you were looking for."]]))
 
 ;; CONFIG
 
