@@ -24,7 +24,7 @@
 (comment
   (filters->query-string {:a :b :c :d}))
 
-(defn Page [& {:keys [title banner container-class content status head footer]
+(defn Page [& {:keys [title banner nav container-class content status head footer]
                :or {status 200}}]
   {:status status
    :body
@@ -33,22 +33,11 @@
      [:meta {:charset :utf-8}]
      [:meta {:name :viewport :content "width=device-width, initial-scale=1"}]
      [:title title " | Rad Telehealth Collective"]
-     [:link {:rel :stylesheet
-             :href "/admin/admin.css"}]
      head]
     [:body
      banner
-     [:nav
-      [:a {:href "/admin"} [:h1 "RTC"]]
-      [:ul
-       [:li [:a {:href "/admin/appointments"} "Appointments"]]
-       #_
-       [:li [:a {:href "/admin/schedulers"} "Schedulers"]]
-       #_
-       [:li [:a {:href "/admin/providers"} "Providers"]]
-       [:li [:a {:href "/account"} "My account"]]]]
-     [:.container {:class container-class}
-      content]
+     nav
+     [:.container {:class container-class} content]
      [:footer footer]]]})
 
 (defn NotFoundPage [_req]

@@ -34,15 +34,28 @@
 (defn AdminPage [& {:keys [footer system] :as req}]
   (when-not system
     (throw (ex-info "No :system key!" {:keys (keys req)})))
-  (ui/Page (assoc req
-                  :banner
-                  (when (false? (get-in system [:app/authentication :enabled?]))
-                    [:.banner-alert
-                     [:strong "WARNING: Authentication is disabled!"]])
-                  :footer
-                  [:<>
-                   footer
-                   (DebugFooter system)])))
+  (ui/Page
+    (assoc req
+           :head
+           [:link {:rel :stylesheet :href "/admin/admin.css"}]
+           :banner
+           (when (false? (get-in system [:app/authentication :enabled?]))
+             [:.banner-alert
+              [:strong "WARNING: Authentication is disabled!"]])
+           :nav
+           [:nav
+            [:a {:href "/admin"} [:h1 "RTC"]]
+            [:ul
+             [:li [:a {:href "/admin/appointments"} "Appointments"]]
+             #_
+             [:li [:a {:href "/admin/schedulers"} "Schedulers"]]
+             #_
+             [:li [:a {:href "/admin/providers"} "Providers"]]
+             [:li [:a {:href "/account"} "My account"]]]]
+           :footer
+           [:<>
+            footer
+            (DebugFooter system)])))
 
 (defn show [_]
   (ui/Page
