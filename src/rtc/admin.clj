@@ -32,6 +32,8 @@
         " | Clojure version: " clojure-version)])
 
 (defn AdminPage [& {:keys [footer system] :as req}]
+  (when-not system
+    (throw (ex-info "No :system key!" {:keys (keys req)})))
   (ui/Page (assoc req
                   :footer
                   [:<>

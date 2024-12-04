@@ -534,6 +534,7 @@
              (annotate {:now (:now req)}))
         available-statuses (filter #(not= status %) $appt-statuses)]
     (admin/AdminPage
+      :system (:system req)
       :title "Appointment"
       :container-class :appt-details
       :content
