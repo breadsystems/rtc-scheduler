@@ -31,7 +31,9 @@
                             (.format fmt-ymd started-at))
         " | Clojure version: " clojure-version)])
 
-(defn AdminPage [& {:keys [footer system] :as req}]
+(defn AdminPage [& {:keys [footer system session] :as req}]
+  (when-not session
+    (throw (ex-info "No :session key!" {:keys (keys req)})))
   (when-not system
     (throw (ex-info "No :system key!" {:keys (keys req)})))
   (ui/Page
@@ -57,23 +59,24 @@
             footer
             (DebugFooter system)])))
 
-(defn show [_]
-  (ui/Page
-    :title "Admin"
-    :footer
-    ;; TODO code splitting
-    [:<> [:script {:src "/js/admin.js"}]]
-    :content
-    [:main.spacious
-     [:article.card
-      [:h1 "Appointments"]
-      [:a {:href "/admin/appointments?status=needs-attention"}
-       [:h2 3 #_(count $appointments) " Appointments need follow-up"]]
-      [:a {:href "/admin/appointments?status=scheduled"}
-       [:h2 4 #_(count $appointments) " scheduled"]]
-      [:a {:href "/admin/appointments?status=archived"}
-       [:h2 35 #_(count $appointments) " archived"]]]
-     #_
-     [:article.card
-      [:h1 (count []) " providers"]
-      [:div.instruct "Provider roster coming soon"]]]))
+(defn show [req]
+  (AdminPage
+    (assoc req
+           :title "Admin"
+           :footer
+           ;; TODO remove?
+           [:<> [:script {:src "/js/admin.js"}]]
+           :content
+           [:main.spacious
+            [:article.card
+             [:h1 "Appointments"]
+             [:a {:href "/admin/appointments?status=needs-attention"}
+              [:h2 3 #_(count $appointments) " Appointments need follow-up"]]
+             [:a {:href "/admin/appointments?status=scheduled"}
+              [:h2 4 #_(count $appointments) " scheduled"]]
+             [:a {:href "/admin/appointments?status=archived"}
+              [:h2 35 #_(count $appointments) " archived"]]]
+            #_
+            [:article.card
+             [:h1 (count []) " providers"]
+             [:div.instruct "Provider roster coming soon"]]])))

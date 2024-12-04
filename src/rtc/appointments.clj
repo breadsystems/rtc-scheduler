@@ -340,52 +340,52 @@
     [:div
      [:a {:href uri} "Details"]]]])
 
-(defn show-all [{:keys [params filters now system] :as req}]
+(defn show-all [{:keys [params filters now] :as req}]
   (let [db $appointments ;; TODO
         {:keys [status state]} filters
         any-filters? (or status state)
         results (get-appointments db filters)
         appts (map (partial annotate {:now now}) results)]
     (admin/AdminPage
-      :system system
-      :title "Appointments"
-      :footer
-      [:<> [:script {:src "/admin/admin.js"}]]
-      :content
-      [:<>
-       [:aside
-        [:h1 "Appointments"]
-        [:form.filter-form {:method :get
-                            :action "/admin/appointments"}
-         [:fieldset
-          [:legend "Filter by..."]
-          [:label {:for "appt-status"} "Status"]
-          [:select#appt-status {:name :status}
-           [:option {:value "" :label "All outstanding"}]
-           (map (partial ui/Option status->label status) $appt-statuses)]
-          [:label {:for "appt-state"} "State"]
-          [:select#appt-state {:name :state}
-           [:option {:value "" :label "Any state"}]
-           (map (partial ui/Option state->label state) [:CA
-                                                        :WA])]
-          [:div
-           [:button {:type :submit}
-            "Filter appointments"]]]]]
-       [:main
-        (when any-filters?
-          [:.applied-filters
-           (when status
-             [:a {:href (ui/filters->query-string (dissoc filters :status))}
-              (status->label status)])
-           (when state
-             [:a {:href (ui/filters->query-string (dissoc filters :state))}
-              (state->label state)])
-           [:span
-            [:a {:href "/admin/appointments"} "Clear filters"]]])
-        (if (zero? (count appts))
-          [:div "No appointments found."]
-          [:div "Listing " (count appts) " appointments"])
-        (map AppointmentCard appts)]])))
+      (assoc req
+             :title "Appointments"
+             :footer
+             [:<> [:script {:src "/admin/admin.js"}]]
+             :content
+             [:<>
+              [:aside
+               [:h1 "Appointments"]
+               [:form.filter-form {:method :get
+                                   :action "/admin/appointments"}
+                [:fieldset
+                 [:legend "Filter by..."]
+                 [:label {:for "appt-status"} "Status"]
+                 [:select#appt-status {:name :status}
+                  [:option {:value "" :label "All outstanding"}]
+                  (map (partial ui/Option status->label status) $appt-statuses)]
+                 [:label {:for "appt-state"} "State"]
+                 [:select#appt-state {:name :state}
+                  [:option {:value "" :label "Any state"}]
+                  (map (partial ui/Option state->label state) [:CA
+                                                               :WA])]
+                 [:div
+                  [:button {:type :submit}
+                   "Filter appointments"]]]]]
+              [:main
+               (when any-filters?
+                 [:.applied-filters
+                  (when status
+                    [:a {:href (ui/filters->query-string (dissoc filters :status))}
+                     (status->label status)])
+                  (when state
+                    [:a {:href (ui/filters->query-string (dissoc filters :state))}
+                     (state->label state)])
+                  [:span
+                   [:a {:href "/admin/appointments"} "Clear filters"]]])
+               (if (zero? (count appts))
+                 [:div "No appointments found."]
+                 [:div "Listing " (count appts) " appointments"])
+               (map AppointmentCard appts)]]))))
 
 (defn AccessNeed [{:as need :need/keys [type met?]}]
   [:.access-need
@@ -534,18 +534,18 @@
              (annotate {:now (:now req)}))
         available-statuses (filter #(not= status %) $appt-statuses)]
     (admin/AdminPage
-      :system (:system req)
-      :title "Appointment"
-      :container-class :appt-details
-      :content
-      (if appt
-        [:<>
-         [:main (AppointmentDetails appt)]
-         [:aside (AppointmentActions appt)]]
-        [:main
-         [:h2 "Appointment not found."]
-         [:div [:a {:href "/admin/appointments"} "All appointments"]]])
-      :footer
-      [:details
-       [:summary "Debug info"]
-       [:pre (with-out-str (clojure.pprint/pprint appt))]])))
+      (assoc req
+             :title "Appointment"
+             :container-class :appt-details
+             :content
+             (if appt
+               [:<>
+                [:main (AppointmentDetails appt)]
+                [:aside (AppointmentActions appt)]]
+               [:main
+                [:h2 "Appointment not found."]
+                [:div [:a {:href "/admin/appointments"} "All appointments"]]])
+             :footer
+             [:details
+              [:summary "Debug info"]
+              [:pre (with-out-str (clojure.pprint/pprint appt))]]))))
