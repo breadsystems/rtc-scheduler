@@ -118,6 +118,8 @@ footer {
   width: calc(100% - 2em);
   text-align: right;
   color: var(--col-grey);
+  font-family: monospace;
+  font-size: 0.9em;
 }
 
 
