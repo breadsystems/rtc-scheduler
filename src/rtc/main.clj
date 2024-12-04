@@ -22,6 +22,9 @@
 
 (declare system)
 
+(defmethod ig/init-key :app/env [_ env]
+  (or env :prod))
+
 (defmethod ig/init-key :app/router [_ {:keys [authentication]}]
   (let [auth-enabled? (:enabled? authentication true)]
     ;; TODO trailing slash

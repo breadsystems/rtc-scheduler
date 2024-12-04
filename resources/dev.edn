@@ -4,4 +4,8 @@
  :app/websocket {:port 4042
                  :authentication #ig/ref :app/authentication}
  :app/router {:authentication #ig/ref :app/authentication}
- :app/authentication {:enabled? false}}
+ :app/authentication {:dev/user {:user/id 123
+                                 :user/email "coby@example.com"
+                                 :user/preferences
+                                 {:color-mode :default}}}
+ :app/env :dev}
