@@ -14,7 +14,7 @@
     [rtc.intake :as intake]
     [rtc.ui :as ui])
   (:import
-    [java.time LocalDateTime]))
+    [java.util Date]))
 
 ;; CONFIG
 
@@ -68,7 +68,11 @@
   (clojure-version))
 
 (defmethod ig/init-key :started-at [_ _]
-  (LocalDateTime/now))
+  (Date.))
+
+(defmethod ig/init-key :git-hash [_ _]
+  (-> (clojure.java.shell/sh "git" "rev-parse" "HEAD")
+      :out str (subs 0 8)))
 
 (defmethod ig/init-key :initial-config [_ config]
   config)
@@ -122,7 +126,8 @@
   (let [config (assoc config
                       :initial-config config
                       :started-at nil
-                      :clojure-version nil)]
+                      :clojure-version nil
+                      :git-hash nil)]
     (reset! system (ig/init config))))
 
 (defn stop! [_]
