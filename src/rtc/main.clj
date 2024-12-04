@@ -24,6 +24,7 @@
 
 (defmethod ig/init-key :app/router [_ {:keys [authentication]}]
   (let [auth-enabled? (:enabled? authentication)]
+    ;; TODO trailing slash
     (rr/router
       [["/admin"
         {:get {:middleware [(when auth-enabled? auth/wrap-require-auth)]}}
@@ -37,8 +38,14 @@
         ["/providers"
          {:get {:handler #'admin/show-providers
                 :middleware [#_(admin/wrap-filter-params {:query provider/filter-params})]}}]]
+       ;; TODO AUTHENTICATION
        ["/login"
-        {:get {:handler #'auth/show-login}}]
+        {:get {:handler #'auth/show-login}
+         #_#_
+         :post {:handler #'auth/login}}]
+       #_
+       ["/logout"
+        {:post {:handler #'auth/logout}}]
        ["/get-care"
         {:get {:handler #'intake/show}}]])))
 
