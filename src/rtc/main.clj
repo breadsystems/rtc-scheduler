@@ -18,6 +18,8 @@
 
 ;; CONFIG
 
+(declare system)
+
 (defmethod ig/init-key :app/router [_ {:keys [authentication]}]
   (let [auth-enabled? (:enabled? authentication)]
     (rr/router
@@ -37,6 +39,10 @@
         {:get {:handler #'auth/show-login}}]
        ["/get-care"
         {:get {:handler #'intake/show}}]])))
+
+(defn -wrap-system [f]
+  (fn [req]
+    (f (assoc req :system @system))))
 
 (defn -wrap-now [f]
   (fn [req]
@@ -76,6 +82,7 @@
                         (assoc-in $ [:params :keywordize] true))
         handler (-> router
                     (rr/ring-handler (rr/create-default-handler {:not-found ui/NotFoundPage}))
+                    -wrap-system
                     -wrap-default-content-type
                     -wrap-keyword-headers
                     -wrap-now
