@@ -2,6 +2,7 @@
   (:require
     [aero.core :as aero]
     [clojure.edn :as edn]
+    [clojure.java.shell :as shell]
     [integrant.core :as ig]
     [org.httpkit.server :as http]
     [reitit.ring :as rr]
@@ -72,7 +73,7 @@
   (Date.))
 
 (defmethod ig/init-key :git-hash [_ _]
-  (-> (clojure.java.shell/sh "git" "rev-parse" "HEAD")
+  (-> (shell/sh "git" "rev-parse" "HEAD")
       :out str (subs 0 8)))
 
 (defmethod ig/init-key :initial-config [_ config]
