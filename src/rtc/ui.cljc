@@ -26,7 +26,8 @@
 
 (defn Page [& {:keys [title container-class content status head footer]
                :or {status 200}}]
-  {:body
+  {:status status
+   :body
    [:html #_{:data-color-mode :high-contrast}
     [:head
      [:meta {:charset :utf-8}]
