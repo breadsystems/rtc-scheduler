@@ -8,7 +8,8 @@
                     (:user session) session
                     (and (= :dev env) (:dev/user authentication))
                     {:user (:dev/user authentication)}
-                    :else session)]
+                    :else session)
+          req (assoc req :session session)]
       (if (:user session)
         (f req)
         {:status 302
