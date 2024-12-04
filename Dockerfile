@@ -2,15 +2,11 @@ FROM clojure:openjdk-11-tools-deps AS build
 WORKDIR /app
 
 COPY deps.edn deps.edn
-RUN clojure -A:build:prod -M -e ::ok   # preload and cache dependencies, only reruns if deps.edn changes
-
 COPY .git .git
 COPY shadow-cljs.edn shadow-cljs.edn
 COPY src src
-COPY build build
-COPY production production
 COPY resources resources
 
-RUN clojure -X:build:prod uberjar :build/jar-name app.jar
+RUN clojure -X:build uberjar
 
-CMD java -cp app.jar clojure.main -m prod
+CMD java -cp target/rtc.jar clojure.main -m prod
