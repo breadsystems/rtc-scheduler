@@ -1,8 +1,6 @@
 (ns rtc.ui
   (:require
-    [rum.core :as rum :exclude [cljsjs/react cljsjs/react-dom]])
-  (:import
-    [java.text SimpleDateFormat]))
+    [rum.core :as rum :exclude [cljsjs/react cljsjs/react-dom]]))
 
 (defn wrap-rum-html [f]
   (fn [req]
@@ -25,18 +23,6 @@
 
 (comment
   (filters->query-string {:a :b :c :d}))
-
-(def fmt-ymd (SimpleDateFormat. "yyyy-MM-dd HH:mm a z"))
-
-(defn DebugFooter [{:keys [clojure-version
-                           git-hash
-                           release-version
-                           started-at]}]
-  [:.bottom
-   (str "Release version: " git-hash
-        " | Started at: " (when started-at
-                            (.format fmt-ymd started-at))
-        " | Clojure version: " clojure-version)])
 
 (defn Page [& {:keys [title container-class content status head footer system]
                :or {status 200}}]
@@ -64,9 +50,7 @@
        [:li [:a {:href "/account"} "My account"]]]]
      [:.container {:class container-class}
       content]
-     [:footer
-      footer
-      (DebugFooter system)]]]})
+     [:footer footer]]]})
 
 (defn NotFoundPage [{:keys [system]}]
   (Page

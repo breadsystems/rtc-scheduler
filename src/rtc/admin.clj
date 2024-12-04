@@ -1,6 +1,8 @@
 (ns rtc.admin
   (:require
-    [rtc.ui :as ui]))
+    [rtc.ui :as ui])
+  (:import
+    [java.text SimpleDateFormat]))
 
 (defn- coerce-filter-params [params coercions]
   (reduce (fn [filters [k coerce]]
@@ -16,6 +18,25 @@
 (defn show-providers [_]
   {:body "TODO show providers"
    :status 200})
+
+(def fmt-ymd (SimpleDateFormat. "yyyy-MM-dd HH:mm a z"))
+
+(defn DebugFooter [{:keys [clojure-version
+                           git-hash
+                           release-version
+                           started-at]}]
+  [:.bottom
+   (str "Release version: " git-hash
+        " | Started at: " (when started-at
+                            (.format fmt-ymd started-at))
+        " | Clojure version: " clojure-version)])
+
+(defn AdminPage [& {:keys [footer system] :as req}]
+  (ui/Page (assoc req
+                  :footer
+                  [:<>
+                   footer
+                   (DebugFooter system)])))
 
 (defn show [_]
   (ui/Page

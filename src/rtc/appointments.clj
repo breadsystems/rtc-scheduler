@@ -1,6 +1,7 @@
 (ns rtc.appointments
   (:require
     [clojure.string :as string]
+    [rtc.admin :as admin]
     [rtc.ui :as ui])
   (:import
     [java.time LocalDateTime ZoneId]
@@ -345,7 +346,7 @@
         any-filters? (or status state)
         results (get-appointments db filters)
         appts (map (partial annotate {:now now}) results)]
-    (ui/Page
+    (admin/AdminPage
       :system system
       :title "Appointments"
       :footer
@@ -532,7 +533,7 @@
              (uuid->appointment $appointments)
              (annotate {:now (:now req)}))
         available-statuses (filter #(not= status %) $appt-statuses)]
-    (ui/Page
+    (admin/AdminPage
       :title "Appointment"
       :container-class :appt-details
       :content
