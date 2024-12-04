@@ -35,6 +35,10 @@
   (when-not system
     (throw (ex-info "No :system key!" {:keys (keys req)})))
   (ui/Page (assoc req
+                  :banner
+                  (when (false? (get-in system [:app/authentication :enabled?]))
+                    [:.banner-alert
+                     [:strong "WARNING: Authentication is disabled!"]])
                   :footer
                   [:<>
                    footer

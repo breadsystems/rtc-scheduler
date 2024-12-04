@@ -24,7 +24,7 @@
 (comment
   (filters->query-string {:a :b :c :d}))
 
-(defn Page [& {:keys [title container-class content status head footer system]
+(defn Page [& {:keys [title banner container-class content status head footer]
                :or {status 200}}]
   {:status status
    :body
@@ -37,8 +37,7 @@
              :href "/admin/admin.css"}]
      head]
     [:body
-     (when (false? (get-in system [:app/authentication :enabled?]))
-       [:div.banner-alert "NOTE: AUTHENTICATION IS DISABLED!"])
+     banner
      [:nav
       [:a {:href "/admin"} [:h1 "RTC"]]
       [:ul
@@ -52,9 +51,8 @@
       content]
      [:footer footer]]]})
 
-(defn NotFoundPage [{:keys [system]}]
+(defn NotFoundPage [_req]
   (Page
-    :system system
     :title "404"
     :content
     [:main
