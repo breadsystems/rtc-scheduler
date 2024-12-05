@@ -34,12 +34,26 @@
 [data-color-mode=high-contrast] {
   --col-inky: black;
   --col-offwhite: white;
-  --col-link: rgb(41, 0, 76);
+  --col-teal: rgb(41, 0, 76);
   --col-hotpink: rgb(197, 2, 93);
-  --col-alert-bg: rgb(255, 227, 227);
-  --col-alert-border: rgb(218, 43, 92);
-  --col-emphasis-bg: rgb(216, 245, 238);
-  --col-emphasis-border: rgb(12, 3, 39);
+  --col-palepurple: rgb(255, 227, 227);
+  --col-purple: rgb(218, 43, 92);
+  --col-paleblue: rgb(216, 245, 238);
+  --col-lavender: rgb(12, 3, 39);
+}
+
+[data-color-mode=low-contrast] {
+  --col-inky: rgb(113, 10, 142);
+  --col-offwhite: rgb(190, 190, 190);
+  --col-teal: rgb(61, 97, 134);
+  --col-hotpink: rgb(167, 30, 93);
+  --col-pink: rgb(216, 200, 202);
+  --col-palepurple: rgb(218, 206, 223);
+  --col-purple: rgb(175, 87, 173);
+  --col-paleblue: rgb(209, 215, 221);
+  --col-lavender: rgb(158, 131, 177);
+  --col-lightgrey: rgb(145, 148, 148);
+  --col-palegrey: rgb(211, 209, 209);
 }
 
 
@@ -68,7 +82,7 @@ body > nav {
   align-items: center;
 
   padding: 0.5rem;
-  border-bottom: 2px solid pink;
+  border-bottom: 2px solid var(--col-pink);
 }
 body > nav > ul {
   display: flex;
@@ -166,6 +180,9 @@ fieldset label {
   font-weight: 800;
 }
 
+button, select, input, textarea {
+  background-color: var(--off-white);
+}
 button, select {
   padding: var(--spacing-form-elem);
   border: var(--border-form-elem);
