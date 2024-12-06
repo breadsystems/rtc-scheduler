@@ -1,15 +1,20 @@
 {:paths ["src" "resources"]
  :deps
- {aero/aero                 {:mvn/version "1.1.6"}
-  metosin/reitit            {:mvn/version "0.7.2"}
-  http-kit/http-kit         {:mvn/version "2.6.0"}
-  integrant/integrant       {:mvn/version "0.8.0"}
-  ring/ring                 {:mvn/version "1.11.0"}
-  ring/ring-defaults        {:mvn/version "0.4.0"}
-  rum/rum                   {:mvn/version "0.12.0"}
-  org.clojure/clojure       {:mvn/version "1.12.0-alpha5"}
-  org.clojure/clojurescript {:mvn/version "1.11.121"}
-  org.clojure/tools.logging {:mvn/version "1.2.4"}}
+ {aero/aero                           {:mvn/version "1.1.6"}
+  systems.bread/bread-core            {:mvn/version "0.7.1746"}
+  systems.bread/bread-plugin-auth     {:mvn/version "0.7.1744"}
+  systems.bread/bread-plugin-reitit   {:mvn/version "0.7.1535"}
+  systems.bread/bread-plugin-datahike {:mvn/version "0.7.1535"}
+  systems.bread/bread-plugin-rum      {:mvn/version "0.7.1535"}
+  metosin/reitit                      {:mvn/version "0.7.2"}
+  http-kit/http-kit                   {:mvn/version "2.6.0"}
+  integrant/integrant                 {:mvn/version "0.8.0"}
+  ring/ring                           {:mvn/version "1.11.0"}
+  ring/ring-defaults                  {:mvn/version "0.4.0"}
+  rum/rum                             {:mvn/version "0.12.0"}
+  org.clojure/clojure                 {:mvn/version "1.12.0-alpha5"}
+  org.clojure/clojurescript           {:mvn/version "1.11.121"}
+  org.clojure/tools.logging           {:mvn/version "1.2.4"}}
 
  :aliases
  {;; clojure -M:test -m kaocha.runner
