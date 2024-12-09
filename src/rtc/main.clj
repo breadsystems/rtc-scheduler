@@ -16,10 +16,10 @@
     [systems.bread.alpha.dispatcher :as dispatcher]
     [systems.bread.alpha.route :as route]
     [systems.bread.alpha.user :as user]
-    [systems.bread.alpha.plugin.auth]
+    [systems.bread.alpha.plugin.auth :as bread-auth]
     [systems.bread.alpha.plugin.reitit :as reitit]
     [systems.bread.alpha.plugin.datahike]
-    [systems.bread.alpha.plugin.rum]
+    [systems.bread.alpha.plugin.rum :as rum]
 
     [rtc.actions :as actions]
     [rtc.admin :as admin]
