@@ -103,12 +103,12 @@
   config)
 
 (defmethod ig/init-key :app/http [_ {:keys [port ring-defaults router]
-                                 :or {ring-defaults {}}}]
+                                     :or {ring-defaults {}}}]
   ;; TODO timbre
   (println "Starting HTTP server on port" port)
   (let [wrap-config (as-> ring/secure-site-defaults $
-                        (reduce #(assoc-in %1 (key %2) (val %2)) $ ring-defaults)
-                        (assoc-in $ [:params :keywordize] true))
+                      (reduce #(assoc-in %1 (key %2) (val %2)) $ ring-defaults)
+                      (assoc-in $ [:params :keywordize] true))
         handler (-> router
                     (rr/ring-handler (rr/create-default-handler {:not-found ui/NotFoundPage}))
                     -wrap-system
