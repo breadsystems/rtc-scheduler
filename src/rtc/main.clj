@@ -9,13 +9,9 @@
     [ring.middleware.defaults :as ring]
 
     [systems.bread.alpha.core :as bread]
+    [systems.bread.alpha.defaults :as bread-defaults]
     [systems.bread.alpha.database :as db]
-    [systems.bread.alpha.component :as component]
-    [systems.bread.alpha.i18n :as i18n]
-    [systems.bread.alpha.expansion :as expansion]
-    [systems.bread.alpha.dispatcher :as dispatcher]
     [systems.bread.alpha.route :as route]
-    [systems.bread.alpha.user :as user]
     [systems.bread.alpha.plugin.auth :as bread-auth]
     [systems.bread.alpha.plugin.reitit]
     [systems.bread.alpha.plugin.datahike]
@@ -36,15 +32,12 @@
 (declare system)
 
 (defmethod ig/init-key :bread/app [_ {:keys [db routes]}]
-  (bread/load-app (bread/app {:plugins [(dispatcher/plugin)
-                                        (expansion/plugin)
-                                        (component/plugin)
-                                        (rum/plugin)
-                                        (user/plugin)
-                                        (bread-auth/plugin)
-                                        (route/plugin routes)
-                                        #_
-                                        (db/plugin db)]})))
+  (let [plugins (concat
+                  (bread-defaults/plugins {:db db
+                                           :routes routes})
+                  [(rum/plugin)
+                   (bread-auth/plugin)])]
+    (bread/load-app (bread/app {:plugins plugins}))))
 
 (defmethod ig/init-key :bread/handler [_ {:keys [loaded-app]}]
   (bread/handler loaded-app))
@@ -166,7 +159,7 @@
 (defn start! [config]
   (let [config (assoc config
                       :app/initial-config config
-                      :bread/app {:db (ig/ref :bread/db)
+                      :bread/app {:db false #_(ig/ref :bread/db) ;; TODO
                                   :routes {:router (ig/ref :app/router)}}
                       :bread/handler {:loaded-app (ig/ref :bread/app)}
                       :app/started-at nil
