@@ -1,8 +1,8 @@
 {:paths ["src" "resources"]
  :deps
  {aero/aero                           {:mvn/version "1.1.6"}
-  systems.bread/bread-core            {:mvn/version "0.7.1746"}
-  systems.bread/bread-plugin-auth     {:mvn/version "0.7.1744"}
+  systems.bread/bread-core            {:mvn/version "0.7.1778"}
+  systems.bread/bread-plugin-auth     {:mvn/version "0.7.1778"}
   systems.bread/bread-plugin-reitit   {:mvn/version "0.7.1535"}
   systems.bread/bread-plugin-datahike {:mvn/version "0.7.1535"}
   systems.bread/bread-plugin-rum      {:mvn/version "0.7.1535"}
