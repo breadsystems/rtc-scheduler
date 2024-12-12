@@ -8,4 +8,9 @@
                                  :user/email "coby@example.com"
                                  :user/preferences
                                  {:color-mode :default}}}
- :app/env :dev}
+ :app/env :dev
+ :bread/db {:db/type :datahike
+            :store {:backend :mem
+                    :id "rtc-db"}
+            :recreate? true
+            :force? true}}

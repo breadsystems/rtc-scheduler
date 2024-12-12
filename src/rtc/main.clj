@@ -17,7 +17,7 @@
     [systems.bread.alpha.route :as route]
     [systems.bread.alpha.user :as user]
     [systems.bread.alpha.plugin.auth :as bread-auth]
-    [systems.bread.alpha.plugin.reitit :as reitit]
+    [systems.bread.alpha.plugin.reitit]
     [systems.bread.alpha.plugin.datahike]
     [systems.bread.alpha.plugin.rum :as rum]
 
@@ -34,6 +34,22 @@
 ;; CONFIG
 
 (declare system)
+
+(defmethod ig/init-key :bread/app [_ {:keys [db routes]}]
+  (bread/load-app (bread/app {:plugins [(dispatcher/plugin)
+                                        (expansion/plugin)
+                                        (component/plugin)
+                                        (rum/plugin)
+                                        (user/plugin)
+                                        (bread-auth/plugin)
+                                        (route/plugin routes)
+                                        #_
+                                        (db/plugin db)]})))
+
+(defmethod ig/init-key :bread/handler [_ {:keys [loaded-app]}]
+  (bread/handler loaded-app))
+
+(defmethod ig/init-key :bread/db [_ db-config] db-config)
 
 (defmethod ig/init-key :app/env [_ env]
   (or env :prod))
@@ -150,6 +166,9 @@
 (defn start! [config]
   (let [config (assoc config
                       :app/initial-config config
+                      :bread/app {:db (ig/ref :bread/db)
+                                  :routes {:router (ig/ref :app/router)}}
+                      :bread/handler {:loaded-app (ig/ref :bread/app)}
                       :app/started-at nil
                       :app/clojure-version nil
                       :app/git-hash nil)]
@@ -170,8 +189,16 @@
   (stop! (-> "resources/dev.edn" aero/read-config))
 
   (deref system)
-  ((rr/ring-handler router) {:uri "/admin"
-                             :request-method :get})
+  (:bread/handler @system)
+  (::bread/plugins (:bread/app @system))
+  (::bread/hooks (:bread/app @system))
+  (= (route/router (:bread/app @system))
+     (bread/hook (:bread/app @system) ::route/router))
+
+  (-> (:bread/app @system)
+      (bread/hook ::bread/route))
+
+  ((:bread/handler @system) {:uri "/admin"})
 
   ;;
 
