@@ -89,17 +89,17 @@
 (defmethod ig/init-key :app/authentication [_ auth-config]
   (merge {:enabled? true} auth-config))
 
-(defmethod ig/init-key :clojure-version [_ _]
+(defmethod ig/init-key :app/clojure-version [_ _]
   (clojure-version))
 
-(defmethod ig/init-key :started-at [_ _]
+(defmethod ig/init-key :app/started-at [_ _]
   (Date.))
 
-(defmethod ig/init-key :git-hash [_ _]
+(defmethod ig/init-key :app/git-hash [_ _]
   (-> (shell/sh "git" "rev-parse" "HEAD")
       :out str (subs 0 8)))
 
-(defmethod ig/init-key :initial-config [_ config]
+(defmethod ig/init-key :app/initial-config [_ config]
   config)
 
 (defmethod ig/init-key :app/http [_ {:keys [port ring-defaults router]
@@ -149,10 +149,10 @@
 
 (defn start! [config]
   (let [config (assoc config
-                      :initial-config config
-                      :started-at nil
-                      :clojure-version nil
-                      :git-hash nil)]
+                      :app/initial-config config
+                      :app/started-at nil
+                      :app/clojure-version nil
+                      :app/git-hash nil)]
     (reset! system (ig/init config))))
 
 (defn stop! [_]

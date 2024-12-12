@@ -1,6 +1,7 @@
-{:app/http {:port 8000
+{:app/env :prod
+ :app/http {:port 8000
             :router #ig/ref :app/router}
  :app/websocket {:port 8001
                  :authentication #ig/ref :app/authentication}
  :app/router {:authentication #ig/ref :app/authentication}
- :app/authentication {}}
+ :app/authentication {:enabled? true}}

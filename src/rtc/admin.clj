@@ -21,10 +21,10 @@
 
 (def fmt-ymd (SimpleDateFormat. "yyyy-MM-dd HH:mm a z"))
 
-(defn DebugFooter [{:keys [clojure-version
-                           git-hash
-                           release-version
-                           started-at]}]
+(defn DebugFooter [{:app/keys [clojure-version
+                               git-hash
+                               release-version
+                               started-at]}]
   [:.bottom
    (str "Release version: " git-hash
         " | Started at: " (when started-at
