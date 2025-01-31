@@ -342,7 +342,7 @@
     [:div
      [:a {:href uri} "Details"]]]])
 
-(defn show-all [{:keys [params filters now] :as req}]
+(defn show-all [{:keys [filters now] :as req}]
   (let [db $appointments ;; TODO
         {:keys [status state]} filters
         any-filters? (or status state)
