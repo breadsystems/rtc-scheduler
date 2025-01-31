@@ -24,23 +24,21 @@
 (comment
   (filters->query-string {:a :b :c :d}))
 
-(defn Page [& {:keys [title banner nav container-class content session status head footer]
+(defn Page [& {:keys [title banner nav container-class content session head footer]
                :or {status 200}}]
   (let [{:user/keys [preferences]} (:user session)]
-    {:status status
-     :body
-     [:html (when preferences
-              {:data-color-mode (:color-mode preferences)})
-      [:head
-       [:meta {:charset :utf-8}]
-       [:meta {:name :viewport :content "width=device-width, initial-scale=1"}]
-       [:title title " | Rad Telehealth Collective"]
-       head]
-      [:body
-       banner
-       nav
-       [:.container {:class container-class} content]
-       [:footer footer]]]}))
+    [:html (when preferences
+             {:data-color-mode (:color-mode preferences)})
+     [:head
+      [:meta {:charset :utf-8}]
+      [:meta {:name :viewport :content "width=device-width, initial-scale=1"}]
+      [:title title " | Rad Telehealth Collective"]
+      head]
+     [:body
+      banner
+      nav
+      [:.container {:class container-class} content]
+      [:footer footer]]]))
 
 (defn NotFoundPage [_req]
   (Page
