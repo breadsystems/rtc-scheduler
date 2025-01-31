@@ -4,7 +4,7 @@
   (:import
     [java.text SimpleDateFormat]))
 
-(defn- coerce-filter-params [params coercions]
+(defn coerce-filter-params [params coercions]
   (reduce (fn [filters [k coerce]]
             (update filters k coerce))
           params coercions))
