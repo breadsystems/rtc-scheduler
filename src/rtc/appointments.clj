@@ -2,6 +2,7 @@
   (:require
     [clojure.string :as string]
     [systems.bread.alpha.core :as bread]
+    [systems.bread.alpha.component :refer [defc]]
 
     [rtc.admin :as admin]
     [rtc.ui :as ui])
@@ -389,6 +390,68 @@
                  [:div "Listing " (count appts) " appointments"])
                (map AppointmentCard appts)]]))))
 
+(defc AppointmentsList [{:keys [appointments filters now system] :as data}]
+  {:key :appointments
+   :query [:appt/*]}
+  (prn now (nil? system))
+  (let [{:keys [status state]} filters
+        any-filters? (or status state)
+        ;; TODO annotate in an expansion
+        appts (map (partial annotate {:now now}) appointments)]
+    (admin/AdminPage
+      (assoc data
+             :title "Appointments"
+             :footer
+             [:<> [:script {:src "/admin/admin.js"}]]
+             :content
+             [:<>
+              [:aside
+               [:h1 "Appointments"]
+               [:form.filter-form {:method :get
+                                   :action "/admin/appointments"}
+                [:fieldset
+                 [:legend "Filter by..."]
+                 [:label {:for "appt-status"} "Status"]
+                 [:select#appt-status {:name :status}
+                  [:option {:value "" :label "All outstanding"}]
+                  (map (partial ui/Option status->label status) $appt-statuses)]
+                 [:label {:for "appt-state"} "State"]
+                 [:select#appt-state {:name :state}
+                  [:option {:value "" :label "Any state"}]
+                  (map (partial ui/Option state->label state) [:CA
+                                                               :WA])]
+                 [:div
+                  [:button {:type :submit}
+                   "Filter appointments"]]]]]
+              [:main
+               (when any-filters?
+                 [:.applied-filters
+                  (when status
+                    [:a {:href (ui/filters->query-string (dissoc filters :status))}
+                     (status->label status)])
+                  (when state
+                    [:a {:href (ui/filters->query-string (dissoc filters :state))}
+                     (state->label state)])
+                  [:span
+                   [:a {:href "/admin/appointments"} "Clear filters"]]])
+               (if (zero? (count appts))
+                 [:div "No appointments found."]
+                 [:div "Listing " (count appts) " appointments"])
+               (map AppointmentCard appts)]]))))
+
+(defmethod bread/dispatch ::show-all
+  [{:keys [now params]}]
+  {:expansions
+   [{:expansion/key :filters
+     :expansion/name ::bread/value
+     :expansion/value (admin/coerce-filter-params params filter-coercions)
+     :expansion/description "The currently applied search filters"}
+    {;; TODO query the db
+     :expansion/key :appointments
+     :expansion/name ::bread/value
+     :expansion/value $appointments
+     :expansion/description "All appointments"}]})
+
 (defn AccessNeed [{:as need :need/keys [type met?]}]
   [:.access-need
    (if met? "✓" "✗")
@@ -551,11 +614,3 @@
              [:details
               [:summary "Debug info"]
               [:pre (with-out-str (clojure.pprint/pprint appt))]]))))
-
-(defmethod bread/dispatch ::show
-  [_]
-  (println "SHOW APPT")
-  {:hooks
-   {::bread/render
-    [{:action/name ::bread/value
-      :action/value {:body "hi there"}}]}})

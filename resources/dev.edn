@@ -1,6 +1,7 @@
 {:app/http {:port 4040
             :ring-defaults {[:security] false}
-            :router #ig/ref :app/router}
+            :router #ig/ref :app/router
+            :bread/handler #ig/ref :bread/handler}
  :app/websocket {:port 4042
                  :authentication #ig/ref :app/authentication}
  :app/router {:authentication #ig/ref :app/authentication}

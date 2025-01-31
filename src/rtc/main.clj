@@ -31,12 +31,25 @@
 
 (declare system)
 
+(defmethod bread/action ::system [req _ _]
+  (assoc-in req [::bread/data :system] @system))
+
+(defmethod bread/action ::now [req _ _]
+  (assoc-in req [::bread/data :now] (LocalDateTime/now)))
+
 (defmethod ig/init-key :bread/app [_ app-config]
   (prn app-config)
   (let [plugins (conj
                   (bread-defaults/plugins app-config)
                   (rum/plugin)
-                  (bread-auth/plugin))]
+                  (bread-auth/plugin)
+                  {:hooks
+                   {::bread/dispatch
+                    [{:action/name ::system
+                      :action/description "Add system-global state to data"}
+                     {:action/name ::now
+                      :action/description "Add current datetime to data"}
+                     ]}})]
     (bread/load-app (bread/app {:plugins plugins}))))
 
 (defmethod ig/init-key :bread/handler [_ {:keys [loaded-app]}]
@@ -59,8 +72,8 @@
          {:get {:handler #'appt/show-all
                 :middleware [(admin/wrap-filter-params {:query appt/filter-coercions})]}}]
         ["/appointments-test"
-         {:get {:handler {:dispatcher/type ::appt/show}
-                :middleware [(admin/wrap-filter-params {:query appt/filter-coercions})]}}]
+         {:get {:handler {:dispatcher/type ::appt/show-all
+                          :dispatcher/component #'appt/AppointmentsList}}}]
         ["/appointments/{appt/uuid}"
          {:get {:handler #'appt/show}}]
         ["/providers"
@@ -76,14 +89,6 @@
         {:post {:handler #'auth/logout}}]
        ["/get-care"
         {:get {:handler #'intake/show}}]])))
-
-(defn -wrap-system [f]
-  (fn [req]
-    (f (assoc req :system @system))))
-
-(defn -wrap-now [f]
-  (fn [req]
-    (f (assoc req :now (LocalDateTime/now)))))
 
 (defn -wrap-keyword-headers [f]
   (fn [req]
@@ -114,20 +119,17 @@
 (defmethod ig/init-key :app/initial-config [_ config]
   config)
 
-(defmethod ig/init-key :app/http [_ {:keys [port ring-defaults router]
+(defmethod ig/init-key :app/http [_ {:as config
+                                     :keys [port ring-defaults]
                                      :or {ring-defaults {}}}]
   ;; TODO timbre
   (println "Starting HTTP server on port" port)
   (let [wrap-config (as-> ring/secure-site-defaults $
                       (reduce #(assoc-in %1 (key %2) (val %2)) $ ring-defaults)
                       (assoc-in $ [:params :keywordize] true))
-        handler (-> router
-                    (rr/ring-handler (rr/create-default-handler {:not-found ui/NotFoundPage}))
-                    -wrap-system
+        handler (-> (:bread/handler config)
                     -wrap-default-content-type
                     -wrap-keyword-headers
-                    -wrap-now
-                    ui/wrap-rum-html
                     (ring/wrap-defaults wrap-config))]
     (http/run-server handler {:port port})))
 
@@ -205,12 +207,18 @@
 
   (as-> (:bread/app @system) $
     (assoc $ :uri "/admin/appointments-test" :request-method :get)
+    (bread/route-dispatcher (route/router $) $))
+  (as-> (:bread/app @system) $
+    (assoc $ :uri "/admin/appointments-test" :request-method :get)
     (bread/hook $ ::bread/route)
     (bread/hook $ ::bread/dispatch)
+    (::bread/dispatcher $)
+    #_#_
     (bread/hook $ ::bread/expand)
     (bread/hook $ ::bread/render))
 
-  ((:bread/handler @system) {:uri "/admin/appointments-test" :request-method :get})
+  ((:bread/handler @system) {:uri "/admin/appointments" :request-method :get})
+  (::bread/expansions ((:bread/handler @system) {:uri "/admin/appointments-test" :request-method :get}))
 
   ;;
 
