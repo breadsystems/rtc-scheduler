@@ -4,6 +4,7 @@ lock
 *.repl-file
 .clj-kondo/
 .calva/
+.nrepl-port
 /target/
 /resources/public/*/*.js
 /resources/public/*/manifest.edn
