@@ -31,12 +31,12 @@
 
 (declare system)
 
-(defmethod ig/init-key :bread/app [_ {:keys [db routes]}]
-  (let [plugins (concat
-                  (bread-defaults/plugins {:db db
-                                           :routes routes})
-                  [(rum/plugin)
-                   (bread-auth/plugin)])]
+(defmethod ig/init-key :bread/app [_ app-config]
+  (prn app-config)
+  (let [plugins (conj
+                  (bread-defaults/plugins app-config)
+                  (rum/plugin)
+                  (bread-auth/plugin))]
     (bread/load-app (bread/app {:plugins plugins}))))
 
 (defmethod ig/init-key :bread/handler [_ {:keys [loaded-app]}]

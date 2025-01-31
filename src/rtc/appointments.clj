@@ -1,6 +1,8 @@
 (ns rtc.appointments
   (:require
     [clojure.string :as string]
+    [systems.bread.alpha.core :as bread]
+
     [rtc.admin :as admin]
     [rtc.ui :as ui])
   (:import
@@ -549,3 +551,11 @@
              [:details
               [:summary "Debug info"]
               [:pre (with-out-str (clojure.pprint/pprint appt))]]))))
+
+(defmethod bread/dispatch ::show
+  [_]
+  (println "SHOW APPT")
+  {:hooks
+   {::bread/render
+    [{:action/name ::bread/value
+      :action/value {:body "hi there"}}]}})
