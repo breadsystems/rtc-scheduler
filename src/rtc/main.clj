@@ -68,13 +68,11 @@
         [""
          {:get {:handler #'admin/show}}]
         ["/appointments"
-         {:get {:handler #'appt/show-all
-                :middleware [(admin/wrap-filter-params {:query appt/filter-coercions})]}}]
-        ["/appointments-test"
          {:get {:handler {:dispatcher/type ::appt/show-all
                           :dispatcher/component #'appt/AppointmentsList}}}]
         ["/appointments/{appt/uuid}"
-         {:get {:handler #'appt/show}}]
+         {:get {:handler {:dispatcher/type ::appt/show
+                          :dispatcher/component #'appt/AppointmentPage}}}]
         ["/providers"
          {:get {:handler #'admin/show-providers
                 :middleware [#_(admin/wrap-filter-params {:query provider/filter-params})]}}]]

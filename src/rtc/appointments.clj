@@ -437,7 +437,7 @@
                (map AppointmentCard appts)]]))))
 
 (defmethod bread/dispatch ::show-all
-  [{:keys [now params]}]
+  [{:keys [params]}]
   {:expansions
    [{:expansion/key :filters
      :expansion/name ::bread/value
@@ -611,3 +611,30 @@
              [:details
               [:summary "Debug info"]
               [:pre (with-out-str (clojure.pprint/pprint appt))]]))))
+
+(defc AppointmentPage [{:keys [appt now] :as data}]
+  {:query []
+   :key :appt}
+  (let [appt (annotate {:now now} appt)] ;; TODO expansion
+    (admin/AdminPage
+      (assoc data
+             :title "Appointment"
+             :container-class :appt-details
+             :content
+             (if appt
+               [:<>
+                [:main (AppointmentDetails appt)]
+                [:aside (AppointmentActions appt)]]
+               [:main
+                [:h2 "Appointment not found."]
+                [:div [:a {:href "/admin/appointments"} "All appointments"]]])
+             :footer
+             [:details
+              [:summary "Debug info"]
+              [:pre (with-out-str (clojure.pprint/pprint appt))]]))))
+
+(defmethod bread/dispatch ::show [{{params :route/params} ::bread/dispatcher}]
+  {:expansions
+   [{:expansion/key :appt
+     :expansion/name ::bread/value
+     :expansion/value (uuid->appointment $appointments (:appt/uuid params))}]})
