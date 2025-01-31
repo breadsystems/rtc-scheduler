@@ -58,6 +58,9 @@
         ["/appointments"
          {:get {:handler #'appt/show-all
                 :middleware [(admin/wrap-filter-params {:query appt/filter-coercions})]}}]
+        ["/appointments-test"
+         {:get {:handler {:dispatcher/type ::appt/show}
+                :middleware [(admin/wrap-filter-params {:query appt/filter-coercions})]}}]
         ["/appointments/{appt/uuid}"
          {:get {:handler #'appt/show}}]
         ["/providers"
@@ -159,7 +162,7 @@
 (defn start! [config]
   (let [config (assoc config
                       :app/initial-config config
-                      :bread/app {:db false #_(ig/ref :bread/db) ;; TODO
+                      :bread/app {:db (ig/ref :bread/db) ;; TODO
                                   :routes {:router (ig/ref :app/router)}}
                       :bread/handler {:loaded-app (ig/ref :bread/app)}
                       :app/started-at nil
@@ -188,10 +191,26 @@
   (= (route/router (:bread/app @system))
      (bread/hook (:bread/app @system) ::route/router))
 
-  (-> (:bread/app @system)
-      (bread/hook ::bread/route))
+  (db/create! (:bread/db @system))
+  (db/connect (:bread/db @system))
+  (let [db @(db/connect (:bread/db @system))]
+    (db/q db
+          '{:find [?i]
+            :in [$]
+            :where [[_ :db/ident ?i]]}))
+  (::bread/config (:bread/app @system))
+  (db/connection (:bread/app @system))
+  (bread/config (:bread/app @system) :db/connection)
+  (db/database (:bread/app @system))
 
-  ((:bread/handler @system) {:uri "/admin"})
+  (as-> (:bread/app @system) $
+    (assoc $ :uri "/admin/appointments-test" :request-method :get)
+    (bread/hook $ ::bread/route)
+    (bread/hook $ ::bread/dispatch)
+    (bread/hook $ ::bread/expand)
+    (bread/hook $ ::bread/render))
+
+  ((:bread/handler @system) {:uri "/admin/appointments-test" :request-method :get})
 
   ;;
 
