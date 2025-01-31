@@ -38,7 +38,6 @@
   (assoc-in req [::bread/data :now] (LocalDateTime/now)))
 
 (defmethod ig/init-key :bread/app [_ app-config]
-  (prn app-config)
   (let [plugins (conj
                   (bread-defaults/plugins app-config)
                   (rum/plugin)

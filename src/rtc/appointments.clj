@@ -393,7 +393,6 @@
 (defc AppointmentsList [{:keys [appointments filters now system] :as data}]
   {:key :appointments
    :query [:appt/*]}
-  (prn now (nil? system))
   (let [{:keys [status state]} filters
         any-filters? (or status state)
         ;; TODO annotate in an expansion
@@ -401,8 +400,6 @@
     (admin/AdminPage
       (assoc data
              :title "Appointments"
-             :footer
-             [:<> [:script {:src "/admin/admin.js"}]]
              :content
              [:<>
               [:aside

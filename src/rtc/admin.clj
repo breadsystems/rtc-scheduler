@@ -63,9 +63,6 @@
   (AdminPage
     (assoc req
            :title "Admin"
-           :footer
-           ;; TODO remove?
-           [:<> [:script {:src "/js/admin.js"}]]
            :content
            [:main.spacious
             [:article.card
