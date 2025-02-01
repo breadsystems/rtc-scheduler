@@ -3,6 +3,7 @@
     [aero.core :as aero]
     [clojure.edn :as edn]
     [clojure.java.shell :as shell]
+    [clojure.string :as string]
     [integrant.core :as ig]
     [org.httpkit.server :as http]
     [reitit.ring :as rr]
@@ -12,7 +13,7 @@
     [systems.bread.alpha.defaults :as bread-defaults]
     [systems.bread.alpha.database :as db]
     [systems.bread.alpha.route :as route]
-    [systems.bread.alpha.plugin.auth :as bread-auth]
+    [systems.bread.alpha.plugin.auth :as auth]
     [systems.bread.alpha.plugin.reitit]
     [systems.bread.alpha.plugin.datahike]
     [systems.bread.alpha.plugin.rum :as rum]
@@ -20,7 +21,6 @@
     [rtc.actions :as actions]
     [rtc.admin :as admin]
     [rtc.appointments :as appt]
-    [rtc.auth :as auth]
     [rtc.intake :as intake]
     [rtc.ui :as ui])
   (:import
@@ -37,13 +37,24 @@
 (defmethod bread/action ::now [req _ _]
   (assoc-in req [::bread/data :now] (LocalDateTime/now)))
 
+(defmethod bread/action ::auth [{:keys [session uri] :as req} _ _]
+  (if (and (nil? (:user session)) (string/starts-with? uri "/admin"))
+    (let [;; TODO URL-encode
+          next-uri uri]
+      {:headers {"Location" (format "/login?next=%s" next-uri)}
+       :status 302})
+    req))
+
 (defmethod ig/init-key :bread/app [_ app-config]
   (let [plugins (conj
                   (bread-defaults/plugins app-config)
                   (rum/plugin)
-                  (bread-auth/plugin)
+                  (auth/plugin)
                   {:hooks
-                   {::bread/dispatch
+                   {::bread/route
+                    [{:action/name ::auth
+                      :action/description "Require login for /admin routes"}]
+                    ::bread/dispatch
                     [{:action/name ::system
                       :action/description "Add system-global state to data"}
                      {:action/name ::now
@@ -64,7 +75,6 @@
     ;; TODO trailing slash
     (rr/router
       [["/admin"
-        {:get {:middleware [(when auth-enabled? auth/wrap-require-auth)]}}
         [""
          {:get {:handler #'admin/show}}]
         ["/appointments"
@@ -78,9 +88,9 @@
                 :middleware [#_(admin/wrap-filter-params {:query provider/filter-params})]}}]]
        ;; TODO AUTHENTICATION
        ["/login"
-        {:get {:handler #'auth/show-login}
-         #_#_
-         :post {:handler #'auth/login}}]
+        {:dispatcher/type ::auth/login
+         ;; TODO implement RTC LoginPage
+         :dispatcher/component #'auth/login-page}]
        #_
        ["/logout"
         {:post {:handler #'auth/logout}}]
