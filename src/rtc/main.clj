@@ -107,6 +107,17 @@
     (let [res (f req)]
       (update res :headers #(merge {:content-type "text/html"} %)))))
 
+(defn -wrap-dev-user [f]
+  (fn [{:as req
+        session :session}]
+    (let [{:app/keys [authentication env]} @system
+          session (cond
+                    (:user session) session
+                    (and (= :dev env) (:dev/user authentication))
+                    {:user (:dev/user authentication)}
+                    :else session)]
+      (f (assoc req :session session)))))
+
 (defmethod aero/reader 'ig/ref [_ _ value]
   (ig/ref value))
 
@@ -137,6 +148,7 @@
         handler (-> (:bread/handler config)
                     -wrap-default-content-type
                     -wrap-keyword-headers
+                    -wrap-dev-user
                     (ring/wrap-defaults wrap-config))]
     (http/run-server handler {:port port})))
 
