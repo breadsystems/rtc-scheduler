@@ -84,7 +84,7 @@
         ["/appointments"
          {:get {:handler {:dispatcher/type ::appt/show-all
                           :dispatcher/component #'appt/AppointmentsList}}}]
-        ["/appointments/{appt/uuid}"
+        ["/appointments/{thing/uuid}"
          {:get {:handler {:dispatcher/type ::appt/show
                           :dispatcher/component #'appt/AppointmentPage}}}]
         ["/providers"

@@ -566,4 +566,4 @@
   {:expansions
    [{:expansion/key :appt
      :expansion/name ::bread/value
-     :expansion/value (uuid->appointment $appointments (:appt/uuid params))}]})
+     :expansion/value (uuid->appointment $appointments (:thing/uuid params))}]})
