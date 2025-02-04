@@ -32,8 +32,8 @@
                                   :color-mode :high-contrast}"
               :user/password #buddy/derive ["hello" :bcrypt+blake2b-512]}
              {:thing/uuid #uuid "c11adee6-1777-4408-9946-dcbb19098df0"
-              ;:thing/created-at #inst "2025-01-31T09:31:00-07:00"
-              ;:thing/updated-at #inst "2025-01-31T09:31:00-07:00"
+              :thing/created-at #inst "2025-01-31T09:31:00-07:00"
+              :thing/updated-at #inst "2025-01-31T09:31:00-07:00"
               :appt/status :needs-attention
               :appt/name "Angela Davis"
               :appt/pronouns "she/her"
@@ -61,8 +61,8 @@
                                    :need/met? false}]
               }
              {:thing/uuid #uuid "b358445e-aa6e-44a0-bf48-dafa93ffa446"
-              ;:thing/created-at #inst "2025-01-25T07:31:00-07:00"
-              ;:thing/updated-at #inst "2025-01-29T14:31:00-07:00"
+              :thing/created-at #inst "2025-01-25T07:31:00-07:00"
+              :thing/updated-at #inst "2025-01-29T14:31:00-07:00"
               :appt/status :waiting
               :appt/name "Bobby Seale"
               :appt/pronouns "he/him"
