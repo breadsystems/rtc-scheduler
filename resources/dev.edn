@@ -21,15 +21,13 @@
             ;; #uuid "acdfca4f-2c57-427a-bced-117e25d823ee"
             [{:db/id "user.coby"
               :user/name "Coby"
-              :user/preferences "{:pronouns \"any\"
-                                  :color-mode :default}"
+              :user/preferences "{:pronouns \"any\" :color-mode :default}"
               :user/email "coby@tamayo.email"
               :user/username "coby@tamayo.email"
               :user/password #buddy/derive ["hello" :bcrypt+blake2b-512]}
              {:db/id "user.ursula"
               :user/name "Ursula"
-              :user/preferences "{:pronouns \"they/elle\"
-                                  :color-mode :high-contrast}"
+              :user/preferences "{:pronouns \"they/elle\" :color-mode :high-contrast}"
               :user/password #buddy/derive ["hello" :bcrypt+blake2b-512]}
              {:thing/uuid #uuid "c11adee6-1777-4408-9946-dcbb19098df0"
               :thing/created-at #inst "2025-01-31T09:31:00-07:00"
