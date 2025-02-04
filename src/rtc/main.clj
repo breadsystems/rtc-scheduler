@@ -237,7 +237,8 @@
 (defn log-dispatch [{:keys [hook action result]}]
   (prn hook '=> (::bread/dispatcher result)))
 (defn log-expand [{:keys [hook action result]}]
-  (prn hook (:action/name action) '=> (::bread/expansions result)))
+  (prn hook (:action/name action) '===>)
+  (clojure.pprint/pprint (::bread/expansions result)))
 
 (defn start! [config]
   (let [config (assoc config
@@ -246,7 +247,7 @@
                                   :routes {:router (ig/ref :app/router)}
                                   :i18n {:query-strings? false}}
                       :bread/handler {:loaded-app (ig/ref :bread/app)}
-                      :bread/profilers [{:hook #{::bread/dispatch} :f #'log-dispatch}
+                      :bread/profilers [#_{:hook #{::bread/dispatch} :f #'log-dispatch}
                                         {:hook #{::bread/expand} :f #'log-expand}
                                         #_{:hook #{::i18n/expansions} :f #'log-i18n-expansions}]
                       :app/started-at nil
@@ -320,7 +321,8 @@
 
   (db/q (db/database (:bread/app @system))
         '{:find [(pull ?e [* {:thing/fields [*]}])]
-          :where [[?e :appt/name]]})
+          :where [[?e :appt/name]
+                  [?e :appt/status :waiting]]})
 
   (as-> (:bread/app @system) $
     (assoc $ :uri "/admin/appointments" :request-method :get)
