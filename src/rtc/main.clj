@@ -142,11 +142,15 @@
     (try
       (f req)
       (catch Throwable e
-        (let [data (dissoc (ex-data e) :app ::bread/core?)]
+        (let [data (dissoc (ex-data e) :app ::bread/core?)
+              m (Throwable->map e)]
           {:body (str
                    (.getMessage e)
                    "<br><br>"
-                   (with-out-str (clojure.pprint/pprint data)))
+                   (with-out-str (clojure.pprint/pprint data))
+                   "<br>"
+                   "<h2>Trace:</h2>"
+                   (apply str (map #(apply str % "<br>") (:trace m))))
            :status 500
            :headers {"Content-Type" "text/html"}})))))
 
