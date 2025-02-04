@@ -150,13 +150,6 @@
            :status 500
            :headers {"Content-Type" "text/html"}})))))
 
-(defn log-hook! [invocation]
-  (let [{:keys [hook action result]} invocation]
-    (prn hook (:action/name action) (select-keys result
-                                                 [:params
-                                                  :status
-                                                  :session]))))
-
 (defmethod ig/init-key :bread/profilers [_ profilers]
   ;; Enable hook profiling.
   (alter-var-root #'bread/*profile-hooks* (constantly true))
@@ -237,6 +230,11 @@
 
 (defonce system (atom nil))
 
+(defn log-dispatch [{:keys [hook action result]}]
+  (prn hook '=> (::bread/dispatcher result)))
+(defn log-expand [{:keys [hook action result]}]
+  (prn hook (:action/name action) '=> (::bread/expansions result)))
+
 (defn start! [config]
   (let [config (assoc config
                       :app/initial-config config
@@ -244,8 +242,9 @@
                                   :routes {:router (ig/ref :app/router)}
                                   :i18n {:query-strings? false}}
                       :bread/handler {:loaded-app (ig/ref :bread/app)}
-                      :bread/profilers [{:hook #{::bread/dispatch}
-                                         :f #'log-hook!}]
+                      :bread/profilers [{:hook #{::bread/dispatch} :f #'log-dispatch}
+                                        {:hook #{::bread/expand} :f #'log-expand}
+                                        #_{:hook #{::i18n/expansions} :f #'log-i18n-expansions}]
                       :app/started-at nil
                       :app/clojure-version nil
                       :app/git-hash nil)]
