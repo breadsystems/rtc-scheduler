@@ -317,8 +317,7 @@
       :info/access-needs-icon (if (access-needs-met? appt) "✓" "♿"))))
 
 (defn AppointmentCard [{:as appt
-                        :post/keys [status]
-                        :appt/keys [state email phone]
+                        :appt/keys [status state email phone]
                         :info/keys [alias
                                     all-access-needs-met?
                                     access-needs-icon
