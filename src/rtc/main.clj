@@ -69,7 +69,15 @@
 (defmethod ig/init-key :bread/handler [_ {:keys [loaded-app]}]
   (bread/handler loaded-app))
 
-(defmethod ig/init-key :bread/db [_ db-config] db-config)
+(defmethod ig/init-key :bread/db
+  [_ {:keys [recreate? force?] :as db-config}]
+  (db/create! db-config {:force? force?})
+  (assoc db-config :db/connection (db/connect db-config)))
+
+(defmethod ig/halt-key! :bread/db
+  [_ {:keys [recreate?] :as db-config}]
+  (when recreate? (db/delete! db-config)))
+
 
 (defmethod ig/init-key :app/env [_ env]
   (or env :prod))
@@ -216,7 +224,6 @@
   (= (route/router (:bread/app @system))
      (bread/hook (:bread/app @system) ::route/router))
 
-  (db/create! (:bread/db (aero/read-config "resources/dev.edn")))
   (db/create! (:bread/db @system))
   (db/connect (:bread/db @system))
   (let [db @(db/connect (:bread/db @system))]
