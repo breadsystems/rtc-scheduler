@@ -353,13 +353,11 @@
     [:div
      [:a {:href uri} "Details"]]]])
 
-(defc AppointmentsList [{:keys [appointments filters now] :as data}]
+(defc AppointmentsList [{:keys [appointments filters] :as data}]
   {:key :appointments
-   :query '[*]}
+   :query '[* {:appt/notes [* {:note/created-by [*]}]}]}
   (let [{:keys [status state]} filters
-        any-filters? (or status state)
-        ;; TODO annotate in an expansion
-        appts (map (comp (partial annotate {:now now}) first) appointments)]
+        any-filters? (or status state)]
     (admin/AdminPage
       (assoc data
              :title "Appointments"
@@ -394,10 +392,15 @@
                      (state->label state)])
                   [:span
                    [:a {:href "/admin/appointments"} "Clear filters"]]])
-               (if (zero? (count appts))
+               (if (zero? (count appointments))
                  [:div "No appointments found."]
-                 [:div "Listing " (count appts) " appointments"])
-               (map AppointmentCard appts)]]))))
+                 [:div "Listing " (count appointments) " appointments"])
+               (map AppointmentCard appointments)]]))))
+
+(defmethod bread/expand ::annotate
+  [{:keys [now] :as expansion} data]
+  (let [appts (map first (get data (:expansion/key expansion)))]
+    (map (partial annotate {:now now}) appts)))
 
 (defmethod bread/dispatch ::show-all
   [{:keys [params] ::bread/keys [dispatcher] :as req}]
@@ -408,24 +411,25 @@
                                      ['?e :post/status (:status filters)])
                                    (when (:state filters)
                                      ['?e :appt/state (:state filters)])])}]
-    (prn 'dispatcher dispatcher)
-    (prn 'FILTERS filters)
-    (prn 'QUERY query)
     {:expansions
      [{:expansion/key :filters
        :expansion/name ::bread/value
        :expansion/value filters
        :expansion/description "The currently applied search filters"}
-      {:expansion/key :appointments
+      {;; TODO DELETE
+       :expansion/key :appointments
        :expansion/name ::bread/value
        :expansion/value $appointments
        :expansion/description "Hard-coded appointments..."}
-      {;; TODO
-       :expansion/key :appointments
+      {:expansion/key :appointments
        :expansion/name ::db/query
        :expansion/description "Query appointments."
        :expansion/db (db/database req)
-       :expansion/args [query]}]}))
+       :expansion/args [query]}
+      {:expansion/key :appointments
+       :expansion/name ::annotate
+       :now (LocalDateTime/now)
+       :expansion/description "Annotate appointment with view-layer data"}]}))
 
 (defn AccessNeed [{:as need :need/keys [type met?]}]
   [:.access-need
