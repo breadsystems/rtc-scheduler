@@ -127,9 +127,9 @@
                                :bread.migration/users}}))
 
 (defmethod bread/action ::migrations [_ _ [all-migrations]]
-  (conj all-migrations
-        base
-        ;; NOTE: add new migrations here...
+  (concat all-migrations
+          [base
+          ;; NOTE: add new migrations here...
 
-        ;;
-        ))
+          ;;
+          ]))
