@@ -3,6 +3,7 @@
     [clojure.string :as string]
     [systems.bread.alpha.core :as bread]
     [systems.bread.alpha.component :refer [defc]]
+    [systems.bread.alpha.database :as db]
 
     [rtc.admin :as admin]
     [rtc.ui :as ui])
@@ -32,9 +33,10 @@
   [])
 
 (def $appointments
-  [{:appt/uuid 123
-    :appt/created-at #inst "2024-11-12T09:06:00-07:00"
-    :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
+  [{:thing/uuid 123
+    :thing/created-at #inst "2024-11-12T09:06:00-07:00"
+    :thing/updated-at #inst "2024-11-13T03:46:00-07:00"
+    :post/type :rtc.appointment
     :appt/name "Angela Davis"
     :appt/alias "A."
     :appt/pronouns "she/her"
@@ -58,9 +60,10 @@
                          :need/met? false}]
     :appt/notes []
     :appt/misc "Lorem ipsum dolor sit amet"}
-   {:appt/uuid 234
-    :appt/created-at #inst "2024-11-12T09:06:00-07:00"
-    :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
+   {:thing/uuid 234
+    :thing/created-at #inst "2024-11-12T09:06:00-07:00"
+    :thing/updated-at #inst "2024-11-13T03:46:00-07:00"
+    :post/type :rtc.appointment
     :appt/name "Bobby Seale"
     :appt/alias "B."
     :appt/pronouns "he/him"
@@ -86,9 +89,10 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Need to schedule live captioner"}]}
-   {:appt/uuid 345
-    :appt/created-at #inst "2024-11-10T08:02:00-07:00"
-    :appt/updated-at #inst "2024-11-11T05:42:00-07:00"
+   {:thing/uuid 345
+    :thing/created-at #inst "2024-11-10T08:02:00-07:00"
+    :thing/updated-at #inst "2024-11-11T05:42:00-07:00"
+    :post/type :rtc.appointment
     :appt/name "Cornel"
     :appt/alias "C."
     :appt/pronouns "he/him"
@@ -106,11 +110,12 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Need to schedule live captioner"}]}
-   {:appt/uuid 456
+   {:thing/uuid 456
     :appt/scheduled-for #inst "2024-11-19T17:00:00-07:00"
     :appt/scheduled-at #inst "2024-11-13T03:46:00-07:00"
-    :appt/created-at #inst "2024-11-12T09:06:00-07:00"
-    :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
+    :thing/created-at #inst "2024-11-12T09:06:00-07:00"
+    :thing/updated-at #inst "2024-11-13T03:46:00-07:00"
+    :post/type :rtc.appointment
     :appt/name "Someone"
     :appt/alias "G."
     :appt/pronouns "they/them"
@@ -138,11 +143,12 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "All set!"}]}
-   {:appt/uuid 567
+   {:thing/uuid 567
     :appt/scheduled-for #inst "2024-11-15T17:00:00-07:00"
     :appt/scheduled-at #inst "2024-11-13T03:46:00-07:00"
-    :appt/created-at #inst "2024-11-12T09:06:00-07:00"
-    :appt/updated-at #inst "2024-11-13T03:46:00-07:00"
+    :thing/created-at #inst "2024-11-12T09:06:00-07:00"
+    :thing/updated-at #inst "2024-11-13T03:46:00-07:00"
+    :post/type :rtc.appointment
     :appt/name "Bobby Seale"
     :appt/alias "D."
     :appt/pronouns "he/him"
@@ -166,9 +172,9 @@
                                     :user/pronouns "they/them"}
                   :note/created-at #inst "2024-11-12T17:23:00-05:00"
                   :note/content "Need to schedule live captioner"}]}
-   {:appt/uuid 678
-    :appt/created-at #inst "2024-11-10T08:02:00-07:00"
-    :appt/updated-at #inst "2024-11-11T05:42:00-07:00"
+   {:thing/uuid 678
+    :thing/created-at #inst "2024-11-10T08:02:00-07:00"
+    :thing/updated-at #inst "2024-11-11T05:42:00-07:00"
     :appt/alias "E."
     :appt/pronouns "they/them"
     :appt/email "c@example.com"
@@ -191,12 +197,12 @@
                                (not= :archived (:appt/status appt)))
                           (= status (:appt/status appt)))
                       (or (nil? state) (= state (:appt/state appt))))))
-       (sort-by :appt/created-at)))
+       (sort-by :thing/created-at)))
 
 (defn uuid->appointment [db uuid]
   (->> db
        (reduce (fn [_ appt]
-                 (when (= (str uuid) (str (:appt/uuid appt)))
+                 (when (= (str uuid) (str (:thing/uuid appt)))
                    (reduced appt)))
                nil)))
 
@@ -262,16 +268,16 @@
 (def note-fmt (SimpleDateFormat. "LLL d 'at' h:mm a"))
 
 (defn annotate [{:keys [now]} {:as appt
+                               :thing/keys [created-at
+                                            updated-at
+                                            uuid]
                                :appt/keys [pronouns
-                                           updated-at
-                                           created-at
                                            scheduled-for
                                            preferred-comm
                                            text-ok?
                                            available-days
                                            available-times
-                                           notes
-                                           uuid]}]
+                                           notes]}]
   (some->
     appt
     (assoc
@@ -279,10 +285,12 @@
       :info/name-and-pronouns (str (:appt/name appt)
                                    (when (seq pronouns)
                                      (str " (" pronouns ")")))
-      :info/updated-at (.format fmt updated-at)
-      :info/updated-days-ago (days-between (Date->LocalDateTime updated-at) now)
-      :info/created-at (.format fmt created-at)
-      :info/created-days-ago (days-between (Date->LocalDateTime created-at) now)
+      :info/updated-at (when updated-at (.format fmt updated-at))
+      :info/updated-days-ago (when updated-at
+                               (days-between (Date->LocalDateTime updated-at) now))
+      :info/created-at (when created-at (.format fmt created-at))
+      :info/created-days-ago (when created-at
+                               (days-between (Date->LocalDateTime created-at) now))
       :info/scheduled-for (when scheduled-for
                             (.format fmt scheduled-for))
       :info/scheduled-for-days (when scheduled-for
@@ -309,7 +317,8 @@
       :info/access-needs-icon (if (access-needs-met? appt) "✓" "♿"))))
 
 (defn AppointmentCard [{:as appt
-                        :appt/keys [status state email phone]
+                        :post/keys [status]
+                        :appt/keys [state email phone]
                         :info/keys [alias
                                     all-access-needs-met?
                                     access-needs-icon
@@ -328,12 +337,14 @@
     [:.appt-access-needs {:class (when-not all-access-needs-met? :unmet)}
      access-needs-icon " " access-needs-summary]
     [:.spacer]
-    [:.days-ago "🕗 last updated " (in-days updated-days-ago)]]
+    (when updated-days-ago
+      [:.days-ago "🕗 last updated " (in-days updated-days-ago)])]
    [:h2 (:appt/alias appt) " in " (state->label state)]
    [:.appt-summary
-    [:div
-     [:.field-label "First requested"]
-     [:.field-value (in-days created-days-ago)]]
+    (when created-days-ago
+      [:div
+       [:.field-label "First requested"]
+       [:.field-value (in-days created-days-ago)]])
     [:div
      [:.field-label "Last note from"]
      [:.field-value last-note-from]]
@@ -343,13 +354,13 @@
     [:div
      [:a {:href uri} "Details"]]]])
 
-(defc AppointmentsList [{:keys [appointments filters now system] :as data}]
+(defc AppointmentsList [{:keys [appointments filters now] :as data}]
   {:key :appointments
-   :query [:appt/*]}
+   :query '[*]}
   (let [{:keys [status state]} filters
         any-filters? (or status state)
         ;; TODO annotate in an expansion
-        appts (map (partial annotate {:now now}) appointments)]
+        appts (map (comp (partial annotate {:now now}) first) appointments)]
     (admin/AdminPage
       (assoc data
              :title "Appointments"
@@ -390,17 +401,32 @@
                (map AppointmentCard appts)]]))))
 
 (defmethod bread/dispatch ::show-all
-  [{:keys [params]}]
-  {:expansions
-   [{:expansion/key :filters
-     :expansion/name ::bread/value
-     :expansion/value (admin/coerce-filter-params params filter-coercions)
-     :expansion/description "The currently applied search filters"}
-    {;; TODO query the db
-     :expansion/key :appointments
-     :expansion/name ::bread/value
-     :expansion/value $appointments
-     :expansion/description "All appointments"}]})
+  [{:keys [params] ::bread/keys [dispatcher] :as req}]
+  (let [filters (admin/coerce-filter-params params filter-coercions)
+        query {:find [(list 'pull '?e (:dispatcher/pull dispatcher))]
+               :where (filter seq [['?e :appt/name] ;; TODO post/type
+                                   (when (:status filters)
+                                     ['?e :post/status (:status filters)])
+                                   (when (:state filters)
+                                     ['?e :appt/state (:state filters)])])}]
+    (prn 'dispatcher dispatcher)
+    (prn 'FILTERS filters)
+    (prn 'QUERY query)
+    {:expansions
+     [{:expansion/key :filters
+       :expansion/name ::bread/value
+       :expansion/value filters
+       :expansion/description "The currently applied search filters"}
+      {:expansion/key :appointments
+       :expansion/name ::bread/value
+       :expansion/value $appointments
+       :expansion/description "Hard-coded appointments..."}
+      {;; TODO
+       :expansion/key :appointments
+       :expansion/name ::db/query
+       :expansion/description "Query appointments."
+       :expansion/db (db/database req)
+       :expansion/args [query]}]}))
 
 (defn AccessNeed [{:as need :need/keys [type met?]}]
   [:.access-need

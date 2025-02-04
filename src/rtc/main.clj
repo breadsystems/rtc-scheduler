@@ -83,10 +83,12 @@
          {:get {:handler #'admin/show}}]
         ["/appointments"
          {:get {:handler {:dispatcher/type ::appt/show-all
-                          :dispatcher/component #'appt/AppointmentsList}}}]
+                          :dispatcher/component #'appt/AppointmentsList
+                          :post/type :rtc.appointment}}}]
         ["/appointments/{thing/uuid}"
          {:get {:handler {:dispatcher/type ::appt/show
-                          :dispatcher/component #'appt/AppointmentPage}}}]
+                          :dispatcher/component #'appt/AppointmentPage
+                          :post/type :rtc.appointment}}}]
         ["/providers"
          {:get {:handler #'admin/show-providers
                 :middleware [#_(admin/wrap-filter-params {:query provider/filter-params})]}}]]
