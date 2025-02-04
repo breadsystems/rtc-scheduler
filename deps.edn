@@ -17,7 +17,13 @@
   org.clojure/tools.logging           {:mvn/version "1.2.4"}}
 
  :aliases
- {;; clojure -M:test -m kaocha.runner
+ {:dev
+  {:extra-paths ["env/dev"]}
+
+  :prod
+  {:extra-paths ["env/prod"]}
+
+  ;; clojure -M:test -m kaocha.runner
   :test
   {:extra-paths ["test"]
    :extra-deps

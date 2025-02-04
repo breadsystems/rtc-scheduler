@@ -21,6 +21,7 @@
     [rtc.actions :as actions]
     [rtc.admin :as admin]
     [rtc.appointments :as appt]
+    [rtc.env]
     [rtc.intake :as intake]
     [rtc.schema :as schema]
     [rtc.ui :as ui])
@@ -215,6 +216,7 @@
   (= (route/router (:bread/app @system))
      (bread/hook (:bread/app @system) ::route/router))
 
+  (db/create! (:bread/db (aero/read-config "resources/dev.edn")))
   (db/create! (:bread/db @system))
   (db/connect (:bread/db @system))
   (let [db @(db/connect (:bread/db @system))]

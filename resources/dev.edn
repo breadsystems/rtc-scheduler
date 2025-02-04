@@ -19,7 +19,14 @@
             ;; #uuid "4363f0dd-b319-409b-a219-45129c9d28e2"
             ;; #uuid "313be3ec-f849-42e7-b4b6-4493807bdc3c"
             ;; #uuid "acdfca4f-2c57-427a-bced-117e25d823ee"
-            [{:thing/uuid #uuid "c11adee6-1777-4408-9946-dcbb19098df0"
+            [{:user/name "Coby"
+              :user/preferences "{:pronouns \"any\"}"
+              :user/email "coby@tamayo.email"
+              :user/username "coby@tamayo.email"
+              :user/password #buddy/derive ["hello" :bcrypt+blake2b-512]}
+             {:user/name "Ursula"
+              :user/preferences "{:pronouns \"they/elle\"}"}
+             {:thing/uuid #uuid "c11adee6-1777-4408-9946-dcbb19098df0"
               ;:thing/created-at #inst "2025-01-31T09:31:00-07:00"
               ;:thing/updated-at #inst "2025-01-31T09:31:00-07:00"
               :post/status :needs-attention
