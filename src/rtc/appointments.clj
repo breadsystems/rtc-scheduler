@@ -572,7 +572,7 @@
          "Add"]]]]]))
 
 (defc AppointmentPage [{:keys [appt now] :as data}]
-  {:query []
+  {:query '[* {:appt/notes [* {:note/created-by [*]}]}]
    :key :appt}
   (let [appt (annotate {:now now} appt)] ;; TODO expansion
     (admin/AdminPage
