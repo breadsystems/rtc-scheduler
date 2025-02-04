@@ -39,22 +39,29 @@
 (defmethod bread/action ::now [req _ _]
   (assoc-in req [::bread/data :now] (LocalDateTime/now)))
 
-(defmethod bread/action ::auth [{:keys [session uri] :as req} _ _]
-  (if (and (nil? (:user session)) (string/starts-with? uri "/admin"))
-    (let [;; TODO URL-encode
-          next-uri uri]
-      {:headers {"Location" (format "/login?next=%s" next-uri)}
-       :status 302})
-    req))
+(defmethod bread/action ::auth
+  [{:keys [session uri] :as req} {:keys [protected-prefixes]} _]
+  (let [protected? (some (partial string/starts-with? uri) protected-prefixes)
+        should-redirect? (bread/hook req ::auth/should-redirect?
+                                     (and (nil? (:user session)) protected?))]
+    (if should-redirect?
+      (let [;; TODO URL-encode
+            next-uri uri]
+        {:headers {"Location" (format "/login?next=%s" next-uri)}
+         :status 302})
+      req)))
 
 (defmethod ig/init-key :bread/app [_ app-config]
   (let [plugins (conj
                   (bread-defaults/plugins app-config)
                   (rum/plugin)
-                  (auth/plugin)
+                  (auth/plugin {:auth/protected-prefixes #{"/admin"}
+                                :auth/login-route "/login"})
                   {:hooks
                    {::bread/route
-                    [{:action/name ::auth
+                    [;; TODO upstream auth & delete
+                     {:action/name ::auth
+                      :protected-prefixes #{"/admin"}
                       :action/description "Require login for /admin routes"}]
                     ::bread/expand
                     [{:action/name ::system
@@ -130,6 +137,43 @@
                     :else session)]
       (f (assoc req :session session)))))
 
+(defn -wrap-try-catch [f]
+  (fn [req]
+    (try
+      (f req)
+      (catch Throwable e
+        (let [data (dissoc (ex-data e) :app ::bread/core?)]
+          {:body (str
+                   (.getMessage e)
+                   "<br><br>"
+                   (with-out-str (clojure.pprint/pprint data)))
+           :status 500
+           :headers {"Content-Type" "text/html"}})))))
+
+(defn log-hook! [invocation]
+  (let [{:keys [hook action result]} invocation]
+    (prn (:action/name action) (select-keys result
+                                            [:params
+                                             :status
+                                             :session]))))
+
+(defmethod ig/init-key :bread/profilers [_ profilers]
+  ;; Enable hook profiling.
+  (alter-var-root #'bread/*profile-hooks* (constantly true))
+  (map
+    (fn [{h :hook act :action/name f :f :as profiler}]
+      (let [tap (bread/add-profiler
+                  (fn [{{:keys [action hook] :as invocation} ::bread/profile}]
+                    (if (and (or (nil? (seq h)) ((set h) hook))
+                             (or (nil? (seq act)) ((set act) (:action/name action))))
+                      (f invocation))))]
+        (assoc profiler :tap tap)))
+    profilers))
+
+(defmethod ig/halt-key! :bread/profilers [_ profilers]
+  (doseq [{:keys [tap]} profilers]
+    (remove-tap tap)))
+
 (defmethod aero/reader 'ig/ref [_ _ value]
   (ig/ref value))
 
@@ -161,6 +205,7 @@
                     -wrap-default-content-type
                     -wrap-keyword-headers
                     -wrap-dev-user
+                    -wrap-try-catch
                     (ring/wrap-defaults wrap-config))]
     (http/run-server handler {:port port})))
 
@@ -198,6 +243,10 @@
                       :bread/app {:db (ig/ref :bread/db) ;; TODO
                                   :routes {:router (ig/ref :app/router)}}
                       :bread/handler {:loaded-app (ig/ref :bread/app)}
+                      :bread/profilers [{:hook #{::bread/request
+                                                 ::bread/route
+                                                 ::bread/dispatch}
+                                         :f #'log-hook!}]
                       :app/started-at nil
                       :app/clojure-version nil
                       :app/git-hash nil)]
@@ -212,6 +261,34 @@
   (stop! config)
   (start! config))
 
+;; TODO ship bread.tools
+(defn diagnose-expansions [app req]
+  (let [app (-> (merge app req)
+                (bread/hook ::bread/route)
+                (bread/hook ::bread/dispatch))
+        expansions (::bread/expansions app)
+        {:keys [data err n before]}
+        (reduce (fn [{:keys [data n]} _]
+                  (try
+                    (let [before data
+                          data
+                          (-> app
+                              ;; Expand n expansions
+                              (assoc ::bread/expansions
+                                     (subvec expansions 0 (inc n)))
+                              (bread/hook ::bread/expand)
+                              ::bread/data)]
+                      {:data data :n (inc n) :data-before before})
+                    (catch Throwable err
+                      (reduced {:err err :n n}))))
+                {:data {} :err nil :n 0} expansions)]
+    (if err
+      {:err err
+       :at n
+       :query (get-in app [::bread/expansions n])
+       :before before}
+      {:ok data})))
+
 (comment
 
   (restart! (-> "resources/dev.edn" aero/read-config))
@@ -223,6 +300,9 @@
   (::bread/hooks (:bread/app @system))
   (= (route/router (:bread/app @system))
      (bread/hook (:bread/app @system) ::route/router))
+
+  (diagnose-expansions (:bread/app @system) {:uri "/admin/appointments/123"
+                                             :request-method :get})
 
   (db/create! (:bread/db @system))
   (db/connect (:bread/db @system))
@@ -241,10 +321,10 @@
           :where [[?e :appt/name]]})
 
   (as-> (:bread/app @system) $
-    (assoc $ :uri "/admin/appointments-test" :request-method :get)
+    (assoc $ :uri "/admin/appointments" :request-method :get)
     (bread/route-dispatcher (route/router $) $))
   (as-> (:bread/app @system) $
-    (assoc $ :uri "/admin/appointments-test" :request-method :get)
+    (assoc $ :uri "/admin/appointments" :request-method :get)
     (bread/hook $ ::bread/route)
     (bread/hook $ ::bread/dispatch)
     (::bread/dispatcher $)
@@ -253,7 +333,17 @@
     (bread/hook $ ::bread/render))
 
   ((:bread/handler @system) {:uri "/admin/appointments" :request-method :get})
-  (::bread/expansions ((:bread/handler @system) {:uri "/admin/appointments-test" :request-method :get}))
+  (::bread/expansions ((:bread/handler @system)
+                       {:uri "/admin/appointments/123"
+                        :request-method :get
+                        :session {:user {:user/name "Test"}}}))
+  (def $req {:uri "/admin/appointments/123"
+             :request-method :get
+             :session {:user {:user/name "Test"}}})
+  (-> (:bread/app @system)
+      (merge $req)
+      (bread/hook ::bread/route)
+      (bread/hook ::bread/dispatch))
 
   (require '[systems.bread.alpha.util.datalog :as datalog])
   (reduce
