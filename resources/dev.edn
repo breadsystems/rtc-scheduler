@@ -49,7 +49,17 @@
                {:field/key :available-times
                 :field/content
                 ;; TODO keywords??
-                "#{\"Mornings\" \"Afternoons\" \"Evenings\"}"}]}
+                "#{\"Mornings\" \"Afternoons\" \"Evenings\"}"}]
+              :appt/notes
+              [{:note/content "Hello this is a test note"
+                :note/created-by "user.coby"}
+               {:note/content "Need to schedule live captioner"
+                :note/created-by "user.ursula"}
+               {:note/content "Confirming with captioner about availability"
+                :note/created-by "user.ursula"}]
+              :appt/access-needs [{:need/type :need.type/captioning
+                                   :need/met? false}]
+              }
              {:thing/uuid #uuid "b358445e-aa6e-44a0-bf48-dafa93ffa446"
               ;:thing/created-at #inst "2025-01-25T07:31:00-07:00"
               ;:thing/updated-at #inst "2025-01-29T14:31:00-07:00"
