@@ -240,8 +240,9 @@
 (defn start! [config]
   (let [config (assoc config
                       :app/initial-config config
-                      :bread/app {:db (ig/ref :bread/db) ;; TODO
-                                  :routes {:router (ig/ref :app/router)}}
+                      :bread/app {:db (ig/ref :bread/db)
+                                  :routes {:router (ig/ref :app/router)}
+                                  :i18n {:query-strings? false}}
                       :bread/handler {:loaded-app (ig/ref :bread/app)}
                       :bread/profilers [{:hook #{::bread/dispatch}
                                          :f #'log-hook!}]
