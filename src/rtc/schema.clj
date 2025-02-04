@@ -103,6 +103,12 @@
      ;; Notes
 
      ;; created-at comes from :thing/*
+     {:db/ident :appt/notes
+      :attr/label "Appointment notes"
+      :db/doc "Notes for a given Appointment."
+      :db/valueType :db.type/ref
+      :db/cardinality :db.cardinality/many
+      :attr/migration "migration.base"}
      {:db/ident :note/created-by
       :attr/label "Note author"
       :db/doc "The user who wrote this note."
