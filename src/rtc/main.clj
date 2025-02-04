@@ -227,6 +227,10 @@
   (bread/config (:bread/app @system) :db/connection)
   (db/database (:bread/app @system))
 
+  (db/q (db/database (:bread/app @system))
+        '{:find [(pull ?e [* {:thing/fields [*]}])]
+          :where [[?e :appt/name]]})
+
   (as-> (:bread/app @system) $
     (assoc $ :uri "/admin/appointments-test" :request-method :get)
     (bread/route-dispatcher (route/router $) $))

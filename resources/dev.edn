@@ -14,4 +14,48 @@
             :store {:backend :mem
                     :id "rtc-db"}
             :recreate? true
-            :force? true}}
+            :force? true
+            :db/initial-txns
+            ;; #uuid "4363f0dd-b319-409b-a219-45129c9d28e2"
+            ;; #uuid "313be3ec-f849-42e7-b4b6-4493807bdc3c"
+            ;; #uuid "acdfca4f-2c57-427a-bced-117e25d823ee"
+            [{:thing/uuid #uuid "c11adee6-1777-4408-9946-dcbb19098df0"
+              ;:thing/created-at #inst "2025-01-31T09:31:00-07:00"
+              ;:thing/updated-at #inst "2025-01-31T09:31:00-07:00"
+              :post/status :needs-attention
+              :appt/name "Angela Davis"
+              :appt/pronouns "she/her"
+              :appt/email "aydavis@ucsc.edu"
+              :appt/phone "+9165551234"
+              :appt/state :CA
+              :appt/text-ok? true
+              :appt/preferred-comm :text
+              :thing/fields
+              [{:field/key :available-days
+                :field/content
+                "#{:mon :tues :weds :thurs :fri :sat :sun}"}
+               {:field/key :available-times
+                :field/content
+                ;; TODO keywords??
+                "#{\"Mornings\" \"Afternoons\" \"Evenings\"}"}]}
+             {:thing/uuid #uuid "b358445e-aa6e-44a0-bf48-dafa93ffa446"
+              ;:thing/created-at #inst "2025-01-25T07:31:00-07:00"
+              ;:thing/updated-at #inst "2025-01-29T14:31:00-07:00"
+              :post/status :waiting
+              :appt/name "Bobby Seale"
+              :appt/pronouns "he/him"
+              :appt/email "bobby@panthers.social"
+              :appt/phone "+7245556859"
+              :appt/state :WA
+              :appt/text-ok? true
+              :appt/preferred-comm :text
+              :thing/fields
+              [{:field/key :available-days
+                :field/format :edn
+                :field/content
+                "#{:mon :weds :fri}"}
+               {:field/key :available-times
+                :field/format :edn
+                :field/content
+                "#{\"Afternoons\"}"}]}
+             ]}}
