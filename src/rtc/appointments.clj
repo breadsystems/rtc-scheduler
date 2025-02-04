@@ -176,7 +176,8 @@
     [:div
      [:a {:href uri} "Details"]]]])
 
-(defc AppointmentsList [{:keys [appointments filters] :as data}]
+(defc AppointmentsList [{:as data
+                         :keys [appointments filters state-options]}]
   {:key :appointments
    :query '[*
             {:appt/access-needs [*]}
@@ -201,8 +202,7 @@
                  [:label {:for "appt-state"} "State"]
                  [:select#appt-state {:name :state}
                   [:option {:value "" :label "Any state"}]
-                  (map (partial ui/Option state->label state) [:CA
-                                                               :WA])]
+                  (map (partial ui/Option state->label state) state-options)]
                  [:div
                   [:button {:type :submit}
                    "Filter appointments"]]]]]
@@ -227,6 +227,10 @@
   (let [appts (map first (get data (:expansion/key expansion)))]
     (map (partial annotate {:now now}) appts)))
 
+;; TODO upstream
+(defmethod bread/expand ::flatten-many [expansion data]
+  (map first (get data (:expansion/key expansion))))
+
 (defmethod bread/dispatch ::show-all
   [{:keys [params] ::bread/keys [dispatcher] :as req}]
   (let [filters (admin/coerce-filter-params params filter-coercions)
@@ -241,6 +245,15 @@
        :expansion/name ::bread/value
        :expansion/value filters
        :expansion/description "The currently applied search filters"}
+      {:expansion/key :state-options
+       :expansion/name ::db/query
+       :expansion/description "Query state options"
+       :expansion/db (db/database req)
+       :expansion/args ['{:find [?state]
+                          :where [[_ :appt/state ?state]]}]}
+      {;; TODO upstream flatten-many? and remove
+       :expansion/key :state-options
+       :expansion/name ::flatten-many}
       {:expansion/key :appointments
        :expansion/name ::db/query
        :expansion/description "Query appointments."
