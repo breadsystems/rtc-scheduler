@@ -469,9 +469,10 @@
       [:.spacer]
       [:.status {:data-status status} (status->label status)]]
      [:.flex
-      [:div
-       [:.field-label "First requested"]
-       [:.field-value created-at]]
+      (when created-at
+        [:div
+         [:.field-label "First requested"]
+         [:.field-value created-at]])
       [:.spacer]
       (if scheduled-for
         [:div
