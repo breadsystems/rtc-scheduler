@@ -31,185 +31,6 @@
   {:status #(when (seq %) (keyword %))
    :state #(when (seq %) (keyword %))})
 
-(def $archived
-  [])
-
-(def $appointments
-  [{:thing/uuid 123
-    :thing/created-at #inst "2024-11-12T09:06:00-07:00"
-    :thing/updated-at #inst "2024-11-13T03:46:00-07:00"
-    :post/type :rtc.appointment
-    :appt/name "Angela Davis"
-    :appt/alias "A."
-    :appt/pronouns "she/her"
-    :appt/email "aydavis@ucsc.edu"
-    :appt/phone "+19165551234"
-    :appt/state :CA
-    :appt/status :needs-attention
-    :appt/text-ok? true
-    :appt/preferred-comm :text
-    :appt/available-days #{:mon :tues :weds :thurs :fri :sat :sun}
-    :appt/available-times #{"Mornings" "Afternoons" "Evenings"}
-    :appt/provider {:provider/name "Ruha Benjamin"
-                    :provider/title "MD, PDO"
-                    :provider/specialty "MD, PDO"
-                    :provider/pronouns "she/her"
-                    :provider/email "ruha@princeton.edu"
-                    :provider/phone "+12535559876"
-                    :provider/licensure #{{:license/state "MD"}}}
-    :appt/reason "HRT"
-    :appt/access-needs [{:need/type :need.type/captioning
-                         :need/met? false}]
-    :appt/notes []
-    :appt/misc "Lorem ipsum dolor sit amet"}
-   {:thing/uuid 234
-    :thing/created-at #inst "2024-11-12T09:06:00-07:00"
-    :thing/updated-at #inst "2024-11-13T03:46:00-07:00"
-    :post/type :rtc.appointment
-    :appt/name "Bobby Seale"
-    :appt/alias "B."
-    :appt/pronouns "he/him"
-    :appt/email "bobby@panthers.social"
-    :appt/phone "+17245556859"
-    :appt/state :WA
-    :appt/status :waiting
-    :appt/text-ok? true
-    :appt/preferred-comm :text
-    :appt/available-days #{:mon :weds :fri}
-    :appt/available-times #{"Afternoons"}
-    :appt/provider {:provider/name "Ruha Benjamin"
-                    :provider/title "MD, PDO"
-                    :provider/specialty "MD, PDO"
-                    :provider/pronouns "she/her"
-                    :provider/email "ruha@princeton.edu"
-                    :provider/phone "+12535559876"
-                    :provider/licensure #{{:license/state "MD"}}}
-    :appt/reason "ADHD prescription"
-    :appt/access-needs [{:need/type :need.type/captioning
-                         :need/met? true}]
-    :appt/notes [{:note/created-by {:user/name "Danielle"
-                                    :user/pronouns "they/them"}
-                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
-                  :note/content "Need to schedule live captioner"}]}
-   {:thing/uuid 345
-    :thing/created-at #inst "2024-11-10T08:02:00-07:00"
-    :thing/updated-at #inst "2024-11-11T05:42:00-07:00"
-    :post/type :rtc.appointment
-    :appt/name "Cornel"
-    :appt/alias "C."
-    :appt/pronouns "he/him"
-    :appt/email "c@example.com"
-    :appt/phone "+17245556859"
-    :appt/state :WA
-    :appt/status :waiting
-    :appt/text-ok? true
-    :appt/preferred-comm :text
-    :appt/available-days #{}
-    :appt/available-times #{"Evenings"}
-    :appt/reason "HRT"
-    :appt/access-needs []
-    :appt/notes [{:note/created-by {:user/name "Danielle"
-                                    :user/pronouns "they/them"}
-                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
-                  :note/content "Need to schedule live captioner"}]}
-   {:thing/uuid 456
-    :appt/scheduled-for #inst "2024-11-19T17:00:00-07:00"
-    :appt/scheduled-at #inst "2024-11-13T03:46:00-07:00"
-    :thing/created-at #inst "2024-11-12T09:06:00-07:00"
-    :thing/updated-at #inst "2024-11-13T03:46:00-07:00"
-    :post/type :rtc.appointment
-    :appt/name "Someone"
-    :appt/alias "G."
-    :appt/pronouns "they/them"
-    :appt/email "someone@example.com"
-    :appt/phone "+17145555896"
-    :appt/state :WA
-    :appt/status :scheduled
-    :appt/text-ok? true
-    :appt/preferred-comm :text
-    :appt/provider {:provider/name "Ruha Benjamin"
-                    :provider/title "MD, PDO"
-                    :provider/specialty "MD, PDO"
-                    :provider/pronouns "she/her"
-                    :provider/email "ruha@princeton.edu"
-                    :provider/phone "+12535559876"
-                    :provider/licensure #{{:license/state "MD"}}}
-    :appt/reason "ADHD prescription"
-    :appt/access-needs [{:need/type :need.type/captioning
-                         :need/met? true}]
-    :appt/notes [{:note/created-by {:user/name "Danielle"
-                                    :user/pronouns "they/them"}
-                  :note/created-at #inst "2024-11-11T12:17:00-05:00"
-                  :note/content "Doing stuff..."}
-                 {:note/created-by {:user/name "Danielle"
-                                    :user/pronouns "they/them"}
-                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
-                  :note/content "All set!"}]}
-   {:thing/uuid 567
-    :appt/scheduled-for #inst "2024-11-15T17:00:00-07:00"
-    :appt/scheduled-at #inst "2024-11-13T03:46:00-07:00"
-    :thing/created-at #inst "2024-11-12T09:06:00-07:00"
-    :thing/updated-at #inst "2024-11-13T03:46:00-07:00"
-    :post/type :rtc.appointment
-    :appt/name "Bobby Seale"
-    :appt/alias "D."
-    :appt/pronouns "he/him"
-    :appt/email "bobby@panthers.social"
-    :appt/phone "+17245556859"
-    :appt/state :WA
-    :appt/status :archived
-    :appt/text-ok? true
-    :appt/preferred-comm :text
-    :appt/provider {:provider/name "Ruha Benjamin"
-                    :provider/title "MD, PDO"
-                    :provider/specialty "MD, PDO"
-                    :provider/pronouns "she/her"
-                    :provider/email "ruha@princeton.edu"
-                    :provider/phone "+12535559876"
-                    :provider/licensure #{{:license/state "MD"}}}
-    :appt/reason "HRT"
-    :appt/access-needs [{:need/type :need.type/captioning
-                         :need/met? true}]
-    :appt/notes [{:note/created-by {:user/name "Danielle"
-                                    :user/pronouns "they/them"}
-                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
-                  :note/content "Need to schedule live captioner"}]}
-   {:thing/uuid 678
-    :thing/created-at #inst "2024-11-10T08:02:00-07:00"
-    :thing/updated-at #inst "2024-11-11T05:42:00-07:00"
-    :appt/alias "E."
-    :appt/pronouns "they/them"
-    :appt/email "c@example.com"
-    :appt/phone "+17245556859"
-    :appt/state :WA
-    :appt/status :archived
-    :appt/text-ok? true
-    :appt/preferred-comm :text
-    :appt/reason "HRT"
-    :appt/access-needs []
-    :appt/notes [{:note/created-by {:user/name "Danielle"
-                                    :user/pronouns "they/them"}
-                  :note/created-at #inst "2024-11-12T17:23:00-05:00"
-                  :note/content "Need to schedule live captioner"}]}])
-
-(defn get-appointments [db {:keys [status state]}]
-  (->> db
-       (filter (fn [appt]
-                 (and (or (and (nil? status)
-                               (not= :archived (:appt/status appt)))
-                          (= status (:appt/status appt)))
-                      (or (nil? state) (= state (:appt/state appt))))))
-       (sort-by :thing/created-at)))
-
-(defn uuid->appointment [db uuid]
-  (->> db
-       (reduce (fn [_ appt]
-                 (when (= (str uuid) (str (:thing/uuid appt)))
-                   (reduced appt)))
-               nil)))
-
-;; TODO ^^^ REFACTOR WITH A REAL DATABASE
-
 (def $appt-statuses [:needs-attention :waiting :scheduled :archived])
 
 (def $days [:mon :tues :weds :thurs :fri :sat :sun])
@@ -283,7 +104,7 @@
   (some->
     appt
     (assoc
-      :appt/notes (reverse (sort-by :note/created-at notes))
+      :appt/notes (reverse (sort-by :thing/created-at notes))
       :info/name-and-pronouns (str (:appt/name appt)
                                    (when (seq pronouns)
                                      (str " (" pronouns ")")))
@@ -357,7 +178,7 @@
 
 (defc AppointmentsList [{:keys [appointments filters] :as data}]
   {:key :appointments
-   :query '[* {:appt/notes [* {:note/created-by [*]}]}]}
+   :query '[* {:appt/notes [* {:note/created-by [:user/name]}]}]}
   (let [{:keys [status state]} filters
         any-filters? (or status state)]
     (admin/AdminPage
@@ -439,8 +260,8 @@
    " " (need-type->label type)])
 
 (defn AppointmentNote [{:as note
-                        :note/keys [created-at
-                                    created-by
+                        :thing/keys [created-at]
+                        :note/keys [created-by
                                     content]}]
   [:.note
    [:.byline.flex
@@ -575,7 +396,9 @@
 
 (defc AppointmentPage [{:keys [appt now] :as data}]
   {:query '[*
-            {:appt/notes [* {:note/created-by [*]}]}
+            {:appt/notes [:thing/created-at
+                          :note/content
+                          {:note/created-by [:user/name]}]}
             {:thing/fields [*]}]
    :key :appt}
   (let [appt (annotate {:now now} appt)] ;; TODO expansion

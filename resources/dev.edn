@@ -50,11 +50,14 @@
                 "#{\"Mornings\" \"Afternoons\" \"Evenings\"}"}]
               :appt/notes
               [{:note/content "Hello this is a test note"
-                :note/created-by "user.coby"}
+                :note/created-by "user.coby"
+                :thing/created-at #inst "2025-01-25T07:41:00-07:00"}
                {:note/content "Need to schedule live captioner"
-                :note/created-by "user.ursula"}
+                :note/created-by "user.ursula"
+                :thing/created-at #inst "2025-01-26T07:41:00-07:00"}
                {:note/content "Confirming with captioner about availability"
-                :note/created-by "user.ursula"}]
+                :note/created-by "user.ursula"
+                :thing/created-at #inst "2025-01-27T07:41:00-07:00"}]
               :appt/access-needs [{:need/type :need.type/captioning
                                    :need/met? false}]
               }
