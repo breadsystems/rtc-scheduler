@@ -9,7 +9,8 @@
     [rtc.ui :as ui])
   (:import
     [java.time LocalDateTime ZoneId]
-    [java.text SimpleDateFormat]))
+    [java.text SimpleDateFormat]
+    [java.util UUID]))
 
 (defn days-between [a b]
   (.between (java.time.temporal.ChronoUnit/DAYS) a b))
@@ -592,8 +593,15 @@
               [:summary "Debug info"]
               [:pre (with-out-str (clojure.pprint/pprint appt))]]))))
 
-(defmethod bread/dispatch ::show [{{params :route/params} ::bread/dispatcher}]
-  {:expansions
-   [{:expansion/key :appt
-     :expansion/name ::bread/value
-     :expansion/value (uuid->appointment $appointments (:thing/uuid params))}]})
+(defmethod bread/dispatch ::show
+  [{:as req ::bread/keys [dispatcher]}]
+  (let [uuid (UUID/fromString (:thing/uuid (:route/params dispatcher)))
+        query {:find [(list 'pull '?e (:dispatcher/pull dispatcher)) '.]
+               :in '[$ ?uuid]
+               :where '[[?e :thing/uuid ?uuid]]}
+        query-args [query uuid]]
+    {:expansions
+     [{:expansion/key (:dispatcher/key dispatcher)
+       :expansion/name ::db/query
+       :expansion/db (db/database req)
+       :expansion/args query-args}]}))
