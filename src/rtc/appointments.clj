@@ -231,9 +231,9 @@
   [{:keys [params] ::bread/keys [dispatcher] :as req}]
   (let [filters (admin/coerce-filter-params params filter-coercions)
         query {:find [(list 'pull '?e (:dispatcher/pull dispatcher))]
-               :where (filter seq [['?e :appt/name] ;; TODO post/type
+               :where (filter seq [['?e :appt/name]
                                    (when (:status filters)
-                                     ['?e :post/status (:status filters)])
+                                     ['?e :appt/status (:status filters)])
                                    (when (:state filters)
                                      ['?e :appt/state (:state filters)])])}]
     {:expansions
