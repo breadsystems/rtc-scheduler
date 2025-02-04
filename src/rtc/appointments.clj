@@ -241,11 +241,6 @@
        :expansion/name ::bread/value
        :expansion/value filters
        :expansion/description "The currently applied search filters"}
-      {;; TODO DELETE
-       :expansion/key :appointments
-       :expansion/name ::bread/value
-       :expansion/value $appointments
-       :expansion/description "Hard-coded appointments..."}
       {:expansion/key :appointments
        :expansion/name ::db/query
        :expansion/description "Query appointments."
