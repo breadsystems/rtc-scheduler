@@ -614,5 +614,7 @@
                     :expansion/i18n? (:dispatcher/i18n? dispatcher)}]
      {:expansions (bread/hook req ::i18n/expansions expansion)})))
 
+;; TODO ::thing/by-uuid
+;; TODO ::<...> expansion convention?
 (defmethod bread/dispatch ::by-uuid [req]
   (by-uuid-expansion req))
