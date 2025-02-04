@@ -178,7 +178,9 @@
 
 (defc AppointmentsList [{:keys [appointments filters] :as data}]
   {:key :appointments
-   :query '[* {:appt/notes [* {:note/created-by [:user/name]}]}]}
+   :query '[*
+            {:appt/access-needs [*]}
+            {:appt/notes [* {:note/created-by [:user/name]}]}]}
   (let [{:keys [status state]} filters
         any-filters? (or status state)]
     (admin/AdminPage
@@ -396,6 +398,7 @@
 
 (defc AppointmentPage [{:keys [appt now] :as data}]
   {:query '[*
+            {:appt/access-needs [*]}
             {:appt/notes [:thing/created-at
                           :note/content
                           {:note/created-by [:user/name]}]}
