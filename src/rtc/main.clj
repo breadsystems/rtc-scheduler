@@ -152,10 +152,10 @@
 
 (defn log-hook! [invocation]
   (let [{:keys [hook action result]} invocation]
-    (prn (:action/name action) (select-keys result
-                                            [:params
-                                             :status
-                                             :session]))))
+    (prn hook (:action/name action) (select-keys result
+                                                 [:params
+                                                  :status
+                                                  :session]))))
 
 (defmethod ig/init-key :bread/profilers [_ profilers]
   ;; Enable hook profiling.
@@ -243,9 +243,7 @@
                       :bread/app {:db (ig/ref :bread/db) ;; TODO
                                   :routes {:router (ig/ref :app/router)}}
                       :bread/handler {:loaded-app (ig/ref :bread/app)}
-                      :bread/profilers [{:hook #{::bread/request
-                                                 ::bread/route
-                                                 ::bread/dispatch}
+                      :bread/profilers [{:hook #{::bread/dispatch}
                                          :f #'log-hook!}]
                       :app/started-at nil
                       :app/clojure-version nil
