@@ -100,7 +100,7 @@
          {:get {:handler {:dispatcher/type ::appt/show-all
                           :dispatcher/component #'appt/AppointmentsList}}}]
         ["/appointments/{thing/uuid}"
-         {:get {:handler {:dispatcher/type ::appt/show
+         {:get {:handler {:dispatcher/type ::appt/by-uuid ;; TODO ::thing
                           :dispatcher/component #'appt/AppointmentPage}}}]
         ["/providers"
          {:get {:handler #'admin/show-providers
@@ -322,12 +322,14 @@
     (assoc $ :uri "/admin/appointments" :request-method :get)
     (bread/route-dispatcher (route/router $) $))
   (as-> (:bread/app @system) $
-    (assoc $ :uri "/admin/appointments" :request-method :get)
+    (assoc $
+           :uri "/admin/appointments/b358445e-aa6e-44a0-bf48-dafa93ffa446"
+           :request-method :get
+           :session {:user {:user/name "Test"}})
     (bread/hook $ ::bread/route)
     (bread/hook $ ::bread/dispatch)
-    (::bread/dispatcher $)
-    #_#_
-    (bread/hook $ ::bread/expand)
+    (::bread/expansions $)
+    #_
     (bread/hook $ ::bread/render))
 
   ((:bread/handler @system) {:uri "/admin/appointments" :request-method :get})

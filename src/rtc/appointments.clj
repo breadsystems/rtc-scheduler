@@ -4,6 +4,7 @@
     [systems.bread.alpha.core :as bread]
     [systems.bread.alpha.component :refer [defc]]
     [systems.bread.alpha.database :as db]
+    [systems.bread.alpha.i18n :as i18n]
 
     [rtc.admin :as admin]
     [rtc.ui :as ui])
@@ -573,7 +574,9 @@
          "Add"]]]]]))
 
 (defc AppointmentPage [{:keys [appt now] :as data}]
-  {:query '[* {:appt/notes [* {:note/created-by [*]}]}]
+  {:query '[*
+            {:appt/notes [* {:note/created-by [*]}]}
+            {:thing/fields [*]}]
    :key :appt}
   (let [appt (annotate {:now now} appt)] ;; TODO expansion
     (admin/AdminPage
@@ -593,15 +596,23 @@
               [:summary "Debug info"]
               [:pre (with-out-str (clojure.pprint/pprint appt))]]))))
 
-(defmethod bread/dispatch ::show
-  [{:as req ::bread/keys [dispatcher]}]
-  (let [uuid (UUID/fromString (:thing/uuid (:route/params dispatcher)))
-        query {:find [(list 'pull '?e (:dispatcher/pull dispatcher)) '.]
-               :in '[$ ?uuid]
-               :where '[[?e :thing/uuid ?uuid]]}
-        query-args [query uuid]]
-    {:expansions
-     [{:expansion/key (:dispatcher/key dispatcher)
-       :expansion/name ::db/query
-       :expansion/db (db/database req)
-       :expansion/args query-args}]}))
+;; TODO upstream to bread.thing
+(defn by-uuid-expansion
+  ([req]
+   (query-by-uuid req {:params-key :thing/uuid}))
+  ([{:as req ::bread/keys [dispatcher]}
+    {k :params-key :or {k :thing/uuid}}]
+   (let [uuid (UUID/fromString (get (:route/params dispatcher) k))
+         query {:find [(list 'pull '?e (:dispatcher/pull dispatcher)) '.]
+                :in '[$ ?uuid]
+                :where '[[?e :thing/uuid ?uuid]]}
+         expansion {:expansion/key (:dispatcher/key dispatcher)
+                    :expansion/name ::db/query
+                    :expansion/db (db/database req)
+                    :expansion/args [query uuid]
+                    ;; TODO observe this flag from i18n
+                    :expansion/i18n? (:dispatcher/i18n? dispatcher)}]
+     {:expansions (bread/hook req ::i18n/expansions expansion)})))
+
+(defmethod bread/dispatch ::by-uuid [req]
+  (by-uuid-expansion req))

@@ -69,6 +69,7 @@
               :appt/state :WA
               :appt/text-ok? true
               :appt/preferred-comm :text
+              :appt/reason "Disabled and immunocompromised. Need an ADHD prescription"
               :thing/fields
               [{:field/key :available-days
                 :field/format :edn
