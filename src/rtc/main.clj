@@ -22,6 +22,7 @@
     [rtc.admin :as admin]
     [rtc.appointments :as appt]
     [rtc.intake :as intake]
+    [rtc.schema :as schema]
     [rtc.ui :as ui])
   (:import
     [java.time LocalDateTime]
@@ -54,12 +55,14 @@
                    {::bread/route
                     [{:action/name ::auth
                       :action/description "Require login for /admin routes"}]
-                    ::bread/dispatch
+                    ::bread/expand
                     [{:action/name ::system
-                      :action/description "Add system-global state to data"}
+                      :action/description "Add system-global state to ::data"}
                      {:action/name ::now
-                      :action/description "Add current datetime to data"}
-                     ]}})]
+                      :action/description "Add current datetime to ::data"}]
+                    ::db/migrations
+                    [{:action/name ::schema/migrations
+                      :action/description "Add RTC-specific db migrations"}]}})]
     (bread/load-app (bread/app {:plugins plugins}))))
 
 (defmethod ig/init-key :bread/handler [_ {:keys [loaded-app]}]
@@ -238,6 +241,13 @@
 
   ((:bread/handler @system) {:uri "/admin/appointments" :request-method :get})
   (::bread/expansions ((:bread/handler @system) {:uri "/admin/appointments-test" :request-method :get}))
+
+  (require '[systems.bread.alpha.util.datalog :as datalog])
+  (reduce
+    (fn [migrations {:migration/keys [key attrs]}]
+      (assoc migrations key (map :db/ident attrs)))
+    {}
+    (datalog/migrations (db/database (:bread/app @system))))
 
   ;;
 
