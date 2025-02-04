@@ -43,7 +43,8 @@
 
 (def state->label
   {:CA "California"
-   :WA "Washington"})
+   :WA "Washington"
+   :MD "Maryland"})
 
 (def need-type->label
   {:need.type/captioning "Captioning"})
@@ -236,8 +237,10 @@
   (let [filters (admin/coerce-filter-params params filter-coercions)
         query {:find [(list 'pull '?e (:dispatcher/pull dispatcher))]
                :where (filter seq [['?e :appt/name]
-                                   (when (:status filters)
-                                     ['?e :appt/status (:status filters)])
+                                   ;; We only want archived appts if explicitly requested.
+                                   (if (:status filters)
+                                     ['?e :appt/status (:status filters)]
+                                     '(not [?e :appt/status :archived]))
                                    (when (:state filters)
                                      ['?e :appt/state (:state filters)])])}]
     {:expansions
