@@ -41,9 +41,11 @@
               :appt/preferred-comm :text
               :thing/fields
               [{:field/key :available-days
+                :field/format :edn
                 :field/content
                 "#{:mon :tues :weds :thurs :fri :sat :sun}"}
                {:field/key :available-times
+                :field/format :edn
                 :field/content
                 ;; TODO keywords??
                 "#{\"Mornings\" \"Afternoons\" \"Evenings\"}"}]
