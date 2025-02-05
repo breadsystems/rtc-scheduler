@@ -248,7 +248,7 @@
                                   :i18n {:query-strings? false}}
                       :bread/handler {:loaded-app (ig/ref :bread/app)}
                       :bread/profilers [#_{:hook #{::bread/dispatch} :f #'log-dispatch}
-                                        {:hook #{::bread/expand} :f #'log-expand}]
+                                        #_{:hook #{::bread/expand} :f #'log-expand}]
                       :app/started-at nil
                       :app/clojure-version nil
                       :app/git-hash nil)]
