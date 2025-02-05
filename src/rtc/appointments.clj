@@ -94,51 +94,51 @@
 (defn annotate [{:keys [now]} {:as appt
                                :thing/keys [created-at
                                             updated-at
-                                            uuid]
+                                            uuid
+                                            fields]
                                :appt/keys [pronouns
                                            scheduled-for
                                            preferred-comm
                                            text-ok?
-                                           available-days
-                                           available-times
                                            notes]}]
-  (some->
-    appt
-    (assoc
-      :appt/notes (reverse (sort-by :thing/created-at notes))
-      :info/name-and-pronouns (str (:appt/name appt)
-                                   (when (seq pronouns)
-                                     (str " (" pronouns ")")))
-      :info/updated-at (when updated-at (.format fmt updated-at))
-      :info/updated-days-ago (when updated-at
-                               (days-between (Date->LocalDateTime updated-at) now))
-      :info/created-at (when created-at (.format fmt created-at))
-      :info/created-days-ago (when created-at
-                               (days-between (Date->LocalDateTime created-at) now))
-      :info/scheduled-for (when scheduled-for
-                            (.format fmt scheduled-for))
-      :info/scheduled-for-days (when scheduled-for
-                                 (days-between (Date->LocalDateTime scheduled-for) now))
-      :info/note-count (case (count notes)
-                         0 "No notes"
-                         1 "1 note"
-                         (str (count notes) " notes"))
-      :info/last-note-from (if (seq notes)
-                             (get-in (last notes) [:note/created-by :user/name])
-                             "No notes")
-      :info/uri (str "/admin/appointments/" uuid)
-      :info/preferred-comm (when preferred-comm
-                             (string/capitalize (name preferred-comm)))
-      :info/text-ok? (string/capitalize (ui/yes-or-no text-ok?))
-      :info/available-days (summarize-days available-days)
-      :info/available-times (if available-times
-                              (string/join ", " available-times)
-                              "No times specified")
-      :info/all-access-needs-met? (access-needs-met? appt)
-      :info/access-needs-summary (if (access-needs-met? appt)
-                                   "Access needs met"
-                                   "Unmet access needs")
-      :info/access-needs-icon (if (access-needs-met? appt) "✓" "♿"))))
+  (let [{:keys [available-days available-times]} fields]
+    (some->
+      appt
+      (assoc
+        :appt/notes (reverse (sort-by :thing/created-at notes))
+        :info/name-and-pronouns (str (:appt/name appt)
+                                     (when (seq pronouns)
+                                       (str " (" pronouns ")")))
+        :info/updated-at (when updated-at (.format fmt updated-at))
+        :info/updated-days-ago (when updated-at
+                                 (days-between (Date->LocalDateTime updated-at) now))
+        :info/created-at (when created-at (.format fmt created-at))
+        :info/created-days-ago (when created-at
+                                 (days-between (Date->LocalDateTime created-at) now))
+        :info/scheduled-for (when scheduled-for
+                              (.format fmt scheduled-for))
+        :info/scheduled-for-days (when scheduled-for
+                                   (days-between (Date->LocalDateTime scheduled-for) now))
+        :info/note-count (case (count notes)
+                           0 "No notes"
+                           1 "1 note"
+                           (str (count notes) " notes"))
+        :info/last-note-from (if (seq notes)
+                               (get-in (last notes) [:note/created-by :user/name])
+                               "No notes")
+        :info/uri (str "/admin/appointments/" uuid)
+        :info/preferred-comm (when preferred-comm
+                               (string/capitalize (name preferred-comm)))
+        :info/text-ok? (string/capitalize (ui/yes-or-no text-ok?))
+        :info/available-days (summarize-days available-days)
+        :info/available-times (if available-times
+                                (string/join ", " available-times)
+                                "No times specified")
+        :info/all-access-needs-met? (access-needs-met? appt)
+        :info/access-needs-summary (if (access-needs-met? appt)
+                                     "Access needs met"
+                                     "Unmet access needs")
+        :info/access-needs-icon (if (access-needs-met? appt) "✓" "♿")))))
 
 (defn AppointmentCard [{:as appt
                         :appt/keys [status state email phone]
