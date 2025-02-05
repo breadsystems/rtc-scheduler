@@ -225,7 +225,7 @@
 
 (defmethod bread/expand ::annotate
   [{:keys [now] :as expansion} data]
-  (let [appts (map first (get data (:expansion/key expansion)))]
+  (let [appts (get data (:expansion/key expansion))]
     (map (partial annotate {:now now}) appts)))
 
 ;; TODO upstream
@@ -257,12 +257,15 @@
       {;; TODO upstream flatten-many? and remove
        :expansion/key :state-options
        :expansion/name ::flatten-many}
-      {:expansion/key :appointments
+      {:expansion/key (:dispatcher/key dispatcher)
        :expansion/name ::db/query
        :expansion/description "Query appointments."
        :expansion/db (db/database req)
        :expansion/args [query]}
-      {:expansion/key :appointments
+      {;; TODO upstream flatten-many? and remove
+       :expansion/key (:dispatcher/key dispatcher)
+       :expansion/name ::flatten-many}
+      {:expansion/key (:dispatcher/key dispatcher)
        :expansion/name ::annotate
        :now (LocalDateTime/now)
        :expansion/description "Annotate appointment with view-layer data"}]}))
