@@ -239,6 +239,11 @@
 (defn log-expand [{:keys [hook action result]}]
   (prn hook (:action/name action) '===>)
   (clojure.pprint/pprint (::bread/expansions result)))
+(defn log-request [{req :result}]
+  (let [req-keys (filter #(not= "systems.bread.alpha.core" (namespace %)) (keys req))]
+    (clojure.pprint/pprint (select-keys req req-keys))))
+(defn log-flash [{:keys [result]}]
+  (prn :flash (:flash result)))
 
 (defn start! [config]
   (let [config (assoc config
@@ -248,7 +253,9 @@
                                   :i18n {:query-strings? false}}
                       :bread/handler {:loaded-app (ig/ref :bread/app)}
                       :bread/profilers [#_{:hook #{::bread/dispatch} :f #'log-dispatch}
-                                        #_{:hook #{::bread/expand} :f #'log-expand}]
+                                        #_{:hook #{::bread/expand} :f #'log-expand}
+                                        #_{:hook #{::bread/request} :f #'log-request}
+                                        {:hook #{::bread/response} :f #'log-flash}]
                       :app/started-at nil
                       :app/clojure-version nil
                       :app/git-hash nil)]
