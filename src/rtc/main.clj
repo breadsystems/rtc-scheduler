@@ -268,7 +268,7 @@
                       :bread/handler {:loaded-app (ig/ref :bread/app)}
                       :bread/profilers [#_{:hook #{::bread/dispatch} :f #'log-dispatch}
                                         #_{:hook #{::bread/expand} :f #'log-expand}
-                                        #_{:hook #{::bread/request} :f #'log-request}
+                                        {:hook #{::bread/request} :f #'log-request}
                                         {:hook #{::bread/response} :f #'log-flash}]
                       :app/started-at nil
                       :app/clojure-version nil

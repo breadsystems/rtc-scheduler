@@ -481,6 +481,18 @@
          :headers (assoc headers "Location" to)
          :flash flash))
 
+(defn transact! [req txs & {:keys [redirect-to flash]}]
+  {:effects [{:effect/name ::db/transact
+              :effect/key ::add-note
+              :effect/description "Add an appointment note in the db"
+              :conn (db/connection req)
+              :txs txs}]
+   :hooks
+   {::bread/render
+    [{:action/name ::redirect
+      :to (or redirect-to (get-in req [:headers :referer]))
+      :flash flash}]}})
+
 (defmethod bread/dispatch ::add-note
   [{:as req ::bread/keys [dispatcher] :keys [params session]}]
   (let [uuid (:thing/uuid (:route/params dispatcher))
@@ -488,13 +500,4 @@
             :appt/notes [{:note/content (:note-content params)
                           :note/created-by (:db/id (:user session))
                           :thing/created-at (Date.)}]}]
-    {:effects [{:effect/name ::db/transact
-                :effect/key ::add-note
-                :effect/description "Add an appointment note in the db"
-                :conn (db/connection req)
-                :txs [tx]}]
-     :hooks
-     {::bread/render
-      [{:action/name ::redirect
-        :to (str "/admin/appointments/" uuid)
-        :flash {:some :stuff :x {:y :z}}}]}}))
+    (transact! req [tx] :redirect-to (str "/admin/appointments/" uuid))))
