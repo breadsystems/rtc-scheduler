@@ -17,6 +17,7 @@
     [systems.bread.alpha.plugin.reitit]
     [systems.bread.alpha.plugin.datahike]
     [systems.bread.alpha.plugin.rum :as rum]
+    [systems.bread.alpha.user :as user]
 
     [rtc.actions :as actions]
     [rtc.admin :as admin]
@@ -58,7 +59,19 @@
                   (auth/plugin {:auth/protected-prefixes #{"/admin"}
                                 :auth/login-route "/login"})
                   {:hooks
-                   {::bread/route
+                   {::user/pull
+                    [{;; TODO update Bread
+                      :action/name ::bread/value
+                      :action/value [:db/id
+                                     :thing/uuid
+                                     :thing/slug
+                                     :user/email
+                                     :user/name
+                                     :user/preferences
+                                     {:user/roles [:role/key
+                                                   {:role/abilities
+                                                    [:ability/key]}]}]}]
+                    ::bread/route
                     [;; TODO upstream auth & delete
                      {:action/name ::auth
                       :protected-prefixes #{"/admin"}

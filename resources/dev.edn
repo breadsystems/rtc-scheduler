@@ -5,7 +5,9 @@
  :app/websocket {:port 4042
                  :authentication #ig/ref :app/authentication}
  :app/router {:authentication #ig/ref :app/authentication}
- :app/authentication {:dev/user {:user/id 123
+ :app/authentication {:enable? true
+                      #_#_
+                      :dev/user {:db/id 123
                                  :user/email "coby@example.com"
                                  :user/preferences
                                  {:color-mode :default}}}
