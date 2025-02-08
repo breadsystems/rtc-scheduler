@@ -11,7 +11,7 @@
   (:import
     [java.time LocalDateTime ZoneId]
     [java.text SimpleDateFormat]
-    [java.util UUID]))
+    [java.util Date UUID]))
 
 (defn days-between [a b]
   (.between (java.time.temporal.ChronoUnit/DAYS) a b))
@@ -371,8 +371,9 @@
          [:.field-value.instruct "Nothing specified"])]]]))
 
 (defn AppointmentActions [{:appt/keys [notes status]
-                           :info/keys [note-count updated-at]}]
-  (let [available-statuses (filter #(not= status %) $appt-statuses)]
+                           :info/keys [note-count updated-at uri]}]
+  (let [available-statuses (filter #(not= status %) $appt-statuses)
+        add-note-action (str uri "/notes")]
     [:<>
      [:section.actions
       [:.flex
@@ -402,7 +403,7 @@
          (map AppointmentNote notes)])
       [:form.action-form {:method :post
                           :name :add-note
-                          :data-action {:hello true}}
+                          :action add-note-action}
        [:h3 "Add a note"]
        [:textarea {:name :note-content
                    :rows 5}]
@@ -438,23 +439,62 @@
 
 ;; TODO upstream to bread.thing
 (defn by-uuid-expansion
-  ([req]
-   (query-by-uuid req {:params-key :thing/uuid}))
-  ([{:as req ::bread/keys [dispatcher]}
-    {k :params-key :or {k :thing/uuid}}]
-   (let [uuid (UUID/fromString (get (:route/params dispatcher) k))
-         query {:find [(list 'pull '?e (:dispatcher/pull dispatcher)) '.]
-                :in '[$ ?uuid]
-                :where '[[?e :thing/uuid ?uuid]]}
-         expansion {:expansion/key (:dispatcher/key dispatcher)
-                    :expansion/name ::db/query
-                    :expansion/db (db/database req)
-                    :expansion/args [query uuid]
-                    ;; TODO observe this flag from i18n
-                    :expansion/i18n? (:dispatcher/i18n? dispatcher)}]
-     {:expansions (bread/hook req ::i18n/expansions expansion)})))
+  [{:as req ::bread/keys [dispatcher]}]
+  (let [k (:params-key (:route/params dispatcher) :thing/uuid)
+        uuid (UUID/fromString (get (:route/params dispatcher) k))
+        query {:find [(list 'pull '?e (:dispatcher/pull dispatcher)) '.]
+               :in '[$ ?uuid]
+               :where '[[?e :thing/uuid ?uuid]]}
+        expansion {:expansion/key (:dispatcher/key dispatcher)
+                   :expansion/name ::db/query
+                   :expansion/db (db/database req)
+                   :expansion/args [query uuid]
+                   ;; TODO observe this flag from i18n
+                   :expansion/i18n? (:dispatcher/i18n? dispatcher)}]
+    {:expansions (bread/hook req ::i18n/expansions expansion)}))
 
 ;; TODO ::thing/by-uuid
-;; TODO ::<...> expansion convention?
 (defmethod bread/dispatch ::by-uuid [req]
   (by-uuid-expansion req))
+
+(comment
+  (let [{:as req ::bread/keys [dispatcher] :keys [params session]} $req]
+    (let [uuid (UUID/fromString (:thing/uuid (:route/params dispatcher)))
+          tx {:thing/uuid uuid
+              :appt/notes [{:note/content (:note-content params)
+                            :note/created-by (:db/id (:user session))
+                            :thing/created-at (Date.)}]}]
+      (-> req
+          (db/add-txs [tx] {:key ::add-note})
+          (bread/hook ::bread/effects!)
+          ::bread/data)))
+
+  (::bread/data $res)
+
+  ;;
+  )
+
+(defmethod bread/action ::redirect
+  [{:as res :keys [headers]} {:keys [to flash permanent?] :or {permanent? false}} _]
+  (assoc res
+         :status (if permanent? 301 302)
+         :headers (assoc headers "Location" to)
+         :flash flash))
+
+(defmethod bread/dispatch ::add-note
+  [{:as req ::bread/keys [dispatcher] :keys [params session]}]
+  (let [uuid (:thing/uuid (:route/params dispatcher))
+        tx {:thing/uuid (UUID/fromString uuid)
+            :appt/notes [{:note/content (:note-content params)
+                          :note/created-by (:db/id (:user session))
+                          :thing/created-at (Date.)}]}]
+    {:effects [{:effect/name ::db/transact
+                :effect/key ::add-note
+                :effect/description "Add an appointment note in the db"
+                :conn (db/connection req)
+                :txs [tx]}]
+     :hooks
+     {::bread/render
+      [{:action/name ::redirect
+        :to (str "/admin/appointments/" uuid)
+        :flash {:some :stuff :x {:y :z}}}]}}))

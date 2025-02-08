@@ -113,8 +113,9 @@
          {:get {:handler {:dispatcher/type ::appt/show-all
                           :dispatcher/component #'appt/AppointmentsList}}}]
         ["/appointments/{thing/uuid}"
-         {:get {:handler {:dispatcher/type ::appt/by-uuid ;; TODO ::thing
-                          :dispatcher/component #'appt/AppointmentPage}}}]
+         ["" {:get {:handler {:dispatcher/type ::appt/by-uuid ;; TODO ::thing
+                              :dispatcher/component #'appt/AppointmentPage}}}]
+         ["/notes" {:post {:handler {:dispatcher/type ::appt/add-note}}}]]
         ["/providers"
          {:get {:handler #'admin/show-providers
                 :middleware [#_(admin/wrap-filter-params {:query provider/filter-params})]}}]]
