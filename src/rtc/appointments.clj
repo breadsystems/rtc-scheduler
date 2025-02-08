@@ -481,10 +481,13 @@
          :headers (assoc headers "Location" to)
          :flash flash))
 
-(defn transact! [req txs & {:keys [redirect-to flash]}]
+;; TODO upstream somewhere...
+(defn transact! [req txs & {:keys [redirect-to flash]
+                            :effect/keys [description]
+                            :or {description "Run txs against the db"}}]
   {:effects [{:effect/name ::db/transact
               :effect/key ::add-note
-              :effect/description "Add an appointment note in the db"
+              :effect/description description
               :conn (db/connection req)
               :txs txs}]
    :hooks
@@ -500,4 +503,6 @@
             :appt/notes [{:note/content (:note-content params)
                           :note/created-by (:db/id (:user session))
                           :thing/created-at (Date.)}]}]
-    (transact! req [tx] :redirect-to (str "/admin/appointments/" uuid))))
+    (transact! req [tx]
+               :effect/description "Add an appointment note"
+               :redirect-to (str "/admin/appointments/" uuid))))
